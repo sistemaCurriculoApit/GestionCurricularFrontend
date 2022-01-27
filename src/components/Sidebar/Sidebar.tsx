@@ -218,10 +218,11 @@ const Sidebar = ({ ...props }) => {
           {image !== undefined ? (
             <div
             className={classes.background}
-            >
-            <img src={image} className={classes.background} />
+            style={{ backgroundImage: 'url(' + image + ')' }}
+            />
+            // <img src={image} className={classes.background} />
 
-            </div>
+            // </div>
           ) : null}
         </Drawer>
       </Hidden>
