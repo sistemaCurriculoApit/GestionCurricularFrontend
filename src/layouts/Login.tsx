@@ -16,7 +16,7 @@ import routes from '../routes';
 
 import loginStyle from '../assets/jss/material-dashboard-react/layouts/loginStyle';
 
-import image from 'assets/img/sidebar-5.jpeg';
+import image from 'assets/img/sidebar-5.jpg';
 
 const switchRoutes = (
   <Switch>

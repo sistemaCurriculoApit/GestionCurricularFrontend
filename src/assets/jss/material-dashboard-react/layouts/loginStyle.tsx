@@ -30,7 +30,7 @@ const appStyle = (theme: Theme) => createStyles({
   container: {
     paddingRight: '15px',
     paddingLeft: '15px',
-    width:'40%' 
+    width:'35em' 
   },
   map: {
     marginTop: '70px'
