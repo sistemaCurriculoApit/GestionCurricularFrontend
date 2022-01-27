@@ -128,7 +128,7 @@ const Sidebar = ({ ...props }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('idProfileLoggedUser');
-    window.location.reload();
+    window.location.assign("/login");
   }
 
   var brand = (
