@@ -126,7 +126,7 @@ const MenuItemsBuild: React.FC<PropsMenuItem> = ({ menuItem, keyMenuItem, classe
 
 const Sidebar = ({ ...props }) => {
 
-  const { classes, color, logo, image, logoText, routes } = props;
+  const { classes, color, logo, logoText, routes } = props;
 
   const handleLogout = () => {
     localStorage.removeItem('token');
