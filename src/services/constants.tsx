@@ -1,4 +1,5 @@
-export const backendBaseUrl = 'http://127.0.0.1:3000/';
+const production = true;
+export const backendBaseUrl = production ? 'https://curriculo-apit-backend.herokuapp.com' : 'http://127.0.0.1:3000/';
 
 export const getHeaders = ()=>{
   let token = localStorage.getItem('token');
