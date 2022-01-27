@@ -31,18 +31,28 @@ function Login(props: any) {
       localStorage.setItem('idProfileLoggedUser', '4');
       window.location.reload();
     } else {
-      let response: any = await validateLogin({
-        correo: email,
-        contrasena: password
-      });
-      let { body } = response;
-      if (body && body.token) {
-        localStorage.setItem('token', body.token);
-        localStorage.setItem('idProfileLoggedUser', body.user.rolId);
-        window.location.reload();
-      } else {
+      if(email && password){
+
+        let response: any = await validateLogin({
+          correo: email,
+          contrasena: password
+        });
+        let { body } = response;
+        if (body && body.token) {
+          localStorage.setItem('token', body.token);
+          localStorage.setItem('idProfileLoggedUser', body.user.rolId);
+          window.location.reload();
+        } else {
+          setSeverityAlert('error');
+          setMessagesAlert(body && body.descripcion ? body.descripcion:'Ha ocurrido al intentar iniciar sesion');
+          setShowAlert(true);
+          setTimeout(() => {
+            setShowAlert(false);
+          }, 1000);
+        }
+      }else{
         setSeverityAlert('error');
-        setMessagesAlert(body && body.descripcion ? body.descripcion:'Ha ocurrido al intentar iniciar sesion');
+        setMessagesAlert('Correo electrónico y contraseña son obligatorios');
         setShowAlert(true);
         setTimeout(() => {
           setShowAlert(false);
