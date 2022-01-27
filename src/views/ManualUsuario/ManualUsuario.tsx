@@ -8,6 +8,8 @@ import Card from '../../components/Card/Card';
 import CardHeader from '../../components/Card/CardHeader';
 import CardBody from '../../components/Card/CardBody';
 import { createStyles } from '@material-ui/core';
+import { frontendBaseUrl } from '../../services/constants';
+
 
 const styles = createStyles({
   cardCategoryWhite: {
@@ -53,7 +55,7 @@ function ManualUsuario(props: any) {
             <h4 className={classes.cardTitleWhite}>Manual de usuario</h4>
           </CardHeader>
           <CardBody className={classes.cardBodyCustom} >
-            <object data="http://localhost:3002/Manual_de_Usuario_Gestion_Curricular.pdf" type="application/pdf" width="100%" height="100%">
+            <object data={`${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular.pdf`} type="application/pdf" width="100%" height="100%">
             </object>
           </CardBody>
         </Card>
