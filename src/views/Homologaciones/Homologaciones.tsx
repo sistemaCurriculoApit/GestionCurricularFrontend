@@ -1,0 +1,919 @@
+import React, { useState, useEffect } from 'react';
+import MomentUtils from "@date-io/moment";
+// @material-ui/core components
+import withStyles from '@material-ui/core/styles/withStyles';
+import TextField from '@material-ui/core/TextField';
+import Modal from '@material-ui/core/Modal';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import Tooltip from '@material-ui/core/Tooltip';
+import Chip from '@material-ui/core/Chip';
+import Search from '@material-ui/icons/Search';
+import FilterList from '@material-ui/icons/FilterList';
+import CloseIcon from '@material-ui/icons/Close';
+import AddIcon from '@material-ui/icons/Add';
+import SendIcon from '@material-ui/icons/Send';
+import ClearIcon from '@material-ui/icons/Clear';
+import EditIcon from '@material-ui/icons/Edit';
+import moment from "moment";
+import "moment/locale/es";
+
+// core components
+import { createStyles } from '@material-ui/core';
+import GridItem from '../../components/Grid/GridItem';
+import GridContainer from '../../components/Grid/GridContainer';
+import Table from '../../components/Table/Table';
+import Card from '../../components/Card/Card';
+import CardHeader from '../../components/Card/CardHeader';
+import CardBody from '../../components/Card/CardBody';
+import Button from '../../components/CustomButtons/Button';
+import TablePagination from '../../components/Pagination/TablePagination';
+import ModalLoading from '../../components/ModalLoading/ModalLoading';
+import AlertComponent from '../../components/Alert/AlertComponent'
+
+//jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
+import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
+
+import { AnythingObject, estadosHomologacion } from '../../constants/generalConstants'
+import { getAllProgramas } from "../../services/programasServices"
+import { getPlanesByListIds } from "../../services/planesServices"
+import { getAllAsignaturasByPlan } from "../../services/asignaturasServices"
+import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
+import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
+
+
+const styles = createStyles({
+  CustomSearchTextFieldStyle: CustomSearchTextField.input,
+  CustomTextField: CustomTextField.input,
+  container,
+  containerFormModal,
+  containerFooterModal,
+  modalForm,
+  ...cardTabletCustomStyle,
+  ...tooltipStyle,
+  ...containerFloatButton,
+});
+
+function Homologaciones(props: any) {
+  const { classes } = props;
+  const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
+
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [severityAlert, setSeverityAlert] = useState('');
+  const [messageAlert, setMessagesAlert] = useState('');
+  const [searchField, setSearchField] = useState('');
+  const [openMoreFilters, setOpenMoreFilters] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [openModalLoading, setOpenModalLoading] = useState(false);
+  const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
+  const [dateCreationTo, setDateCreationTo] = useState<any>(null);
+
+  const [programasList, setProgramasList] = useState([]);
+  const [programaSelected, setProgramaSelected] = useState<AnythingObject>({});
+  const [planesList, setPlanesList] = useState([]);
+  const [planSelected, setPlanSelected] = useState<AnythingObject>({});
+  const [asignaturasList, setAsignaturasList] = useState([]);
+  const [asignaturaSelected, setAsignaturaSelected] = useState<AnythingObject>({});
+  const [estadoHomologacionSelected, setEstadoHomologacionSelected] = useState<AnythingObject>({});
+  const [contenidosList, setContenidosList] = useState([]);
+
+  const [homologacionList, setHomologacionesList] = useState([]);
+  const [totalHomologaciones, setTotalHomologaciones] = useState(0);
+  const [pagePagination, setPagePagination] = useState(1);
+  const [homologacionObject, setHomologacionObject] = useState<AnythingObject>({
+    programaId: '',
+    planId: '',
+    asignaturaId: '',
+    identificacionSolicitante: '',
+    nombreSolicitante: '',
+    universidadSolicitante: '',
+    programaSolicitante: '',
+    asignaturaSolicitante: '',
+    añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+    periodo: '1',
+    estadoHomologacion: {},
+    descripcion: '',
+  });
+
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getHomologaciones();
+    if (openModalCreate) {
+      handleOpenModal(
+        false,
+        {
+          programaId: '',
+          planId: '',
+          asignaturaId: '',
+          identificacionSolicitante: '',
+          nombreSolicitante: '',
+          universidadSolicitante: '',
+          programaSolicitante: '',
+          asignaturaSolicitante: '',
+          añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+          periodo: '1',
+          estadoHomologacion: {},
+          descripcion: ''
+        }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!searchField) {
+      setOpenModalLoading(true);
+      getHomologaciones();
+    }
+  }, [searchField]);
+
+  useEffect(() => {
+    if (programaSelected._id) {
+      if (homologacionObject._id) {
+        getPlanes(homologacionObject._id ? true : false, homologacionObject);
+      } else {
+        getPlanes();
+      }
+    } else {
+      setPlanSelected({});
+      setAsignaturaSelected({});
+      setPlanesList([]);
+      setAsignaturasList([]);
+      setContenidosList([]);
+    }
+  }, [programaSelected]);
+
+  useEffect(() => {
+    if (planSelected._id) {
+      if (homologacionObject._id) {
+        getAsignaturas(homologacionObject._id ? true : false, homologacionObject);
+      } else {
+        getAsignaturas();
+      }
+    } else {
+      setAsignaturaSelected({});
+      setAsignaturasList([]);
+      setContenidosList([]);
+    }
+  }, [planSelected]);
+
+  useEffect(() => {
+    if (asignaturaSelected._id) {
+      if (homologacionObject._id) {
+        getContenidos(homologacionObject._id ? true : false, homologacionObject);
+      } else {
+        getContenidos();
+      }
+    } else {
+      setContenidosList([]);
+    }
+  }, [asignaturaSelected]);
+
+  useEffect(() => {
+    if (homologacionObject._id) {
+      getProgramas(true, homologacionObject)
+    }
+  }, [homologacionObject]);
+
+  const getHomologaciones = async (page?: any) => {
+    let response: any = await getHomologacionesPaginated({
+      page: page ? page : 0,
+      search: searchField,
+      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+    });
+    setPagePagination(page ? page + 1 : 1);
+    if (response.homologaciones && response.homologaciones.length) {
+      let homologaciones = response.homologaciones.map((data: any) => {
+        let arrayData = [
+          data.identificacionSolicitante,
+          data.nombreSolicitante,
+          data.asignaturaSolicitante,
+          data.descripcion,
+          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
+                onClick={() => {
+                  setDataEditHomologacion(data);
+                }} />
+            </div>
+          </Tooltip>
+        ];
+        return arrayData;
+      });
+      setTotalHomologaciones(response.totalHomologaciones);
+      setHomologacionesList(homologaciones);
+    } else {
+      setTotalHomologaciones(0);
+      setHomologacionesList([]);
+
+    }
+    setOpenModalLoading(false);
+  }
+
+  const getProgramas = async (isEdit?: boolean, homologacionToEdit?: any) => {
+    let response: any = await getAllProgramas({
+      search: '',
+    });
+    if (response && response.programas) {
+      setProgramasList(response.programas);
+      if (isEdit && homologacionToEdit.programaId) {
+        let findPrograma = response.programas.find((plan: any) => plan._id === homologacionToEdit.programaId);
+        if (findPrograma) {
+          setProgramaSelected({ ...findPrograma });
+        }
+      }
+    }
+    if (!isEdit) {
+      setOpenModalLoading(false);
+    }
+  }
+
+  const getPlanes = async (isEdit?: boolean, homologacionToEdit?: any) => {
+    const planIds = programaSelected.plan.map((option: any) => option._id);
+    let response: any = await getPlanesByListIds({
+      search: '',
+      planIds
+    });
+    if (response && response.planes) {
+      setPlanesList(response.planes);
+      if (isEdit && homologacionToEdit.planId) {
+        let findPlan = response.planes.find((plan: any) => plan._id === homologacionToEdit.planId)
+        if (findPlan) {
+          setPlanSelected({ ...findPlan })
+        }
+      }
+    }
+    if (!isEdit) {
+      setOpenModalLoading(false);
+    }
+  }
+
+  const getAsignaturas = async (isEdit?: boolean, homologacionToEdit?: any) => {
+    const areasIds = planSelected.area.map((option: any) => option._id);
+    let response: any = await getAllAsignaturasByPlan({
+      search: '',
+      areasIds
+    });
+    if (response && response.asignaturas) {
+      setAsignaturasList(response.asignaturas);
+      if (isEdit && homologacionToEdit.asignaturaId) {
+        let findAsignatura = response.asignaturas.find((plan: any) => plan._id === homologacionToEdit.asignaturaId)
+        if (findAsignatura) {
+          setAsignaturaSelected({ ...findAsignatura });
+        }
+      }
+    }
+    if (isEdit) {
+      setOpenModalLoading(false);
+    }
+  }
+
+  const getContenidos = async (isEdit?: boolean, homologacionToEdit?: any) => {
+    const contenidosIds = asignaturaSelected.contenido.map((option: any) => option._id);
+    let response: any = await getAllContenidoByAsignatura({
+      search: '',
+      contenidosIds
+    });
+    if (response && response.contenidos) {
+      setContenidosList(response.contenidos);
+    }
+    if (isEdit) {
+      setHomologacionObject({ ...homologacionObject, programaId: '', planId: '', asignaturaId: '' });
+      setOpenModalLoading(false);
+    }
+  }
+
+  const onChangePage = (page: number) => {
+    setOpenModalLoading(true);
+    getHomologaciones(page);
+  };
+
+  const setDataEditHomologacion = (data: any) => {
+    try {
+      handleOpenModal(true, data);
+    } catch (error) {
+      setOpenModalLoading(false);
+    }
+  };
+
+  const handleOpenModal = (isEdit?: boolean, homologacionToEdit?: any) => {
+    try {
+      setOpenModal(true);
+      setOpenModalLoading(true);
+      if (!isEdit) {
+        setProgramaSelected({});
+        setPlanSelected({});
+        setAsignaturaSelected({});
+        setPlanesList([]);
+        setAsignaturasList([]);
+        setContenidosList([]);
+        setEstadoHomologacionSelected({});
+        setHomologacionObject(homologacionToEdit);
+        getProgramas(isEdit, homologacionToEdit);
+      } else {
+        console.log(moment(new Date(new Date(homologacionToEdit.añoHomologacion).getFullYear(), 0, 1)));
+        setHomologacionObject({ ...homologacionToEdit, añoHomologacion: moment(new Date(new Date(homologacionToEdit.añoHomologacion).getFullYear(), 0, 1)) });
+        const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion);
+        setEstadoHomologacionSelected(estado || {});
+      }
+    } catch (error) {
+      setOpenModalLoading(false);
+    }
+  }
+
+  const handleSaveHomologacion = () => {
+    setOpenModalLoading(true);
+    let isValid = validateFields();
+    if (isValid) {
+      if (homologacionObject._id) {
+        //EDITAR
+        handleEditHomologacion();
+      } else {
+        //CREAR
+        handleCreateHomologacion();
+      }
+
+    } else {
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    }
+  };
+
+  const handleCreateHomologacion = async () => {
+    let homologacionToSave = {
+      ...homologacionObject,
+      programaId: programaSelected._id,
+      planId: planSelected._id,
+      asignaturaId: asignaturaSelected._id,
+      estadoHomologacion: estadoHomologacionSelected.id,
+      añoHomologacion: homologacionObject.añoHomologacion.toDate()
+
+    };
+    let response: any = await createHomologacion(homologacionToSave);
+    if (response && response.error) {
+      setSeverityAlert('error');
+      setShowAlert(true);
+      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Homologación creado satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModal(false);
+      getHomologaciones();
+    }
+  }
+
+  const handleEditHomologacion = async () => {
+    let homologacionToSave = {
+      ...homologacionObject,
+      programaId: programaSelected._id,
+      planId: planSelected._id,
+      asignaturaId: asignaturaSelected._id,
+      estadoHomologacion: estadoHomologacionSelected.id,
+      añoHomologacion: homologacionObject.añoHomologacion.toDate()
+    };
+    let response: any = await updateHomologacion(homologacionToSave, homologacionObject._id);
+    if (response && response.error) {
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Homologación editado satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModal(false);
+      getHomologaciones();
+    }
+  }
+
+  const validateFields = () => {
+    if (programaSelected._id &&
+      planSelected._id &&
+      asignaturaSelected._id &&
+      homologacionObject.identificacionSolicitante &&
+      homologacionObject.nombreSolicitante &&
+      homologacionObject.universidadSolicitante &&
+      homologacionObject.programaSolicitante &&
+      homologacionObject.asignaturaSolicitante &&
+      homologacionObject.añoHomologacion &&
+      homologacionObject.periodo &&
+      estadoHomologacionSelected.title
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  return (
+    <div>
+      <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={12}>
+          <Card>
+            <CardHeader color="success">
+              <div className={classes.TitleFilterContainer}>
+                <h4 className={classes.cardTitleWhite}>Homologaciones</h4>
+                <div className={classes.headerActions}>
+                  <TextField
+                    id="outlined-email"
+                    label="Búsqueda"
+                    variant="outlined"
+                    margin="dense"
+                    className={classes.CustomSearchTextFieldStyle}
+                    value={searchField}
+                    onChange={(event) => setSearchField(event.target.value)}
+                    InputProps={{
+                      endAdornment:
+                        <Button key={'searchButton'} color={'primary'} round variant="outlined" size='sm' justIcon startIcon={<ClearIcon />}
+                          onClick={() => {
+                            setSearchField('')
+                          }} />
+                    }}
+                  />
+
+                  <Tooltip id='searchTooltip' title="Buscar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <div className={classes.buttonHeaderContainer}>
+                      <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
+                        onClick={() => {
+                          if (searchField.length > 2 || dateCreationFrom || dateCreationTo) {
+                            setOpenModalLoading(true);
+                            getHomologaciones();
+                          }
+                        }}
+                      />
+                    </div>
+                  </Tooltip>
+                  <Tooltip id='filterTooltip' title="Más filtros" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <div className={classes.buttonHeaderContainer}>
+                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" justIcon startIcon={<FilterList />}
+                        onClick={() => { setOpenMoreFilters(!openMoreFilters) }} />
+                    </div>
+                  </Tooltip>
+                </div>
+              </div>
+              {
+                openMoreFilters ?
+                  <div>
+                    <Card className={classes.cardFilters}>
+                      <div >
+                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                          <GridContainer>
+                            <GridItem xs={12} sm={12} md={12}>
+                              <h4 className={classes.cardTitleBlack}>Fecha de creación</h4>
+                            </GridItem>
+                            <GridItem xs={12} sm={12} md={6}>
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <DatePicker
+                                  label="Fecha desde"
+                                  inputVariant='outlined'
+                                  margin='dense'
+                                  className={classes.CustomTextField}
+                                  format="DD/MM/YYYY"
+                                  value={dateCreationFrom}
+                                  onChange={(newValue: any) => {
+                                    setDateCreationFrom(newValue);
+                                  }}
+                                  clearable
+                                  clearLabel='Limpiar'
+                                />
+                                {
+                                  dateCreationFrom ? (
+                                    <CloseIcon onClick={(e) => setDateCreationFrom(null)} />
+                                  ) : null
+                                }
+                              </div>
+                            </GridItem>
+
+                            <GridItem xs={12} sm={12} md={6}>
+                              <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <DatePicker
+                                  label="Fecha hasta"
+                                  inputVariant='outlined'
+                                  margin='dense'
+                                  className={classes.CustomTextField}
+                                  format="DD/MM/YYYY"
+                                  value={dateCreationTo}
+                                  onChange={(newValue: any) => {
+                                    setDateCreationTo(newValue);
+                                  }}
+                                  clearable
+                                  clearLabel='Limpiar'
+                                />
+                                {
+                                  dateCreationTo ? (
+                                    <CloseIcon onClick={(e) => setDateCreationTo(null)} />
+                                  ) : null
+                                }
+                              </div>
+                            </GridItem>
+                          </GridContainer>
+                        </MuiPickersUtilsProvider>
+                      </div>
+                      <div className={classes.containerFooterCard} >
+                        <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                          onClick={() => {
+                            if (searchField.length > 2 || dateCreationFrom || dateCreationTo) {
+                              setOpenModalLoading(true);
+                              getHomologaciones();
+                            }
+                          }}
+                        >
+                          {'Aplicar filtros'}
+                        </Button>
+
+                      </div>
+                    </Card>
+                  </div>
+                  : null
+              }
+            </CardHeader>
+            <CardBody>
+
+              {
+                !homologacionList.length ?
+                  <h2 style={{ textAlign: 'center' }}>No se encontraron homologaciones en la base de datos</h2>
+                  :
+                  <Table
+                    tableHeaderColor="success"
+                    tableHead={[
+                      'Identificacion del solicitante',
+                      'Nombre del solicitante',
+                      'Asignatura del solicitante',
+                      'Descripcion',
+                      'Fecha de creación',
+                      'Fecha ultima actualización',
+                      'Acciones'
+                    ]}
+                    tableData={homologacionList}
+                  />
+              }
+            </CardBody>
+          </Card>
+
+          <Card className={classes.centerContent}>
+            <TablePagination page={pagePagination} onChangePage={onChangePage} totalData={totalHomologaciones} />
+          </Card>
+
+        </GridItem>
+      </GridContainer>
+      <div className={classes.containerFloatButton}>
+        <Tooltip id='addTooltip' title="Crear nueva homologación" placement='left' classes={{ tooltip: classes.tooltip }}>
+          <div>
+            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+              onClick={() => {
+                handleOpenModal(false, {
+                  programaId: '',
+                  planId: '',
+                  asignaturaId: '',
+                  identificacionSolicitante: '',
+                  nombreSolicitante: '',
+                  universidadSolicitante: '',
+                  programaSolicitante: '',
+                  asignaturaSolicitante: '',
+                  añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+                  periodo: '1',
+                  estadoHomologacion: {},
+                  descripcion: ''
+                })
+              }} />
+          </div>
+        </Tooltip>
+      </div>
+      <Modal
+        open={openModal}
+        className={classes.modalForm}
+        // onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div className={classes.centerContent}>
+          <GridItem xs={12} sm={8} md={8} >
+            <Card className={classes.container}>
+              <CardHeader color="success">
+                <div className={classes.TitleFilterContainer}>
+                  <h4 className={classes.cardTitleWhite}>{homologacionObject._id ? 'Editar': 'Crear'} homologación</h4>
+                  <div className={classes.headerActions}>
+                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                      <div className={classes.buttonHeaderContainer}>
+                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModal(false) }} />
+                      </div>
+                    </Tooltip>
+                  </div>
+                </div>
+              </CardHeader >
+              <div className={classes.containerFormModal} >
+                <GridContainer>
+
+                  <GridItem xs={12} sm={12} md={4} >
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={programasList}
+                      getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
+                      filterSelectedOptions
+                      onChange={(e, option) => {
+                        setProgramaSelected(option || {})
+                        setPlanSelected({});
+                        setAsignaturaSelected({});
+                      }}
+                      value={programaSelected}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-rol"
+                          label="Programa"
+                          variant="outlined"
+                          margin="dense"
+                          error={programaSelected && !programaSelected._id ? true : false}
+                          className={classes.CustomTextField}
+                          helperText={!programaSelected._id ? 'Primero seleccione un programa.':''}
+                        />
+                      )}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={planesList}
+                      getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
+                      filterSelectedOptions
+                      onChange={(e, option) => {
+                        setPlanSelected(option || {})
+                        setAsignaturaSelected({});
+                      }}
+                      value={planSelected}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-rol"
+                          label="Plan"
+                          variant="outlined"
+                          margin="dense"
+                          error={planSelected && !planSelected._id ? true : false}
+                          className={classes.CustomTextField}
+                          helperText={!programaSelected._id ? 'Debe seleccionar un programa.':''}
+
+                        />
+                      )}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={asignaturasList}
+                      getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
+                      filterSelectedOptions
+                      onChange={(e, option) => setAsignaturaSelected(option || {})}
+                      value={asignaturaSelected}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-rol"
+                          label="Asignatura"
+                          variant="outlined"
+                          margin="dense"
+                          error={asignaturaSelected && !asignaturaSelected._id ? true : false}
+                          className={classes.CustomTextField}
+                          helperText={!planSelected._id ? 'Debe seleccionar un plan.':''}
+                        />
+                      )}
+                    />
+                  </GridItem>
+
+
+                  {
+                    contenidosList.length ?
+                      <GridItem xs={12} sm={12} md={12}>
+                        <h4 className={classes.cardTitleBlack}>Contenidos</h4>
+                        {
+                          contenidosList.map((contenido: any, index) => <Chip
+                            key={index}
+                            color={'primary'}
+                            label={`${contenido.codigo} - ${contenido.nombre}`}
+                          />)
+                        }
+                      </GridItem>
+                      : null
+                  }
+
+                  <GridItem xs={12} sm={12} md={12} >
+                    <br />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12} >
+                    <hr />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12}>
+                    <h4 className={classes.cardTitleBlack}>Información del solicitante</h4>
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Identificación del solicitante"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!homologacionObject.identificacionSolicitante ? true : false}
+                      value={homologacionObject.identificacionSolicitante}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, identificacionSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Nombre del solicitante"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!homologacionObject.nombreSolicitante ? true : false}
+                      value={homologacionObject.nombreSolicitante}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, nombreSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Universidad del solicitante"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!homologacionObject.universidadSolicitante ? true : false}
+                      value={homologacionObject.universidadSolicitante}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, universidadSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Programa del solicitante"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!homologacionObject.programaSolicitante ? true : false}
+                      value={homologacionObject.programaSolicitante}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, programaSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Asignatura del solicitante"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!homologacionObject.asignaturaSolicitante ? true : false}
+                      value={homologacionObject.asignaturaSolicitante}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, asignaturaSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6}>
+                    <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <DatePicker
+                          views={["year"]}
+                          label="Año"
+                          inputVariant='outlined'
+                          margin='dense'
+                          className={classes.CustomTextField}
+                          format="YYYY"
+                          value={homologacionObject.añoHomologacion}
+                          onChange={(newValue: any) => {
+                            console.log(newValue);
+
+                            setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue })
+                          }}
+                          clearable
+                          clearLabel='Limpiar'
+                        />
+                        {
+                          homologacionObject.añoHomologacion ? (
+                            <CloseIcon onClick={(e) => setHomologacionObject({ ...homologacionObject, añoHomologacion: null })} />
+                          ) : null
+                        }
+
+                      </div>
+                    </MuiPickersUtilsProvider>
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={6}>
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={["1", "2"]}
+                      getOptionLabel={(option) => option}
+                      filterSelectedOptions
+                      onChange={(e, option) => setHomologacionObject({ ...homologacionObject, periodo: option })}
+                      value={homologacionObject.periodo}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-estado-solicitud"
+                          label="Periodo"
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.CustomTextField}
+                          error={homologacionObject && !homologacionObject.periodo ? true : false}
+                        />
+                      )}
+                    />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={6} >
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={estadosHomologacion}
+                      getOptionLabel={(option) => option.title}
+                      filterSelectedOptions
+                      onChange={(e, option) => setEstadoHomologacionSelected(option || {})}
+                      value={estadoHomologacionSelected}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-estado-solicitud"
+                          label="Estado de la solicitud"
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.CustomTextField}
+                          error={estadoHomologacionSelected && !estadoHomologacionSelected.title ? true : false}
+                        />
+                      )}
+                    />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12} >
+                    <TextField
+                      id="outlined-email"
+                      label="Descripción"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      minRows={4}
+                      maxRows={10}
+                      multiline
+                      value={homologacionObject.descripcion}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, descripcion: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+
+                </GridContainer>
+              </div>
+
+
+              <div className={classes.containerFooterModal} >
+                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                  onClick={() => { handleSaveHomologacion() }} >
+                  {'Guardar'}
+                </Button>
+
+              </div>
+
+            </Card>
+          </GridItem>
+        </div>
+      </Modal>
+      <ModalLoading showModal={openModalLoading} />
+    </div>
+  );
+}
+
+export default withStyles(styles)(Homologaciones);
