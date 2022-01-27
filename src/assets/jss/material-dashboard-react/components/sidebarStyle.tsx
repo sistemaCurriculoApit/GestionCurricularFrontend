@@ -119,6 +119,8 @@ const sidebarStyle = (theme: Theme) => createStyles({
     left: '0',
     backgroundSize: 'cover',
     backgroundPosition: '80% 70%',
+    objectFit: 'cover',
+    objectPosition: '80% 70%',
     '&:after': {
       position: 'absolute',
       zIndex: 3,

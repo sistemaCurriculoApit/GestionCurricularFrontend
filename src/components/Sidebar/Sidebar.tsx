@@ -21,6 +21,9 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import AdminNavbarLinks from '../Navbars/AdminNavbarLinks';
 import Button from '../../components/CustomButtons/Button';
 
+import image from '../../assets/img/sidebar-5.jpeg';
+
+
 
 import sidebarStyle from '../../assets/jss/material-dashboard-react/components/sidebarStyle';
 
@@ -214,9 +217,11 @@ const Sidebar = ({ ...props }) => {
           </div>
           {image !== undefined ? (
             <div
-              className={classes.background}
-              style={{ backgroundImage: 'url(' + image + ')' }}
-            />
+            className={classes.background}
+            >
+            <img src={image} className={classes.background} />
+
+            </div>
           ) : null}
         </Drawer>
       </Hidden>
