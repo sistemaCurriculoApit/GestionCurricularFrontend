@@ -63,6 +63,7 @@ function Login(props: any) {
       }
 
     }
+    setOpenModalLoading(false);
   }
 
   return (
@@ -91,11 +92,11 @@ function Login(props: any) {
                 onChange={(event) => setPassword(event.target.value)}
               />
 
-              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => { handleLogin() }}>
+              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => {setOpenModalLoading(true); handleLogin() }}>
                 Iniciar sesión
               </Button>
 
-              <a onClick={() => { handleLogin(true) }} className={classes.a}>
+              <a onClick={() => {setOpenModalLoading(true); handleLogin(true) }} className={classes.a}>
                 Ingresar cómo invitado
               </a>
 
@@ -104,6 +105,7 @@ function Login(props: any) {
         </form>
 
       </Card>
+      <ModalLoading showModal={openModalLoading} />
     </div>
   );
 }
