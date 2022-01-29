@@ -14,11 +14,14 @@ import {
 } from '../../assets/jss/material-dashboard-react';
 
 import AlertComponent from '../../components/Alert/AlertComponent'
+import ModalLoading from '../../components/ModalLoading/ModalLoading';
+
 
 import { validateLogin } from "../../services/loginServices"
 
 function Login(props: any) {
   const { classes } = props;
+  const [openModalLoading, setOpenModalLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
