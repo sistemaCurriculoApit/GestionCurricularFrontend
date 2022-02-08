@@ -205,7 +205,7 @@ function Usuarios(props: any) {
     if (response && response.error) {
       setSeverityAlert('error');
       setShowAlert(true);
-      setMessagesAlert('Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setMessagesAlert(response && response.descripcion ? response.descripcion:'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -233,7 +233,7 @@ function Usuarios(props: any) {
     if (response && response.error) {
       setSeverityAlert('error');
       setShowAlert(true);
-      setMessagesAlert('Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setMessagesAlert(response && response.descripcion ? response.descripcion:'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
