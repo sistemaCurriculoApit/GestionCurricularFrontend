@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -51,6 +52,7 @@ import { getDocentesByListIds } from "../../services/docentesServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
 import { getAvancesPaginated, createAvance, updateAvance } from "../../services/avancesServices"
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -63,7 +65,10 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function AvancesAsignaturas(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
   const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
 
@@ -107,6 +112,7 @@ function AvancesAsignaturas(props: any) {
     descripcion: '',
   });
 
+  //Al iniciar el componente se obtienen los avances y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
     setOpenModalLoading(true);
     getAvances();
@@ -128,6 +134,7 @@ function AvancesAsignaturas(props: any) {
     }
   }, []);
 
+  //Actualizacion de la lista de asingaturas si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -135,6 +142,7 @@ function AvancesAsignaturas(props: any) {
     }
   }, [searchField]);
 
+  //Accion al seleccionar un programa dentro de la modal de creacion y edicion
   useEffect(() => {
     if (programaSelected._id) {
       if (avanceObject._id) {
@@ -160,6 +168,7 @@ function AvancesAsignaturas(props: any) {
     }
   }, [programaSelected]);
 
+  //Accion al seleccionar un plan dentro de la modal de creacion y edicion
   useEffect(() => {
     if (planSelected._id) {
       if (avanceObject._id) {
@@ -185,6 +194,7 @@ function AvancesAsignaturas(props: any) {
     }
   }, [planSelected]);
 
+  //Accion al seleccionar una area dentro de la modal de creacion y edicion
   useEffect(() => {
     if (areaSelected._id) {
       if (avanceObject._id) {
@@ -205,6 +215,7 @@ function AvancesAsignaturas(props: any) {
     }
   }, [areaSelected]);
 
+  //Accion al seleccionar una asignatura dentro de la modal de creacion y edicion
   useEffect(() => {
     if (asignaturaSelected._id) {
       if (avanceObject._id) {
@@ -226,13 +237,16 @@ function AvancesAsignaturas(props: any) {
     }
   }, [asignaturaSelected]);
 
+  //Accion al seleccionar un avance para ser editada, carga programas planes, areas, asginaturas...
   useEffect(() => {
     if (avanceObject._id) {
       getProgramas(true, avanceObject)
     }
   }, [avanceObject]);
 
+  //Metodo de obtencion de homologaciones
   const getAvances = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getAvancesPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -241,6 +255,7 @@ function AvancesAsignaturas(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.avances && response.avances.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let avances = response.avances.map((data: any) => {
         let arrayData = [
           moment(data.añoAvance).format('YYYY'),
@@ -270,6 +285,7 @@ function AvancesAsignaturas(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Obtencion de los programas para la modal, cuando se crea o se edita una homologacion
   const getProgramas = async (isEdit?: boolean, avanceToEdit?: any) => {
     let response: any = await getAllProgramas({
       search: '',
@@ -288,6 +304,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Obtencion de los planes para la modal, cuando se crea o se edita una homologacion
   const getPlanes = async (isEdit?: boolean, avanceToEdit?: any) => {
     const planIds = programaSelected.plan.map((option: any) => option._id);
     let response: any = await getPlanesByListIds({
@@ -308,6 +325,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Obtencion de las areas para la modal, cuando se crea o se edita una homologacion
   const getAreas = async (isEdit?: boolean, avanceToEdit?: any) => {
     const areaIds = planSelected.area.map((option: any) => option._id);
     let response: any = await getAreasByListIds({
@@ -328,6 +346,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Obtencion de las asignaturas para la modal, cuando se crea o se edita una homologacion
   const getAsignaturas = async (isEdit?: boolean, avanceToEdit?: any) => {
     const asignaturaIds = areaSelected.asignatura.map((option: any) => option._id);
     let response: any = await getAsignaturaByListIds({
@@ -348,6 +367,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Obtencion de los docentes para la modal, cuando se crea o se edita una homologacion
   const getDocentes = async (isEdit?: boolean, avanceToEdit?: any) => {
     const docenteIds = asignaturaSelected.docente.map((option: any) => option._id);
     let response: any = await getDocentesByListIds({
@@ -368,6 +388,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Obtencion de los contenidos para la modal, cuando se crea o se edita una homologacion
   const getContenidos = async (isEdit?: boolean, avanceToEdit?: any) => {
     const contenidosIds = asignaturaSelected.contenido.map((option: any) => option._id);
     let response: any = await getAllContenidoByAsignatura({
@@ -393,11 +414,13 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getAvances con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getAvances(page);
   };
 
+  //Se establecen los datos de un avance a editar en la modal
   const setDataEditAvance = (data: any) => {
     try {
       handleOpenModal(true, data);
@@ -406,6 +429,7 @@ function AvancesAsignaturas(props: any) {
     }
   };
 
+  //Metodo que controla la apertura de la modal con el fin de obtener toda la informacion
   const handleOpenModal = (isEdit?: boolean, avanceToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -439,6 +463,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSaveAvance = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -462,6 +487,7 @@ function AvancesAsignaturas(props: any) {
     }
   };
 
+  //Metodo para crear un Avance
   const handleCreateAvance = async () => {
     let avanceToSave = {
       ...avanceObject,
@@ -494,6 +520,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Metodo para editar un Avance
   const handleEditAvance = async () => {
     let avanceToSave = {
       ...avanceObject,
@@ -526,6 +553,7 @@ function AvancesAsignaturas(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (programaSelected._id &&
       planSelected._id &&
@@ -543,6 +571,7 @@ function AvancesAsignaturas(props: any) {
     }
   };
 
+  //Manejador de checkbos de los contenidos cuando es seleccionado o deseleccionado
   const handleToggleCheck = (value: any) => () => {
     const currentIndex = contenidoChecked.findIndex((contenido: any) => (value._id === contenido._id));
     const newChecked: any = [...contenidoChecked];
@@ -556,6 +585,7 @@ function AvancesAsignaturas(props: any) {
     setContenidoChecked(newChecked);
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -725,6 +755,9 @@ function AvancesAsignaturas(props: any) {
           </div>
         </Tooltip>
       </div>
+      
+      {/* Modal de creación y edicion de contenidos */}
+      
       <Modal
         open={openModal}
         className={classes.modalForm}

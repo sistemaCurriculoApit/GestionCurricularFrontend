@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -49,6 +50,7 @@ import { getAllDocentes } from "../../services/docentesServices"
 import { getAllContenidos } from "../../services/contenidosServices"
 
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -63,7 +65,10 @@ const styles = createStyles({
 });
 
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Asignaturas(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -92,11 +97,13 @@ function Asignaturas(props: any) {
     docente: []
   });
 
+  //Al iniciar el componente se obtienen las asignaturas
   useEffect(() => {
     setOpenModalLoading(true);
     getAsignaturas();
   }, [])
 
+  //Actualizacion de la lista de asingaturas si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -104,7 +111,10 @@ function Asignaturas(props: any) {
     }
   }, [searchField])
 
+  
+  //Metodo de obtencion de asignaturas
   const getAsignaturas = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getAsignaturasPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -113,6 +123,7 @@ function Asignaturas(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.asignaturas && response.asignaturas.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let asignaturas = response.asignaturas.map((data: any) => {
         let arrayData = [
           data.codigo,
@@ -143,6 +154,7 @@ function Asignaturas(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Obtencion de los docentes para la modal, cuando se crea o se edita una asignatura
   const getDocentes = async (isEdit?: boolean, asignaturaToEdit?: any) => {
     let response: any = await getAllDocentes({
       search: '',
@@ -163,6 +175,7 @@ function Asignaturas(props: any) {
 
   }
 
+  //Obtencion de los docentes para la modal, cuando se crea o se edita una asignatura
   const getContenidos = async (isEdit?: boolean, asignaturaToEdit?: any) => {
     let response: any = await getAllContenidos({
       search: '',
@@ -183,12 +196,14 @@ function Asignaturas(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getAsignaturas con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getAsignaturas(page);
 
   };
 
+  //Se establecen los datos de una asignatura a editar en la modal
   const setDataEditAsignatura = (data: any) => {
     try {
       handleOpenModal(true, data);
@@ -197,6 +212,7 @@ function Asignaturas(props: any) {
     }
   };
 
+  //Metodo que controla la apertura de la modal con el fin de obtener los docentes y los contenidos
   const handleOpenModal = (isEdit?: boolean, asignaturaToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -207,6 +223,7 @@ function Asignaturas(props: any) {
     }
   }
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSaveAsignatura = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -230,6 +247,7 @@ function Asignaturas(props: any) {
     }
   };
 
+  //Metodo para crear una Asignatura
   const handleCreateAsignatura = async () => {
     let asignaturaToSave = {
       ...asignaturaObject,
@@ -257,6 +275,7 @@ function Asignaturas(props: any) {
     }
   }
 
+  //Metodo para editar una Asignatura
   const handleEditAsignatura = async () => {
     let asignaturaToSave = {
       ...asignaturaObject,
@@ -284,6 +303,7 @@ function Asignaturas(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (asignaturaObject.codigo &&
       asignaturaObject.nombre &&
@@ -297,6 +317,7 @@ function Asignaturas(props: any) {
     }
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -465,6 +486,9 @@ function Asignaturas(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion de contenidos */}
+
       <Modal
         open={openModal}
         // onClose={handleClose}

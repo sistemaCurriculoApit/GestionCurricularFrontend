@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -45,6 +46,7 @@ import { AnythingObject } from '../../constants/generalConstants'
 import { getContenidosPaginated, createContenido, updateContenido } from "../../services/contenidosServices"
 
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -57,7 +59,10 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Contenidos(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -82,11 +87,13 @@ function Contenidos(props: any) {
   });
 
 
+  //Al iniciar el componente se obtienen los contenidos
   useEffect(() => {
     setOpenModalLoading(true);
     getContenidos();
   }, [])
 
+  //Actualizacion de la lista de contenidos si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -94,7 +101,9 @@ function Contenidos(props: any) {
     }
   }, [searchField])
 
+  //Metodo de obtencion de contenidos
   const getContenidos = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getContenidosPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -103,6 +112,7 @@ function Contenidos(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.contenidos && response.contenidos.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let contenidos = response.contenidos.map((data: any) => {
         let arrayData = [
           data.codigo,
@@ -131,6 +141,7 @@ function Contenidos(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getContenidos con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getContenidos(page);
@@ -138,6 +149,7 @@ function Contenidos(props: any) {
   };
 
 
+  //Se establecen los datos de un contenido a editar en la modal
   const setDataEditContenido = (data: any) => {
     setOpenModal(true);
     setContenidoObject({
@@ -149,6 +161,7 @@ function Contenidos(props: any) {
     });
   };
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSaveContenido = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -172,6 +185,7 @@ function Contenidos(props: any) {
     }
   };
 
+  //Metodo para crear un Contenido
   const handleCreateContenido = async () => {
     let contenidoToSave = {
       codigo: contenidoObject.codigo,
@@ -200,6 +214,7 @@ function Contenidos(props: any) {
     }
   }
 
+  //Metodo para editar un Contenido
   const handleEditContenido = async () => {
     let contenidoToSave = {
       codigo: contenidoObject.codigo,
@@ -228,6 +243,7 @@ function Contenidos(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (contenidoObject.codigo &&
       contenidoObject.nombre
@@ -238,6 +254,7 @@ function Contenidos(props: any) {
     }
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -403,6 +420,9 @@ function Contenidos(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion de contenidos */}
+
       <Modal
         open={openModal}
         className={classes.modalForm}

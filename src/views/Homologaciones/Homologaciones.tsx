@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -46,6 +47,7 @@ import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
 import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
 
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -58,7 +60,10 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Homologaciones(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
   const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
 
@@ -100,6 +105,7 @@ function Homologaciones(props: any) {
     descripcion: '',
   });
 
+  //Al iniciar el componente se obtienen las homologaciones y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
     setOpenModalLoading(true);
     getHomologaciones();
@@ -124,6 +130,7 @@ function Homologaciones(props: any) {
     }
   }, []);
 
+  //Actualizacion de la lista de asingaturas si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -131,6 +138,7 @@ function Homologaciones(props: any) {
     }
   }, [searchField]);
 
+  //Accion al seleccionar un programa dentro de la modal de creacion y edicion
   useEffect(() => {
     if (programaSelected._id) {
       if (homologacionObject._id) {
@@ -147,6 +155,7 @@ function Homologaciones(props: any) {
     }
   }, [programaSelected]);
 
+  //Accion al seleccionar un plan dentro de la modal de creacion y edicion
   useEffect(() => {
     if (planSelected._id) {
       if (homologacionObject._id) {
@@ -161,6 +170,7 @@ function Homologaciones(props: any) {
     }
   }, [planSelected]);
 
+  //Accion al seleccionar una asignatura dentro de la modal de creacion y edicion
   useEffect(() => {
     if (asignaturaSelected._id) {
       if (homologacionObject._id) {
@@ -173,13 +183,16 @@ function Homologaciones(props: any) {
     }
   }, [asignaturaSelected]);
 
+  //Accion al seleccionar una homologacion para ser editada, carga programas planes y asginaturas
   useEffect(() => {
     if (homologacionObject._id) {
       getProgramas(true, homologacionObject)
     }
   }, [homologacionObject]);
 
+  //Metodo de obtencion de homologaciones
   const getHomologaciones = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getHomologacionesPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -188,6 +201,7 @@ function Homologaciones(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.homologaciones && response.homologaciones.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let homologaciones = response.homologaciones.map((data: any) => {
         let arrayData = [
           data.identificacionSolicitante,
@@ -217,6 +231,7 @@ function Homologaciones(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Obtencion de los programas para la modal, cuando se crea o se edita una homologacion
   const getProgramas = async (isEdit?: boolean, homologacionToEdit?: any) => {
     let response: any = await getAllProgramas({
       search: '',
@@ -235,6 +250,7 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Obtencion de los planes para la modal, cuando se crea o se edita una homologacion
   const getPlanes = async (isEdit?: boolean, homologacionToEdit?: any) => {
     const planIds = programaSelected.plan.map((option: any) => option._id);
     let response: any = await getPlanesByListIds({
@@ -255,6 +271,7 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Obtencion de las asignaturas para la modal, cuando se crea o se edita una homologacion
   const getAsignaturas = async (isEdit?: boolean, homologacionToEdit?: any) => {
     const areasIds = planSelected.area.map((option: any) => option._id);
     let response: any = await getAllAsignaturasByPlan({
@@ -275,6 +292,7 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Obtencion de los contenidos para la modal, cuando se crea o se edita una homologacion
   const getContenidos = async (isEdit?: boolean, homologacionToEdit?: any) => {
     const contenidosIds = asignaturaSelected.contenido.map((option: any) => option._id);
     let response: any = await getAllContenidoByAsignatura({
@@ -290,11 +308,13 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getHomologaciones con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getHomologaciones(page);
   };
 
+  //Se establecen los datos de una homologacion a editar en la modal
   const setDataEditHomologacion = (data: any) => {
     try {
       handleOpenModal(true, data);
@@ -303,6 +323,7 @@ function Homologaciones(props: any) {
     }
   };
 
+  //Metodo que controla la apertura de la modal con el fin de obtener toda la informacion
   const handleOpenModal = (isEdit?: boolean, homologacionToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -318,7 +339,6 @@ function Homologaciones(props: any) {
         setHomologacionObject(homologacionToEdit);
         getProgramas(isEdit, homologacionToEdit);
       } else {
-        console.log(moment(new Date(new Date(homologacionToEdit.añoHomologacion).getFullYear(), 0, 1)));
         setHomologacionObject({ ...homologacionToEdit, añoHomologacion: moment(new Date(new Date(homologacionToEdit.añoHomologacion).getFullYear(), 0, 1)) });
         const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion);
         setEstadoHomologacionSelected(estado || {});
@@ -328,6 +348,7 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSaveHomologacion = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -351,6 +372,7 @@ function Homologaciones(props: any) {
     }
   };
 
+  //Metodo para crear una Homologacion
   const handleCreateHomologacion = async () => {
     let homologacionToSave = {
       ...homologacionObject,
@@ -382,6 +404,7 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Metodo para editar una Homologacion
   const handleEditHomologacion = async () => {
     let homologacionToSave = {
       ...homologacionObject,
@@ -412,6 +435,7 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (programaSelected._id &&
       planSelected._id &&
@@ -431,6 +455,7 @@ function Homologaciones(props: any) {
     }
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -606,6 +631,9 @@ function Homologaciones(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion de contenidos */}
+
       <Modal
         open={openModal}
         className={classes.modalForm}

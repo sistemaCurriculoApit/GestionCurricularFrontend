@@ -1,9 +1,9 @@
+//importacion de dependencias
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { createBrowserHistory } from 'history';
 import { Router, Route, Switch, Redirect } from 'react-router-dom';
 
-// core components
 import Login from './layouts/Login';
 import Admin from './layouts/Admin';
 import Coordinador from './layouts/Coordinador';
@@ -16,14 +16,17 @@ import 'assets/css/material-dashboard-react.css?v=1.6.0';
 
 const hist = createBrowserHistory();
 
+//Inicio componente funcional En este se valida el rol logueado para retornar sus respectivos accesos
 function IndexApp(props: any) {
   const [islogged, setIsLogged] = useState('');
 
+  //Al iniciar el componente se valida si existe un token activo
   useEffect(() => {
     var activeSession = localStorage.getItem('token');
     setIsLogged(activeSession ? activeSession : '');
   });
 
+  //Se obtinen las rutas o accesos segun el rol en sesion
   const getRouteByProfile = () => {
     var idProfile = localStorage.getItem('idProfileLoggedUser');
     switch (idProfile) {
@@ -69,7 +72,7 @@ function IndexApp(props: any) {
     }
   }
 
-
+  //Retorno de las rutas si existe sesión, de lo contrario direcciona al login
   return (
     <Router history={hist}>
       {
@@ -87,27 +90,3 @@ function IndexApp(props: any) {
 
 ReactDOM.render(<IndexApp />, document.getElementById('root'))
 
-
-// ReactDOM.render(
-//   // tslint:disable-next-line: jsx-wrap-multiline
-//   <Router history={hist}>
-//     <Switch>
-//       {
-//         islogged ?
-//           <div>
-//             <Route path="/admin" component={Admin} />
-//             <Route path="/coordinador" component={Coordinador} />
-//             <Route path="/docente" component={Docente} />
-//             <Redirect to={'/admin/dashboard'} from={'/'}/>
-//           </div>
-//           :
-//           <div>
-//             <Route path="/login" component={Login} />
-//             <Redirect to={'/login'} from={'/'}/>
-//           </div>
-
-//       }
-//     </Switch>
-//   </Router>,
-//   document.getElementById('root')
-// )

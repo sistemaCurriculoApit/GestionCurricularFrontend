@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -42,7 +43,7 @@ import { AnythingObject } from '../../constants/generalConstants'
 import { getDocentePaginated, createDocente, updateDocente } from "../../services/docentesServices"
 
 
-
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -55,7 +56,10 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Docentes(props: any) {
+
+  //Declaración de variables y estados del componente
   const { classes } = props;
   const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
 
@@ -79,14 +83,17 @@ function Docentes(props: any) {
     document: '',
   });
 
+
+  //Al iniciar el componente se obtienen los docentes y si es redirección del dashboard se abre la modal de creacion
   useEffect(() => {
     setOpenModalLoading(true);
     getDocentes();
-    if(openModalCreate){
+    if (openModalCreate) {
       setOpenModal(true);
     }
   }, [])
 
+  //Actualizacion de la lista de docentes si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -94,7 +101,9 @@ function Docentes(props: any) {
     }
   }, [searchField])
 
+  //Metodo de obtencion de docentes
   const getDocentes = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getDocentePaginated({
       page: page ? page : 0,
       search: searchField,
@@ -103,6 +112,7 @@ function Docentes(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.docentes && response.docentes.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let docentes = response.docentes.map((data: any) => {
         let arrayData = [
           data.nombre,
@@ -129,11 +139,10 @@ function Docentes(props: any) {
       setDocentesList([]);
 
     }
-    // setTimeout(() => {
     setOpenModalLoading(false);
-    // }, 1500);
   }
 
+  //Se establecen los datos de un docente a editar en la modal
   const setDataEditDocente = (data: any) => {
     setOpenModal(true);
     setDocenteObject({
@@ -144,12 +153,13 @@ function Docentes(props: any) {
     });
   };
 
+  //Cuando se cambia de pagina se ejecuta el metodo getDocentes con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getDocentes(page);
   };
 
-
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSaveDocente = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -160,7 +170,7 @@ function Docentes(props: any) {
         handleEditDocente();
       } else {
         //CREAR DOCENTE
-        handleCreateUser();
+        handleCreateDocente();
       }
 
     } else {
@@ -174,7 +184,8 @@ function Docentes(props: any) {
     }
   };
 
-  const handleCreateUser = async () => {
+  //Metodo para crear un Docente
+  const handleCreateDocente = async () => {
     let docenteToSave = {
       nombre: docenteObject.name,
       correo: docenteObject.email,
@@ -184,7 +195,7 @@ function Docentes(props: any) {
     if (response && response.error) {
       setSeverityAlert('error');
       setShowAlert(true);
-      setMessagesAlert(response && response.descripcion ? response.descripcion:'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setMessagesAlert(response && response.descripcion ? response.descripcion : 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -201,6 +212,7 @@ function Docentes(props: any) {
     }
   }
 
+  //Metodo para editar un Docente
   const handleEditDocente = async () => {
     let docenteToSave = {
       nombre: docenteObject.name,
@@ -211,7 +223,7 @@ function Docentes(props: any) {
     if (response && response.error) {
       setSeverityAlert('error');
       setShowAlert(true);
-      setMessagesAlert(response && response.descripcion ? response.descripcion:'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setMessagesAlert(response && response.descripcion ? response.descripcion : 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -228,6 +240,7 @@ function Docentes(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (docenteObject._id) {
       if (docenteObject.name && docenteObject.email) {
@@ -245,6 +258,7 @@ function Docentes(props: any) {
     }
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -356,7 +370,7 @@ function Docentes(props: any) {
                           onClick={() => {
                             setOpenModalLoading(true);
                             getDocentes();
-                           }} >
+                          }} >
                           {'Aplicar filtros'}
                         </Button>
 
@@ -409,6 +423,8 @@ function Docentes(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion de docentes */}
       <Modal
         open={openModal}
         className={classes.modalForm}
@@ -421,7 +437,7 @@ function Docentes(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{docenteObject._id ? 'Editar': 'Crear'} docente</h4>
+                  <h4 className={classes.cardTitleWhite}>{docenteObject._id ? 'Editar' : 'Crear'} docente</h4>
                   <div className={classes.headerActions}>
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>

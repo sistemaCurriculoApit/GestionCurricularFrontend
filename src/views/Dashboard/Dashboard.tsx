@@ -1,24 +1,13 @@
+//importacion de dependencias y servicios
 import React, { useEffect, useState } from 'react';
 // react plugin for creating charts
 import ChartistGraph from 'react-chartist';
 import { NavLink } from 'react-router-dom';
 // @material-ui/core
 import withStyles from '@material-ui/core/styles/withStyles';
-import Icon from '@material-ui/core/Icon';
 import Chip from '@material-ui/core/Chip';
 
 // @material-ui/icons
-import Store from '@material-ui/icons/Store';
-import Warning from '@material-ui/icons/Warning';
-import DateRange from '@material-ui/icons/DateRange';
-import LocalOffer from '@material-ui/icons/LocalOffer';
-import Update from '@material-ui/icons/Update';
-import ArrowUpward from '@material-ui/icons/ArrowUpward';
-import AccessTime from '@material-ui/icons/AccessTime';
-import Accessibility from '@material-ui/icons/Accessibility';
-import BugReport from '@material-ui/icons/BugReport';
-import Code from '@material-ui/icons/Code';
-import Cloud from '@material-ui/icons/Cloud';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import DescriptionIcon from '@material-ui/icons/Description';
 import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
@@ -28,10 +17,6 @@ import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 // core components
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
-import Table from '../../components/Table/Table';
-import Tasks from '../../components/Tasks/Tasks';
-import CustomTabs from '../../components/CustomTabs/CustomTabs';
-import Danger from '../../components/Typography/Danger';
 import Card from '../../components/Card/Card';
 import CardHeader from '../../components/Card/CardHeader';
 import CardIcon from '../../components/Card/CardIcon';
@@ -52,6 +37,7 @@ import { userProfilesObject } from '../../constants/generalConstants';
 
 import { getDashboardData, getDashboardHomologacionesChart, getDashboardAvancesChart } from "../../services/dashboardServices"
 
+//Constante de los meses del año para ser mostrados en las graficas
 const MonthsArray = [
   'Enero',
   'Febrero',
@@ -67,7 +53,10 @@ const MonthsArray = [
   'Diciembre'
 ]
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Dashboard(props: any) {
+
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [openModalLoading, setOpenModalLoading] = useState(false);
@@ -79,12 +68,15 @@ function Dashboard(props: any) {
 
   const idProfile = localStorage.getItem('idProfileLoggedUser');
 
+  //Al iniciar el componente se cargan automaticamente todos los datos de las graficas
   useEffect(() => {
     setOpenModalLoading(true);
     getData();
   }, []);
 
+  //Metodo de obtencion de datos de las graficas
   const getData = async (page?: any) => {
+    //Llamados al backend 
     let response: any = await getDashboardData();
     let homologacionesChartData: any = await getDashboardHomologacionesChart();
     let avancesChartData: any = await getDashboardAvancesChart();
@@ -103,6 +95,7 @@ function Dashboard(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Manejador de redireccion de los accesos directos
   const handleRedirectActas = () => {
     if (idProfile) {
       switch (parseInt(idProfile)) {
@@ -123,6 +116,7 @@ function Dashboard(props: any) {
     }
   }
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <GridContainer>

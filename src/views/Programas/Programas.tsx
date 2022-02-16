@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -42,6 +43,7 @@ import { getProgramasPaginated, createPrograma, updatePrograma } from "../../ser
 import { getAllPlanes } from "../../services/planesServices"
 
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -55,7 +57,10 @@ const styles = createStyles({
 });
 
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Programas(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -80,11 +85,13 @@ function Programas(props: any) {
     plan: [],
   });
 
+  //Al iniciar el componente se obtienen los programas
   useEffect(() => {
     setOpenModalLoading(true);
     getProgramas();
   }, [])
 
+  //Actualizacion de la lista de programas si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -92,7 +99,9 @@ function Programas(props: any) {
     }
   }, [searchField])
 
+  //Metodo de obtencion de programas
   const getProgramas = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getProgramasPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -101,6 +110,7 @@ function Programas(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.programas && response.programas.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let programas = response.programas.map((data: any) => {
         let arrayData = [
           data.codigo,
@@ -129,6 +139,7 @@ function Programas(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Obtencion de los planes para la modal, cuando se crea o se edita un programa
   const getPlanes = async (isEdit?: boolean, programaToEdit?: any) => {
     let response: any = await getAllPlanes({
       search: '',
@@ -149,11 +160,13 @@ function Programas(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getProgramas con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getProgramas(page);
   };
 
+  //Se establecen los datos de un programa a editar en la modal
   const setDataEditPrograma = (data: any) => {
     try {
       handleOpenModal(true, data);
@@ -162,6 +175,7 @@ function Programas(props: any) {
     }
   };
 
+  //Metodo que controla la apertura de la modal con el fin de obtener los planes
   const handleOpenModal = (isEdit?: boolean, programaToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -172,6 +186,7 @@ function Programas(props: any) {
     }
   }
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSavePrograma = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -195,6 +210,7 @@ function Programas(props: any) {
     }
   };
 
+  //Metodo para crear un programa
   const handleCreatePrograma = async () => {
     let programaToSave = {
       ...programaObject,
@@ -221,6 +237,7 @@ function Programas(props: any) {
     }
   }
 
+  //Metodo para editar un programa
   const handleEditPrograma = async () => {
     let programaToSave = {
       ...programaObject,
@@ -247,6 +264,7 @@ function Programas(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (programaObject.codigo &&
       programaObject.nombre
@@ -257,6 +275,7 @@ function Programas(props: any) {
     }
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div >
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -419,6 +438,9 @@ function Programas(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion de contenidos */}
+
       <Modal
         open={openModal}
         className={classes.modalForm}

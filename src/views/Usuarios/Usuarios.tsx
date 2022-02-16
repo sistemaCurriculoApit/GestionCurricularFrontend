@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useEffect, useState } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -46,6 +47,7 @@ import { userProfilesArray, AnythingObject } from '../../constants/generalConsta
 
 import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -59,10 +61,12 @@ const styles = createStyles({
   ...checkboxAdnRadioStyle,
 });
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Usuarios(props: any) {
   const { classes } = props;
   const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
 
+  //Declaración de variables y estados del componente
   const [showAlert, setShowAlert] = useState(false);
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
@@ -86,6 +90,7 @@ function Usuarios(props: any) {
   });
 
 
+  //Al iniciar el componente se obtienen los usuarios y si es redirección del dashboard se abre la modal de creacion
   useEffect(() => {
     setOpenModalLoading(true);
     getUsers();
@@ -94,6 +99,7 @@ function Usuarios(props: any) {
     }
   }, [])
 
+  //Actualizacion de la lista de usuarios si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -101,7 +107,9 @@ function Usuarios(props: any) {
     }
   }, [searchField])
 
+  //Metodo de obtencion de usuarios
   const getUsers = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getUserPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -110,6 +118,7 @@ function Usuarios(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.users && response.users.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let users = response.users.map((data: any) => {
         let arrayData = [
           data.correo,
@@ -138,12 +147,14 @@ function Usuarios(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getUsers con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getUsers(page);
 
   };
 
+  //Se establecen los datos de un usuario a editar en la modal
   const setDataEditUser = (data: any) => {
     setOpenModal(true);
     let roleItem = userProfilesArray.find((item) => item.id === data.rolId);
@@ -157,6 +168,7 @@ function Usuarios(props: any) {
     });
   };
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSaveUser = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -194,6 +206,7 @@ function Usuarios(props: any) {
     }
   };
 
+  //Metodo para crear un usuario
   const handleCreateUser = async () => {
     let userToSave = {
       nombreUsuario: userObject.name,
@@ -222,6 +235,7 @@ function Usuarios(props: any) {
     }
   }
 
+  //Metodo para editar un usuario
   const handleEditUser = async () => {
     let userToSave = {
       nombreUsuario: userObject.name,
@@ -250,6 +264,7 @@ function Usuarios(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (userObject._id) {
       if (userObject.name && userObject.email && userObject.role.id) {
@@ -270,6 +285,7 @@ function Usuarios(props: any) {
     }
   };
 
+  //Validacion de contraseñas, que sean iguales
   const validatePassword = () => {
     if (userObject.password !== userObject.passwordConfirm) {
       setShowAlert(true);
@@ -284,6 +300,7 @@ function Usuarios(props: any) {
     return true;
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -445,6 +462,8 @@ function Usuarios(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion */}
       <Modal
         open={openModal}
         className={classes.modalForm}

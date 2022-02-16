@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -42,6 +43,7 @@ import { getAreasPaginated, createArea, updateArea } from "../../services/areasS
 import { getAllAsignaturas } from "../../services/asignaturasServices"
 
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -53,7 +55,11 @@ const styles = createStyles({
   ...tooltipStyle,
   ...containerFloatButton,
 });
+
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Areas(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -78,11 +84,13 @@ function Areas(props: any) {
     asignatura: [],
   });
 
+  //Al iniciar el componente se obtienen las areas
   useEffect(() => {
     setOpenModalLoading(true);
     getAreas();
   }, [])
 
+  //Actualizacion de la lista de areas si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -90,7 +98,9 @@ function Areas(props: any) {
     }
   }, [searchField])
 
+  //Metodo de obtencion de areas
   const getAreas = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getAreasPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -99,6 +109,7 @@ function Areas(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.areas && response.areas.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let areas = response.areas.map((data: any) => {
         let arrayData = [
           data.codigo,
@@ -127,6 +138,7 @@ function Areas(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Obtencion de las asignaturas para la modal, cuando se crea o se edita
   const getAsignaturas = async (isEdit?: boolean, areaToEdit?: any) => {
     let response: any = await getAllAsignaturas({
       search: '',
@@ -147,11 +159,13 @@ function Areas(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getAreas con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getAreas(page);
   };
 
+  //Se establecen los datos de una area a editar en la modal
   const setDataEditArea = (data: any) => {
     try {
       handleOpenModal(true, data);
@@ -160,6 +174,7 @@ function Areas(props: any) {
     }
   };
 
+  //Metodo que controla la apertura de la modal con el fin de obtener las asignaturas
   const handleOpenModal = (isEdit?: boolean, areaToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -170,6 +185,7 @@ function Areas(props: any) {
     }
   }
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSaveAarea = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -193,6 +209,7 @@ function Areas(props: any) {
     }
   };
 
+  //Metodo para crear una area
   const handleCreateArea = async () => {
     let areaToSave = {
       ...areaObject,
@@ -219,6 +236,7 @@ function Areas(props: any) {
     }
   }
 
+  //Metodo para editar una area
   const handleEditArea = async () => {
     let areaToSave = {
       ...areaObject,
@@ -245,6 +263,7 @@ function Areas(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (areaObject.codigo &&
       areaObject.nombre
@@ -256,6 +275,7 @@ function Areas(props: any) {
   };
 
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div >
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -402,6 +422,9 @@ function Areas(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion de contenidos */}
+
       <Modal
         open={openModal}
         className={classes.modalForm}

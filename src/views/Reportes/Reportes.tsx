@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -55,6 +56,7 @@ import { getAllHomologacionesByIdSolicitante, getAllHomologacionesByPeriodo } fr
 
 
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -67,7 +69,10 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Reportes(props: any) {
+
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -116,6 +121,7 @@ function Reportes(props: any) {
 
   const [filterIdSolicitante, setFilterIdSolicitante] = useState('');
 
+  //Al iniciar el componente o seleccionar una pestaña se obtienen los filtros necesarios o simplemente se inicializa la lista de datos
   useEffect(() => {
     setTotalDataList(0);
     switch (tabSelection) {
@@ -148,6 +154,7 @@ function Reportes(props: any) {
   }, [tabSelection])
 
 
+  //Obtencion de asignaturas para los filtros en las pestañas
   const getAsignaturas = async () => {
     let response: any = await getAllAsignaturas({
       search: '',
@@ -158,6 +165,7 @@ function Reportes(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Obtencion de docentes para los filtros en las pestañas
   const getDocentes = async () => {
     let response: any = await getAllDocentes({
       search: '',
@@ -168,8 +176,10 @@ function Reportes(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Metodo de obtencion de los avances por asignatura
   const getAvancesByAsignatura = async (page?: any, isReport?: boolean) => {
     if (filterObject1.añoAvance && filterObject1.periodo && filterObject1.asignatura && filterObject1.asignatura._id) {
+      //Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllAvancesByAsignatura({
         page: page ? page : 0,
         añoAvance: filterObject1.añoAvance.toDate(),
@@ -179,9 +189,10 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.avances && response.avances.length) {
         if (isReport) {
+          //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
           var data = response.avances.map((data: any) => {
             return {
-              asignatura:`${filterObject1.asignatura.codigo} - ${filterObject1.asignatura.nombre}`,
+              asignatura: `${filterObject1.asignatura.codigo} - ${filterObject1.asignatura.nombre}`,
               añoAvance: moment(data.añoAvance).format('YYYY'),
               periodo: data.periodo,
               porcentajeAvance: data.porcentajeAvance,
@@ -260,8 +271,10 @@ function Reportes(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Metodo de obtencion de los avances por docente
   const getAvancesByDocente = async (page?: any, isReport?: boolean) => {
     if (filterObject2.añoAvance && filterObject2.periodo && filterObject2.docente && filterObject2.docente._id) {
+      //Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllAvancesByDocente({
         page: page ? page : 0,
         añoAvance: filterObject2.añoAvance.toDate(),
@@ -271,9 +284,10 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.avances && response.avances.length) {
         if (isReport) {
+          //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
           var data = response.avances.map((data: any) => {
             return {
-              docente:`${filterObject2.docente.nombre} - ${filterObject2.docente.documento}`,
+              docente: `${filterObject2.docente.nombre} - ${filterObject2.docente.documento}`,
               añoAvance: moment(data.añoAvance).format('YYYY'),
               periodo: data.periodo,
               porcentajeAvance: data.porcentajeAvance,
@@ -353,8 +367,10 @@ function Reportes(props: any) {
 
   }
 
+  //Metodo de obtencion de los avances por periodo
   const getAvancesByPeriodo = async (page?: any, isReport?: boolean) => {
     if (filterObject3.añoAvance && filterObject3.periodo) {
+      //Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllAvancesByPerido({
         page: page ? page : 0,
         añoAvance: filterObject3.añoAvance.toDate(),
@@ -363,6 +379,7 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.avances && response.avances.length) {
         if (isReport) {
+          //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
           var data = response.avances.map((data: any) => {
             return {
               añoAvance: moment(data.añoAvance).format('YYYY'),
@@ -442,8 +459,10 @@ function Reportes(props: any) {
 
   }
 
+  //Metodo de obtencion de las homologacoiones por el id del solicitante
   const getHomologacionesByIdSolicitante = async (page?: any, isReport?: boolean) => {
     if (filterIdSolicitante) {
+    //Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllHomologacionesByIdSolicitante({
         page: page ? page : 0,
         identificacionSolicitante: filterIdSolicitante,
@@ -451,10 +470,11 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.homologaciones && response.homologaciones.length) {
         if (isReport) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
           var data = response.homologaciones.map((data: any) => {
             return {
               año: moment(data.añoHomologacion).format('YYYY'),
-              periodo:data.periodo,
+              periodo: data.periodo,
               identificacionSolicitante: data.identificacionSolicitante,
               nombreSolicitante: data.nombreSolicitante,
               asignaturaSolicitante: data.asignaturaSolicitante,
@@ -536,8 +556,10 @@ function Reportes(props: any) {
 
   }
 
+  //Metodo de obtencion de las homologacoiones por periodo
   const getHomologacionesByPeriodo = async (page?: any, isReport?: boolean) => {
     if (filterObject5.añoHomologacion && filterObject5.periodo) {
+    //Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllHomologacionesByPeriodo({
         page: page ? page : 0,
         añoHomologacion: filterObject5.añoHomologacion.toDate(),
@@ -546,10 +568,11 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.homologaciones && response.homologaciones.length) {
         if (isReport) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
           var data = response.homologaciones.map((data: any) => {
             return {
               año: moment(data.añoHomologacion).format('YYYY'),
-              periodo:data.periodo,
+              periodo: data.periodo,
               identificacionSolicitante: data.identificacionSolicitante,
               nombreSolicitante: data.nombreSolicitante,
               asignaturaSolicitante: data.asignaturaSolicitante,
@@ -631,6 +654,7 @@ function Reportes(props: any) {
 
   }
 
+  //Manejador de la apertura de la modal para establecer la paginacion al generar el reporte 
   const handleReportOpenModal = async () => {
     setPageReportSelected({});
     let pagesReport = Math.ceil(totalDataList / 100);
@@ -642,6 +666,7 @@ function Reportes(props: any) {
     setOpenModal(true)
   }
 
+  //Segun la pestaña activa se ejecuta el metodo de obtencion de datos para la tabla que se listara
   const handleReportCallFunction = async () => {
     setOpenModalLoading(true);
     switch (tabSelection) {
@@ -678,6 +703,7 @@ function Reportes(props: any) {
     return sheetData;
   }
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -1257,6 +1283,8 @@ function Reportes(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de generacion de reportes */}
 
       <Modal
         open={openModal}

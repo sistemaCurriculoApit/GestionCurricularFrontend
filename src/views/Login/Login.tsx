@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState } from "react";
 import { createStyles } from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -19,7 +20,10 @@ import ModalLoading from '../../components/ModalLoading/ModalLoading';
 
 import { validateLogin } from "../../services/loginServices"
 
+//Inicio componente funcional
 function Login(props: any) {
+
+  //Declaración de variables y estados del componente
   const { classes } = props;
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -28,32 +32,35 @@ function Login(props: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async (guest?:Boolean) => {
+  //Metodo que controla el inicio de sesion
+  const handleLogin = async (guest?: Boolean) => {
     if (guest) {
+      //Ingreso con el rol de invitado
       localStorage.setItem('token', '-1');
       localStorage.setItem('idProfileLoggedUser', '4');
       window.location.reload();
     } else {
-      if(email && password){
-
+      if (email && password) {
+        //Ingreso roles del sistema con credenciales
         let response: any = await validateLogin({
           correo: email,
           contrasena: password
         });
         let { body } = response;
         if (body && body.token) {
+          //almacenamiento de token y del perfil logeado
           localStorage.setItem('token', body.token);
           localStorage.setItem('idProfileLoggedUser', body.user.rolId);
           window.location.reload();
         } else {
           setSeverityAlert('error');
-          setMessagesAlert(body && body.descripcion ? body.descripcion:'Ha ocurrido al intentar iniciar sesion');
+          setMessagesAlert(body && body.descripcion ? body.descripcion : 'Ha ocurrido al intentar iniciar sesion');
           setShowAlert(true);
           setTimeout(() => {
             setShowAlert(false);
           }, 1000);
         }
-      }else{
+      } else {
         setSeverityAlert('error');
         setMessagesAlert('Correo electrónico y contraseña son obligatorios');
         setShowAlert(true);
@@ -66,6 +73,7 @@ function Login(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div className="App" >
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -92,11 +100,11 @@ function Login(props: any) {
                 onChange={(event) => setPassword(event.target.value)}
               />
 
-              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => {setOpenModalLoading(true); handleLogin() }}>
+              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => { setOpenModalLoading(true); handleLogin() }}>
                 Iniciar sesión
               </Button>
 
-              <a onClick={() => {setOpenModalLoading(true); handleLogin(true) }} className={classes.a}>
+              <a onClick={() => { setOpenModalLoading(true); handleLogin(true) }} className={classes.a}>
                 Ingresar cómo invitado
               </a>
 
@@ -110,6 +118,7 @@ function Login(props: any) {
   );
 }
 
+//Estilos del modulo
 const styles = createStyles({
   cardLogin: {
     padding: '10px',
@@ -154,16 +163,16 @@ const styles = createStyles({
     width: '40%',
   },
   a: {
-    fontSize:20,
-    fontWeight:400,
+    fontSize: 20,
+    fontWeight: 400,
     color: successColor[0], // color: primaryColor
     textDecoration: 'none',
     backgroundColor: 'transparent',
-    marginTop:15,
-    marginBottom:15,
+    marginTop: 15,
+    marginBottom: 15,
     textAlign: 'center',
-    cursor:'pointer',
-    '&:hover':{
+    cursor: 'pointer',
+    '&:hover': {
       color: successColor[1],
     }
   },

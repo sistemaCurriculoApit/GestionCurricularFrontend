@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -41,6 +42,7 @@ import { AnythingObject } from '../../constants/generalConstants'
 import { getPlanesPaginated, createPlan, updatePlan } from "../../services/planesServices"
 import { getAllAreas } from "../../services/areasServices"
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -54,7 +56,10 @@ const styles = createStyles({
 });
 
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Planes(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -79,11 +84,13 @@ function Planes(props: any) {
     area: [],
   });
 
+  //Al iniciar el componente se obtienen los planes
   useEffect(() => {
     setOpenModalLoading(true);
     getPlanes();
   }, [])
 
+  //Actualizacion de la lista de planes si el componente de busqueda es modificado
   useEffect(() => {
     if (!searchField) {
       setOpenModalLoading(true);
@@ -91,7 +98,9 @@ function Planes(props: any) {
     }
   }, [searchField])
 
+  //Metodo de obtencion de planes
   const getPlanes = async (page?: any) => {
+    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getPlanesPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -100,6 +109,7 @@ function Planes(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.planes && response.planes.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let planes = response.planes.map((data: any) => {
         let arrayData = [
           data.codigo,
@@ -128,6 +138,7 @@ function Planes(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Obtencion de las areas para la modal, cuando se crea o se edita un plan
   const getAreas = async (isEdit?: boolean, planToEdit?: any) => {
     let response: any = await getAllAreas({
       search: '',
@@ -148,11 +159,13 @@ function Planes(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getPlanes con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getPlanes(page);
   };
 
+  //Se establecen los datos de un plan a editar en la modal
   const setDataEditPlan = (data: any) => {
     try {
       handleOpenModal(true, data);
@@ -161,6 +174,7 @@ function Planes(props: any) {
     }
   };
 
+  //Metodo que controla la apertura de la modal con el fin de obtener las areas
   const handleOpenModal = (isEdit?: boolean, planToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -171,6 +185,7 @@ function Planes(props: any) {
     }
   }
 
+  //Manejador de la accion guardar de la modal, se encarga de crear o editar
   const handleSavePlan = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
@@ -194,6 +209,7 @@ function Planes(props: any) {
     }
   };
 
+  //Metodo para crear un plan
   const handleCreatePlan = async () => {
     let planToSave = {
       ...planObject,
@@ -220,6 +236,7 @@ function Planes(props: any) {
     }
   }
 
+  //Metodo para editar un plan
   const handleEditPlan = async () => {
     let planToSave = {
       ...planObject,
@@ -246,6 +263,7 @@ function Planes(props: any) {
     }
   }
 
+  //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (planObject.codigo &&
       planObject.nombre
@@ -256,6 +274,7 @@ function Planes(props: any) {
     }
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -421,6 +440,9 @@ function Planes(props: any) {
           </div>
         </Tooltip>
       </div>
+
+      {/* Modal de creación y edicion de contenidos */}
+      
       <Modal
         open={openModal}
         className={classes.modalForm}

@@ -1,3 +1,4 @@
+//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
 import MomentUtils from "@date-io/moment";
 // @material-ui/core components
@@ -44,6 +45,7 @@ import { getAreasByListIdsNoToken } from "../../services/areasServices"
 import { getAllContenidoByAsignaturaNoToken } from "../../services/contenidosServices"
 import { getAsignaturaByListIdsPaginatedNoToken } from "../../services/asignaturasServices"
 
+//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -56,7 +58,10 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
+//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Micrositios(props: any) {
+  
+  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -79,11 +84,13 @@ function Micrositios(props: any) {
   const [totalAsignaturas, setTotalAsignaturas] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
 
+  //Al iniciar el modulo se obtienen los programas para el filtro inicial
   useEffect(() => {
     setOpenModalLoading(true);
     getProgramas();
   }, []);
 
+  //Al seleccionar un programa se obtienen los planes
   useEffect(() => {
     if (programaSelected._id) {
       setOpenModalLoading(true);
@@ -102,6 +109,7 @@ function Micrositios(props: any) {
     }
   }, [programaSelected]);
 
+  //Al seleccionar un plan se obtienen las areas
   useEffect(() => {
     if (planSelected._id) {
       setOpenModalLoading(true);
@@ -117,6 +125,7 @@ function Micrositios(props: any) {
     }
   }, [planSelected]);
 
+  //Al seleccionar una area se obtienen las asignaturas
   useEffect(() => {
     if (areaSelected._id) {
       setOpenModalLoading(true);
@@ -124,6 +133,7 @@ function Micrositios(props: any) {
     }
   }, [areaSelected]);
 
+  //Metodo para la obtencion de programas
   const getProgramas = async () => {
     let response: any = await getAllProgramasNoToken({
       search: '',
@@ -134,6 +144,7 @@ function Micrositios(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Metodo para la obtencion de planes
   const getPlanes = async () => {
     const planIds = programaSelected.plan.map((option: any) => option._id);
     let response: any = await getPlanesByListIdsNoToken({
@@ -146,6 +157,7 @@ function Micrositios(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Metodo para la obtencion de areas
   const getAreas = async () => {
     const areaIds = planSelected.area.map((option: any) => option._id);
     let response: any = await getAreasByListIdsNoToken({
@@ -158,6 +170,7 @@ function Micrositios(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Metodo para la obtencion de asignaturas
   const getAsignaturas = async (page?: any) => {
     const asignaturaIds = areaSelected.asignatura.map((option: any) => option._id);
     let response: any = await getAsignaturaByListIdsPaginatedNoToken({
@@ -165,6 +178,7 @@ function Micrositios(props: any) {
       asignaturaIds
     });
     if (response && response.asignaturas && response.asignaturas.length) {
+      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let asignaturas = response.asignaturas.map((data: any) => {
         let arrayData = [
           data.codigo,
@@ -201,6 +215,7 @@ function Micrositios(props: any) {
     }
   }
 
+  //Metodo para la obtencion de contenidos segun la asignatura seleccionada
   const getContenidos = async (asignaturaSelected: any) => {
     
     const contenidosIds = asignaturaSelected.contenido.map((option: any) => option._id);
@@ -233,11 +248,13 @@ function Micrositios(props: any) {
     setOpenModalLoading(false);
   }
 
+  //Cuando se cambia de pagina se ejecuta el metodo getHomologaciones con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getAsignaturas(page);
   };
 
+  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -378,6 +395,9 @@ function Micrositios(props: any) {
 
         </GridItem>
       </GridContainer>
+
+      {/* Modal listado de contenidos por asignatura */}
+      
       <Modal
         open={openModal}
         className={classes.modalForm}
