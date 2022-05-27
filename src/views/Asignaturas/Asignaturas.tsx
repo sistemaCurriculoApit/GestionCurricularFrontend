@@ -48,6 +48,7 @@ import { AnythingObject } from '../../constants/generalConstants'
 import { getAsignaturasPaginated, createAsignatura, updateAsignatura } from "../../services/asignaturasServices"
 import { getAllDocentes } from "../../services/docentesServices"
 import { getAllContenidos } from "../../services/contenidosServices"
+import { getAllEquivalencias } from '../../services/equivalenciasServices'
 
 
 //Estilos generales usados en el modulo
@@ -84,6 +85,7 @@ function Asignaturas(props: any) {
   const [asignaturaList, setAsignaturasList] = useState([]);
   const [contenidoList, setContenidoList] = useState([]);
   const [docenteList, setDocenteList] = useState([]);
+  const [equivalenciaList, setEquivalenciaList] = useState([]);
   const [totalAsignaturas, setTotalAsignaturas] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
   const [asignaturaObject, setAsignaturaObject] = useState<AnythingObject>({
@@ -94,7 +96,8 @@ function Asignaturas(props: any) {
     cantidadCredito: 1,
     intensidadHoraria: 1,
     contenido: [],
-    docente: []
+    docente: [],
+    equivalencia: []
   });
 
   //Al iniciar el componente se obtienen las asignaturas
@@ -172,7 +175,6 @@ function Asignaturas(props: any) {
       }
     }
     getContenidos(isEdit, { ...asignaturaToEdit, docente: docentesSelected });
-
   }
 
   //Obtencion de los docentes para la modal, cuando se crea o se edita una asignatura
@@ -192,7 +194,26 @@ function Asignaturas(props: any) {
         }
       }
     }
-    setAsignaturaObject({ ...asignaturaToEdit, contenido: contenidosSelected });
+    getEquivalencias(isEdit, { ...asignaturaToEdit, contenido: contenidosSelected });
+  }
+
+  const getEquivalencias = async (isEdit?: boolean, asignaturaToEdit?: any) => {
+    let response: any = await getAllEquivalencias({
+      search: '',
+    });
+    let equivalenciasSelected = [];
+    if (response && response.equivalencias){
+      setEquivalenciaList(response.equivalencias);
+      if (isEdit && asignaturaToEdit.equivalencia.length){
+        for (let i=0; i<asignaturaToEdit.equivalencia.length; i++){
+          let findEquivalencia = response.equivalencias.find((equivalencia:any) => equivalencia._id === asignaturaToEdit.equivalencia[i]._id)
+          if (findEquivalencia){
+            equivalenciasSelected.push(findEquivalencia);
+          }
+        }
+      }
+    }
+    setAsignaturaObject({ ...asignaturaToEdit, equivalencia: equivalenciasSelected });
     setOpenModalLoading(false);
   }
 
@@ -280,7 +301,8 @@ function Asignaturas(props: any) {
     let asignaturaToSave = {
       ...asignaturaObject,
       docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
-      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id }))
+      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
+      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia._id}))
     };
     let response: any = await updateAsignatura(asignaturaToSave, asignaturaObject._id);
     if (response && response.error) {
@@ -479,7 +501,8 @@ function Asignaturas(props: any) {
                     cantidadCredito: 1,
                     intensidadHoraria: 1,
                     contenido: [],
-                    docente: []
+                    docente: [],
+                    equivalencia: []
                   }
                 )
               }} />
@@ -655,6 +678,29 @@ function Asignaturas(props: any) {
                       )}
                     />
 
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={12}> 
+                  <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={equivalenciaList}
+                      getOptionLabel={(option: any) => `${option.sourceCourseCode} - ${option.sourceCourseName}`}
+                      filterSelectedOptions
+                      value={asignaturaObject.equivalencia}
+                      onChange={(e, value) => {
+                        setAsignaturaObject({ ...asignaturaObject, equivalencia: value })
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-email"
+                          label="Equivalencias"
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.CustomTextField}
+                        />
+                      )}
+                    />
                   </GridItem>
                 </GridContainer>
               </div>
