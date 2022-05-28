@@ -1,5 +1,24 @@
 import { backendBaseUrl, getHeaders } from './constants'
 
+
+export const getEquivalenciasPaginated = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    let query = `page=${data.page}&search=${data.search}`;
+    fetch(`${backendBaseUrl}api/equivalencia/all?${query}`, {
+      headers,
+      method: 'GET'
+    })
+      .then(response => response.json())
+      .then(response => {
+        resolve(response)
+      })
+      .catch(error => resolve({
+        ...error
+      }));
+  });
+}
+
 export const getAllEquivalencias = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();

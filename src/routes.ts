@@ -39,6 +39,7 @@ import Icons from './views/Icons/Icons';
 import Maps from './views/Maps/Maps';
 import NotificationsPage from './views/Notifications/Notifications';
 import Actas from './views/Actas/Actas';
+import EquivalenciasPages from './views/Equivalencias/Equivalencias';
 
 const dashboardRoutes = [
   {
@@ -63,24 +64,10 @@ const dashboardRoutes = [
     layout: '/admin',
     subItems:[
       {
-        path: '/curriculo/contenidos',
-        name: 'Contenidos',
+        path: '/curriculo/programas',
+        name: 'Programas',
         icon: School,
-        component: ContenidosPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/asignaturas',
-        name: 'Asignaturas',
-        icon: School,
-        component: AsignaturasPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/areas',
-        name: 'Áreas',
-        icon: School,
-        component: AreasPage,
+        component: ProgramasPage,
         layout: '/admin'
       },
       {
@@ -91,10 +78,31 @@ const dashboardRoutes = [
         layout: '/admin'
       },
       {
-        path: '/curriculo/programas',
-        name: 'Programas',
+        path: '/curriculo/areas',
+        name: 'Áreas',
         icon: School,
-        component: ProgramasPage,
+        component: AreasPage,
+        layout: '/admin'
+      },
+      {
+        path: '/curriculo/asignaturas',
+        name: 'Asignaturas',
+        icon: School,
+        component: AsignaturasPage,
+        layout: '/admin'
+      },
+      {
+        path: '/curriculo/contenidos',
+        name: 'Contenidos',
+        icon: School,
+        component: ContenidosPage,
+        layout: '/admin'
+      },
+      {
+        path: '/curriculo/equivalencias',
+        name: 'Equivalencias',
+        icon: School,
+        component: EquivalenciasPages,
         layout: '/admin'
       },
     ]
@@ -173,24 +181,10 @@ const dashboardRoutes = [
     layout: '/coordinador',
     subItems:[
       {
-        path: '/curriculo/contenidos',
-        name: 'Contenidos',
+        path: '/curriculo/programas',
+        name: 'Programas',
         icon: School,
-        component: ContenidosPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/asignaturas',
-        name: 'Asignaturas',
-        icon: School,
-        component: AsignaturasPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/areas',
-        name: 'Áreas',
-        icon: School,
-        component: AreasPage,
+        component: ProgramasPage,
         layout: '/admin'
       },
       {
@@ -201,10 +195,24 @@ const dashboardRoutes = [
         layout: '/admin'
       },
       {
-        path: '/curriculo/programas',
-        name: 'Programas',
+        path: '/curriculo/areas',
+        name: 'Áreas',
         icon: School,
-        component: ProgramasPage,
+        component: AreasPage,
+        layout: '/admin'
+      },
+      {
+        path: '/curriculo/asignaturas',
+        name: 'Asignaturas',
+        icon: School,
+        component: AsignaturasPage,
+        layout: '/admin'
+      },
+      {
+        path: '/curriculo/contenidos',
+        name: 'Contenidos',
+        icon: School,
+        component: ContenidosPage,
         layout: '/admin'
       },
     ]
