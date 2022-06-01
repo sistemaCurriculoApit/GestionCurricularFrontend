@@ -889,7 +889,7 @@ function Homologaciones(props: any) {
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <DatePicker
                           views={["year"]}
-                          label="Año"
+                          label="Año de la solicitud"
                           inputVariant='outlined'
                           margin='dense'
                           className={classes.CustomTextField}
