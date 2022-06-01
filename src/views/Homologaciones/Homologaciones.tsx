@@ -44,6 +44,7 @@ import { getAllProgramas } from "../../services/programasServices"
 import { getPlanesByListIds } from "../../services/planesServices"
 import { getAllAsignaturasByPlan } from "../../services/asignaturasServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
+import { getAllEquivalenciaByAsignatura } from "../../services/equivalenciasServices"
 import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
 
 
@@ -86,6 +87,7 @@ function Homologaciones(props: any) {
   const [asignaturaSelected, setAsignaturaSelected] = useState<AnythingObject>({});
   const [estadoHomologacionSelected, setEstadoHomologacionSelected] = useState<AnythingObject>({});
   const [contenidosList, setContenidosList] = useState([]);
+  const [equivalenciasList, setEquivalenciasList] = useState([]);
 
   const [homologacionList, setHomologacionesList] = useState([]);
   const [totalHomologaciones, setTotalHomologaciones] = useState(0);
@@ -152,6 +154,7 @@ function Homologaciones(props: any) {
       setPlanesList([]);
       setAsignaturasList([]);
       setContenidosList([]);
+      setEquivalenciasList([]);
     }
   }, [programaSelected]);
 
@@ -180,6 +183,19 @@ function Homologaciones(props: any) {
       }
     } else {
       setContenidosList([]);
+    }
+  }, [asignaturaSelected]);
+
+  //Accion para obtener equivalencias en el moda de creacion y edicion
+  useEffect(() => {
+    if (asignaturaSelected._id) {
+      if (homologacionObject._id) {
+        getEquivalencias(homologacionObject._id ? true : false, homologacionObject);
+      } else {
+        getEquivalencias();
+      }
+    } else {
+      setEquivalenciasList([]);
     }
   }, [asignaturaSelected]);
 
@@ -308,6 +324,22 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Metodo para obtener el listado de equivalencias.
+  const getEquivalencias = async (isEdit?: boolean, homologacionToEdit?: any) => {
+    const equivalenciasIds = asignaturaSelected.equivalencia.map((option: any) => option._id);
+    let response: any = await getAllEquivalenciaByAsignatura({
+      search: '',
+      equivalenciasIds
+    });
+    if (response && response.equivalencias) {
+      setEquivalenciasList(response.equivalencias);
+    }
+    if (isEdit) {
+      setHomologacionObject({ ...homologacionObject, programaId: '', planId: '', asignaturaId: '' });
+      setOpenModalLoading(false);
+    }
+  }
+
   //Cuando se cambia de pagina se ejecuta el metodo getHomologaciones con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
@@ -335,6 +367,7 @@ function Homologaciones(props: any) {
         setPlanesList([]);
         setAsignaturasList([]);
         setContenidosList([]);
+        setEquivalenciasList([]);
         setEstadoHomologacionSelected({});
         setHomologacionObject(homologacionToEdit);
         getProgramas(isEdit, homologacionToEdit);
@@ -735,22 +768,40 @@ function Homologaciones(props: any) {
                     />
                   </GridItem>
 
-
-                  {
-                    contenidosList.length ?
-                      <GridItem xs={12} sm={12} md={12}>
-                        <h4 className={classes.cardTitleBlack}>Contenidos</h4>
-                        {
-                          contenidosList.map((contenido: any, index) => <Chip
-                            key={index}
-                            color={'primary'}
-                            label={`${contenido.codigo} - ${contenido.nombre}`}
-                          />)
-                        }
-                      </GridItem>
-                      : null
-                  }
-
+                    {/* Visualizacion de contenidos */}
+                    {
+                      contenidosList.length ?
+                        <GridItem xs={12} sm={12} md={12}>
+                          <h4 className={classes.cardTitleBlack}>Contenidos</h4>
+                          {
+                            contenidosList.map((contenido: any, index) => <Chip
+                              key={index}
+                              color={'primary'}
+                              label={`${contenido.codigo} - ${contenido.nombre}`}
+                            />)
+                          }
+                        </GridItem>
+                        : null
+                    }
+                    <GridItem xs={12} sm={12} md={12} >
+                      <br />
+                    </GridItem>
+                    {/* Visualizacion de equivalencias */}
+                    {
+                      equivalenciasList.length ?
+                        <GridItem xs={12} sm={12} md={12}>
+                          <h4 className={classes.cardTitleBlack}>Equivalencias</h4>
+                          {
+                            equivalenciasList.map((equivalencia: any, index) => <Chip
+                              key={index}
+                              color={'primary'}
+                              label={`${equivalencia.sourceCourseCode} - ${equivalencia.sourceCourseName}`}
+                            />)
+                          }
+                        </GridItem>
+                        : null
+                    }
+            
                   <GridItem xs={12} sm={12} md={12} >
                     <br />
                   </GridItem>
