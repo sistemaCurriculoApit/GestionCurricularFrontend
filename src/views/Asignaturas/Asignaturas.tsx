@@ -45,10 +45,9 @@ import {
 } from '../../assets/jss/material-dashboard-react'
 
 import { AnythingObject } from '../../constants/generalConstants'
-import { getAsignaturasPaginated, createAsignatura, updateAsignatura } from "../../services/asignaturasServices"
+import { getAsignaturasPaginated, createAsignatura, updateAsignatura, getAllAsignaturas } from "../../services/asignaturasServices"
 import { getAllDocentes } from "../../services/docentesServices"
 import { getAllContenidos } from "../../services/contenidosServices"
-import { getAllEquivalencias } from '../../services/equivalenciasServices'
 
 
 //Estilos generales usados en el modulo
@@ -198,15 +197,16 @@ function Asignaturas(props: any) {
   }
 
   const getEquivalencias = async (isEdit?: boolean, asignaturaToEdit?: any) => {
-    let response: any = await getAllEquivalencias({
+    let response: any = await getAllAsignaturas({
       search: '',
     });
     let equivalenciasSelected = [];
-    if (response && response.equivalencias){
-      setEquivalenciaList(response.equivalencias);
+      if (response && (response.asignaturas)){
+      var newAsignaturasList = response.asignaturas.filter((item:any) => item.asignatura._id !== asignaturaToEdit._id);
+      setEquivalenciaList(newAsignaturasList);
       if (isEdit && asignaturaToEdit.equivalencia.length){
         for (let i=0; i<asignaturaToEdit.equivalencia.length; i++){
-          let findEquivalencia = response.equivalencias.find((equivalencia:any) => equivalencia._id === asignaturaToEdit.equivalencia[i]._id)
+          let findEquivalencia = response.asignaturas.find((asignatura:any) => asignatura.asignatura._id === asignaturaToEdit.equivalencia[i]._id)
           if (findEquivalencia){
             equivalenciasSelected.push(findEquivalencia);
           }
@@ -273,7 +273,8 @@ function Asignaturas(props: any) {
     let asignaturaToSave = {
       ...asignaturaObject,
       docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
-      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id }))
+      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
+      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
     };
     let response: any = await createAsignatura(asignaturaToSave);
     if (response && response.error) {
@@ -302,7 +303,7 @@ function Asignaturas(props: any) {
       ...asignaturaObject,
       docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
       contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
-      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia._id}))
+      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
     };
     let response: any = await updateAsignatura(asignaturaToSave, asignaturaObject._id);
     if (response && response.error) {
@@ -684,7 +685,7 @@ function Asignaturas(props: any) {
                       multiple
                       id="tags-outlined"
                       options={equivalenciaList}
-                      getOptionLabel={(option: any) => `${option.sourceCourseCode} - ${option.sourceCourseName}`}
+                      getOptionLabel={(option: any) => `${option.codigoPlan}: ${option.asignatura.codigo} - ${option.asignatura.nombre}`}
                       filterSelectedOptions
                       value={asignaturaObject.equivalencia}
                       onChange={(e, value) => {

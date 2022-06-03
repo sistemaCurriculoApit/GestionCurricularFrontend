@@ -40,7 +40,7 @@ export const getAllEquivalencias = async(data:any)=>{
 export const getAllEquivalenciaByAsignatura = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/equivalencia/getEquivalenciaByAsignatura`,{
+    fetch(`${backendBaseUrl}api/asignatura/getEquivalenciaByAsignatura`,{
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -58,7 +58,7 @@ export const getAllEquivalenciaByAsignatura = async(data:any)=>{
 export const getAllEquivalenciaByAsignaturaNoToken = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/equivalencia/getEquivalenciaByAsignaturaNT`,{
+    fetch(`${backendBaseUrl}api/asignatura/getEquivalenciaByAsignaturaNT`,{
       headers,
       method: 'POST',
       body: JSON.stringify(data)

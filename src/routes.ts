@@ -98,13 +98,14 @@ const dashboardRoutes = [
         component: ContenidosPage,
         layout: '/admin'
       },
-      {
-        path: '/curriculo/equivalencias',
-        name: 'Equivalencias',
-        icon: School,
-        component: EquivalenciasPages,
-        layout: '/admin'
-      },
+      //Unused view
+      // {
+      //   path: '/curriculo/equivalencias',
+      //   name: 'Equivalencias',
+      //   icon: School,
+      //   component: EquivalenciasPages,
+      //   layout: '/admin'
+      // },
     ]
   },
   {

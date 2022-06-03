@@ -795,7 +795,8 @@ function Homologaciones(props: any) {
                             equivalenciasList.map((equivalencia: any, index) => <Chip
                               key={index}
                               color={'primary'}
-                              label={`${equivalencia.sourceCourseCode} - ${equivalencia.sourceCourseName}`}
+                              // `${option.codigoPlan}: ${option.asignatura.codigo} - ${option.asignatura.nombre}`
+                              label={`${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre}`}
                             />)
                           }
                         </GridItem>

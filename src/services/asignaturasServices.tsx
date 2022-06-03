@@ -22,7 +22,7 @@ export const getAllAsignaturas = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/asignatura/allNotPaginated?${query}`,{
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCode?${query}`,{
       headers,
       method: 'GET'
     })
