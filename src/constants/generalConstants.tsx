@@ -29,7 +29,7 @@ export const userProfilesArray=[
   }
 ]
 
-export const estadosHomologacion= [{ id: 0, title: 'Rechazada' },{ id: 1, title: 'Aceptada' } ]
+export const estadosHomologacion= [{ id: 0, title: 'Rechazada' },{ id: 1, title: 'Aceptada' }, { id: 2, title: 'Ingresada' } ]
 
 export interface AnythingObject {
   [key: string]: any;

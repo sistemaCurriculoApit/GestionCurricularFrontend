@@ -406,12 +406,13 @@ function Homologaciones(props: any) {
         setAsignaturasList([]);
         setContenidosList([]);
         setEquivalenciasList([]);
-        setEstadoHomologacionSelected({});
+        const estado = estadosHomologacion.find((estado: any) => estado.id === 2) ;
+        setEstadoHomologacionSelected(estado || {});
         setHomologacionObject(homologacionToEdit);
         getProgramas(isEdit, homologacionToEdit);
       } else {
         setHomologacionObject({ ...homologacionToEdit, añoHomologacion: moment(new Date(new Date(homologacionToEdit.añoHomologacion).getFullYear(), 0, 1)) });
-        const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion);
+        const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion || estado.id === 2);
         setEstadoHomologacionSelected(estado || {});
       }
     } catch (error) {
