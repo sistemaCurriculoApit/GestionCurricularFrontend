@@ -102,7 +102,8 @@ function Homologaciones(props: any) {
     universidadSolicitante: '',
     programaSolicitante: '',
     asignaturaSolicitante: '',
-    añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+    añoHomologacion: moment(new Date()),
+    fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
     periodo: '1',
     estadoHomologacion: {},
     descripcion: '',
@@ -124,7 +125,8 @@ function Homologaciones(props: any) {
           universidadSolicitante: '',
           programaSolicitante: '',
           asignaturaSolicitante: '',
-          añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+          añoHomologacion: moment(new Date()),
+          fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
           periodo: '1',
           estadoHomologacion: {},
           descripcion: ''
@@ -370,10 +372,6 @@ function Homologaciones(props: any) {
     }
     if (isEdit) {
       setHomologacionObject({ ...homologacionObject, programaId: '', planId: '', asignaturaId: '' });
-      // setHomologacionObject({ ...homologacionObject, 
-      //   descripcion: homologacionObject.descripcion 
-      //   + equivalenciasList.map((equivalencia:any) => `\n ${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
-      // });
       setOpenModalLoading(false);
     }
   }
@@ -409,9 +407,14 @@ function Homologaciones(props: any) {
         const estado = estadosHomologacion.find((estado: any) => estado.id === 2) ;
         setEstadoHomologacionSelected(estado || {});
         setHomologacionObject(homologacionToEdit);
+        setHomologacionObject({...homologacionToEdit, 
+          añoHomologacion: moment(new Date()),
+          fechaDecision: null });
         getProgramas(isEdit, homologacionToEdit);
       } else {
-        setHomologacionObject({ ...homologacionToEdit, añoHomologacion: moment(new Date(new Date(homologacionToEdit.añoHomologacion).getFullYear(), 0, 1)) });
+        setHomologacionObject({ ...homologacionToEdit, 
+            añoHomologacion: moment(new Date(homologacionToEdit.añoHomologacion)),
+            fechaDecision: homologacionToEdit.fechaDecision ? moment(new Date(homologacionToEdit.fechaDecision)) : null });
         const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion || estado.id === 2);
         setEstadoHomologacionSelected(estado || {});
       }
@@ -452,7 +455,8 @@ function Homologaciones(props: any) {
       planId: planSelected._id,
       asignaturaId: asignaturaSelected._id,
       estadoHomologacion: estadoHomologacionSelected.id,
-      añoHomologacion: homologacionObject.añoHomologacion.toDate()
+      añoHomologacion: homologacionObject.añoHomologacion.toDate(),
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null
 
     };
     let response: any = await createHomologacion(homologacionToSave);
@@ -478,13 +482,15 @@ function Homologaciones(props: any) {
 
   //Metodo para editar una Homologacion
   const handleEditHomologacion = async () => {
+    let fechaDecisionNew = homologacionObject.fechaDecision ? homologacionObject.fechaDecision.toDate() : moment(new Date());
     let homologacionToSave = {
       ...homologacionObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
       asignaturaId: asignaturaSelected._id,
       estadoHomologacion: estadoHomologacionSelected.id,
-      añoHomologacion: homologacionObject.añoHomologacion.toDate()
+      añoHomologacion: homologacionObject.añoHomologacion.toDate(),
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? fechaDecisionNew : null
     };
     let response: any = await updateHomologacion(homologacionToSave, homologacionObject._id);
     if (response && response.error) {
@@ -694,7 +700,8 @@ function Homologaciones(props: any) {
                   universidadSolicitante: '',
                   programaSolicitante: '',
                   asignaturaSolicitante: '',
-                  añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+                  añoHomologacion: moment(new Date()),
+                  fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null ,
                   periodo: '1',
                   estadoHomologacion: {},
                   descripcion: ''
@@ -935,8 +942,6 @@ function Homologaciones(props: any) {
                           format="MMM DD, YYYY"
                           value={homologacionObject.añoHomologacion}
                           onChange={(newValue: any) => {
-                            console.log(newValue);
-
                             setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue })
                           }}
                           clearable
@@ -963,19 +968,13 @@ function Homologaciones(props: any) {
                           margin='dense'
                           className={classes.CustomTextField}
                           format="MMM DD, YYYY"
-                          value={moment().toDate()}
+                          value={homologacionObject.fechaDecision}
                           onChange={(newValue: any) => {
-                            console.log(newValue);
-                            setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue })
+                            setHomologacionObject({ ...homologacionObject, fechaDecision: newValue })
                           }}
                           clearable
                           clearLabel='Limpiar'
                         />
-                        {
-                          homologacionObject.añoHomologacion ? (
-                            <CloseIcon onClick={(e) => setHomologacionObject({ ...homologacionObject, añoHomologacion: null })} />
-                          ) : null
-                        }
 
                       </div>
                     </MuiPickersUtilsProvider>
