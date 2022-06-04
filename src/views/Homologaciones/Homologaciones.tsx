@@ -46,6 +46,7 @@ import { getAllAsignaturasByPlan } from "../../services/asignaturasServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
 import { getAllEquivalenciaByAsignatura } from "../../services/equivalenciasServices"
 import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
+import Equivalencias from '../Equivalencias/Equivalencias';
 
 
 //Estilos generales usados en el modulo
@@ -170,6 +171,7 @@ function Homologaciones(props: any) {
       setAsignaturaSelected({});
       setAsignaturasList([]);
       setContenidosList([]);
+      setEquivalenciasList([]);
     }
   }, [planSelected]);
 
@@ -199,12 +201,40 @@ function Homologaciones(props: any) {
     }
   }, [asignaturaSelected]);
 
-  //Accion al seleccionar una homologacion para ser editada, carga programas planes y asginaturas
+
+  useEffect(()=> {
+    if (equivalenciasList.length > 0){
+      setDescription()
+    }
+  })
+
+  //Accion al seleccionar una homologacion para ser editada, carga programas planes, asginaturas y equivalencias
   useEffect(() => {
     if (homologacionObject._id) {
       getProgramas(true, homologacionObject)
     }
   }, [homologacionObject]);
+
+
+  //Metodo para asignar las equivalencias por default a la descripcion de la homologacion. 
+  const setDescription = async () => {
+    let PlanCodeList = equivalenciasList.map((equivalencia:any) => equivalencia.codigoPlan)
+    for (var i=0; i < PlanCodeList.length; i++){
+      if (!homologacionObject.descripcion.includes(PlanCodeList[i])){
+        if (homologacionObject.descripcion.length > 0 || i > 0){
+          setHomologacionObject({ ...homologacionObject, 
+            descripcion: homologacionObject.descripcion 
+            + equivalenciasList.map((equivalencia:any) => `\n ${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
+          });
+        }else{
+          setHomologacionObject({ ...homologacionObject, 
+            descripcion: homologacionObject.descripcion 
+            + equivalenciasList.map((equivalencia:any) => `${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
+          });
+        }
+      } 
+    }
+  }
 
   //Metodo de obtencion de homologaciones
   const getHomologaciones = async (page?: any) => {
@@ -333,9 +363,17 @@ function Homologaciones(props: any) {
     });
     if (response && response.equivalencias) {
       setEquivalenciasList(response.equivalencias);
+      setHomologacionObject({ ...homologacionObject, 
+        descripcion: homologacionObject.descripcion 
+        + equivalenciasList.map((equivalencia:any) => `\n ${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
+      });
     }
     if (isEdit) {
       setHomologacionObject({ ...homologacionObject, programaId: '', planId: '', asignaturaId: '' });
+      // setHomologacionObject({ ...homologacionObject, 
+      //   descripcion: homologacionObject.descripcion 
+      //   + equivalenciasList.map((equivalencia:any) => `\n ${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
+      // });
       setOpenModalLoading(false);
     }
   }
@@ -795,7 +833,6 @@ function Homologaciones(props: any) {
                             equivalenciasList.map((equivalencia: any, index) => <Chip
                               key={index}
                               color={'primary'}
-                              // `${option.codigoPlan}: ${option.asignatura.codigo} - ${option.asignatura.nombre}`
                               label={`${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre}`}
                             />)
                           }
@@ -885,20 +922,49 @@ function Homologaciones(props: any) {
                       }}
                     />
                   </GridItem>
-                  <GridItem xs={12} sm={12} md={6}>
+                  <GridItem xs={6} sm={6} md={3}>
                     <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <DatePicker
                           views={["year"]}
-                          label="Año de la solicitud"
+                          label="Fecha de la solicitud"
                           inputVariant='outlined'
                           margin='dense'
                           className={classes.CustomTextField}
-                          format="YYYY"
+                          format="MMM DD, YYYY"
                           value={homologacionObject.añoHomologacion}
                           onChange={(newValue: any) => {
                             console.log(newValue);
 
+                            setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue })
+                          }}
+                          clearable
+                          clearLabel='Limpiar'
+                        />
+                        {
+                          homologacionObject.añoHomologacion ? (
+                            <CloseIcon onClick={(e) => setHomologacionObject({ ...homologacionObject, añoHomologacion: null })} />
+                          ) : null
+                        }
+
+                      </div>
+                    </MuiPickersUtilsProvider>
+                  </GridItem>
+
+                  <GridItem xs={6} sm={6} md={3}>
+                    <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <DatePicker
+                          views={["year"]}
+                          label="Fecha de la decisión"
+                          inputVariant='outlined'
+                          disabled={true}
+                          margin='dense'
+                          className={classes.CustomTextField}
+                          format="MMM DD, YYYY"
+                          value={moment().toDate()}
+                          onChange={(newValue: any) => {
+                            console.log(newValue);
                             setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue })
                           }}
                           clearable
