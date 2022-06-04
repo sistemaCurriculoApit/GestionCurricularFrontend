@@ -46,7 +46,6 @@ import { getAllAsignaturasByPlan } from "../../services/asignaturasServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
 import { getAllEquivalenciaByAsignatura } from "../../services/equivalenciasServices"
 import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
-import Equivalencias from '../Equivalencias/Equivalencias';
 
 
 //Estilos generales usados en el modulo

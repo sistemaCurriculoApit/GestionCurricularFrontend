@@ -22,6 +22,24 @@ export const getAllAsignaturas = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
     let query = `search=${data.search}`;
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginated?${query}`,{
+      headers,
+      method: 'GET'
+    })
+    .then(response => response.json())
+    .then(response => {
+      resolve(response)
+    })
+    .catch(error => resolve({ 
+      ...error 
+    }));
+  });
+}
+
+export const getAllAsignaturasWithPlanCode = async(data:any)=>{
+  return new Promise(resolve=>{
+    let headers:any = getHeaders();
+    let query = `search=${data.search}`;
     fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCode?${query}`,{
       headers,
       method: 'GET'

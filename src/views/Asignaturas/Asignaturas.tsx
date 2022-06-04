@@ -45,7 +45,7 @@ import {
 } from '../../assets/jss/material-dashboard-react'
 
 import { AnythingObject } from '../../constants/generalConstants'
-import { getAsignaturasPaginated, createAsignatura, updateAsignatura, getAllAsignaturas } from "../../services/asignaturasServices"
+import { getAsignaturasPaginated, createAsignatura, updateAsignatura, getAllAsignaturas, getAllAsignaturasWithPlanCode } from "../../services/asignaturasServices"
 import { getAllDocentes } from "../../services/docentesServices"
 import { getAllContenidos } from "../../services/contenidosServices"
 
@@ -197,7 +197,7 @@ function Asignaturas(props: any) {
   }
 
   const getEquivalencias = async (isEdit?: boolean, asignaturaToEdit?: any) => {
-    let response: any = await getAllAsignaturas({
+    let response: any = await getAllAsignaturasWithPlanCode({
       search: '',
     });
     let equivalenciasSelected = [];
