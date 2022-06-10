@@ -14,12 +14,12 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
-import EditIcon from '@material-ui/icons/Edit';
+import EditIcon from '@material-ui/icons/Edit';   
 import moment from "moment";
 import "moment/locale/es";
 
 // core components
-import { createStyles } from '@material-ui/core';
+import { createStyles, Divider } from '@material-ui/core';
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
 import Table from '../../components/Table/Table';
@@ -552,7 +552,6 @@ function Asignaturas(props: any) {
                       }}
                     />
                   </GridItem>
-
                   <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
@@ -592,12 +591,111 @@ function Asignaturas(props: any) {
                       }}
                     />
                   </GridItem>
+                  <GridItem xs={12} sm={12} md={4}> 
+                  <Autocomplete
+                      multiple
+                      id="tags-outlined"
+                      options={["Teorica", "Practica"]}
+                      getOptionLabel={(option: any) => ""}
+                      filterSelectedOptions
+                      value={asignaturaObject.equivalencia}
+                      onChange={(e, value) => {
+                        setAsignaturaObject({ ...asignaturaObject, asignaturaTipo: value })
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-email"
+                          label="Tipo de asignatura"
+                          variant="outlined"
+                          margin="dense"
+                          className={classes.CustomTextField}
+                        />
+                      )}
+                    />
+                   </GridItem>
                   <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
-                      label="Horas semanales"
+                      label="Horas Trabajo Presencial Teorico"
                       variant="outlined"
                       margin="dense"
+                      className={classes.CustomTextField}
+                      type={'number'}
+                      error={!asignaturaObject.intensidadHorariaTeorica ? true : false}
+                      value={asignaturaObject.intensidadHorariaTeorica}
+                      onKeyPress={ event => {
+                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        if(event.target.validity.valid){
+                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaTeorica: event.target.value })
+                        }
+                      }}
+                      InputProps={{
+                        inputProps: { min: 1, pattern: "[0-9]*", }
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Horas Trabajo Presencial Practico"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      type={'number'}
+                      error={!asignaturaObject.intensidadHorariaPractica ? true : false}
+                      value={asignaturaObject.intensidadHorariaPractica}
+                      onKeyPress={ event => {
+                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        if(event.target.validity.valid){
+                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaPractica: event.target.value })
+                        }
+                      }}
+                      InputProps={{
+                        inputProps: { min: 1, pattern: "[0-9]*", }
+                      }}
+                    />
+                    </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Horas Trabajo Independiente"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      type={'number'}
+                      error={!asignaturaObject.intensidadHorariaIndependiente ? true : false}
+                      value={asignaturaObject.intensidadHorariaIndependiente}
+                      onKeyPress={ event => {
+                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                          event.preventDefault();
+                        }
+                      }}
+                      onChange={(event) => {
+                        if(event.target.validity.valid){
+                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaIndependiente: event.target.value })
+                        }
+                      }}
+                      InputProps={{
+                        inputProps: { min: 1, pattern: "[0-9]*", }
+                      }}
+                    />
+                   </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Total Horas Semanales"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
                       className={classes.CustomTextField}
                       type={'number'}
                       error={!asignaturaObject.intensidadHoraria ? true : false}
@@ -616,8 +714,7 @@ function Asignaturas(props: any) {
                         inputProps: { min: 1, pattern: "[0-9]*", }
                       }}
                     />
-                  </GridItem>
-
+                   </GridItem>
                   <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
@@ -631,7 +728,160 @@ function Asignaturas(props: any) {
                         setAsignaturaObject({ ...asignaturaObject, semestre: event.target.value })
                       }}
                     />
-                  </GridItem>
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Prerrequisitos"
+                      variant="outlined"
+                      minRows={3}
+                      maxRows={9}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.prerrequisitos ? true : false}
+                      value={asignaturaObject.prerrequisitos}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, prerrequisitos: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Correquisitos"
+                      variant="outlined"
+                      minRows={3}
+                      maxRows={9}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.correquisitos ? true : false}
+                      value={asignaturaObject.correquisitos}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, correquisitos: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Presentacion de la asignatura"
+                      variant="outlined"
+                      minRows={3}
+                      maxRows={9}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.presentacionAsignatura ? true : false}
+                      value={asignaturaObject.presentacionAsignatura}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, presentacionAsignatura: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Justificacion"
+                      variant="outlined"
+                      minRows={3}
+                      maxRows={9}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.justificacionAsignatura ? true : false}
+                      value={asignaturaObject.justificacionAsignatura}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, justificacionAsignatura: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Objetivo General"
+                      variant="outlined"
+                      minRows={3}
+                      maxRows={9}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.objetivoGeneral ? true : false}
+                      value={asignaturaObject.objetivoGeneral}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, objetivoGeneral: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Objetivos Especificos"
+                      variant="outlined"
+                      minRows={3}
+                      maxRows={9}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.objetivosEspecificos ? true : false}
+                      value={asignaturaObject.objetivosEspecificos}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, objetivosEspecificos: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Competencias a Desarrollar"
+                      variant="outlined"
+                      minRows={5}
+                      maxRows={10}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.competencias ? true : false}
+                      value={asignaturaObject.competencias}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, competencias: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Medios Educativos"
+                      variant="outlined"
+                      minRows={5}
+                      maxRows={10}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.mediosEducativos ? true : false}
+                      value={asignaturaObject.mediosEducativos}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, mediosEducativos: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Evaluacion"
+                      variant="outlined"
+                      minRows={5}
+                      maxRows={10}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.evaluacion ? true : false}
+                      value={asignaturaObject.evaluacion}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, evaluacion: event.target.value })
+                      }}
+                    />
+                   </GridItem>
                   <GridItem xs={12} sm={12} md={12} >
                     <Autocomplete
                       multiple
@@ -654,9 +904,8 @@ function Asignaturas(props: any) {
                         />
                       )}
                     />
-
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={12} >
+                   </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <Autocomplete
                       multiple
                       id="tags-outlined"
@@ -679,8 +928,8 @@ function Asignaturas(props: any) {
                       )}
                     />
 
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={12}> 
+                   </GridItem>
+                  <GridItem xs={12} sm={12} md={6}> 
                   <Autocomplete
                       multiple
                       id="tags-outlined"
@@ -702,7 +951,41 @@ function Asignaturas(props: any) {
                         />
                       )}
                     />
-                  </GridItem>
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Bibliografia"
+                      variant="outlined"
+                      minRows={4}
+                      maxRows={10}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.bibliografia ? true : false}
+                      value={asignaturaObject.bibliografia}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, bibliografia: event.target.value })
+                      }}
+                    />
+                   </GridItem>
+                   <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Objetivos Especificos"
+                      variant="outlined"
+                      minRows={4}
+                      maxRows={10}
+                      multiline
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!asignaturaObject.cibergrafia ? true : false}
+                      value={asignaturaObject.cibergrafia}
+                      onChange={(event) => {
+                        setAsignaturaObject({ ...asignaturaObject, cibergrafia: event.target.value })
+                      }}
+                    />
+                   </GridItem>
                 </GridContainer>
               </div>
               <div className={classes.containerFooterModal} >

@@ -837,7 +837,8 @@ function Homologaciones(props: any) {
                         <GridItem xs={12} sm={12} md={12}>
                           <h4 className={classes.cardTitleBlack}>Equivalencias</h4>
                           {
-                            equivalenciasList.map((equivalencia: any, index) => <Chip
+                            equivalenciasList.map((equivalencia: any, index) => 
+                            <Chip
                               key={index}
                               color={'primary'}
                               label={`${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre}`}
