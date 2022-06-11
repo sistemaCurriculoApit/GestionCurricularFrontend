@@ -94,10 +94,10 @@ function Asignaturas(props: any) {
     semestre: '',
     cantidadCredito: 1,
     asignaturaTipo: {},
-    intensidadHorariaPractica: undefined,
-    intensidadHorariaTeorica: undefined,
-    intensidadHorariaIndependiente: undefined,
-    intensidadHoraria: undefined,
+    intensidadHorariaPractica: 0,
+    intensidadHorariaTeorica: 0,
+    intensidadHorariaIndependiente: 0,
+    intensidadHoraria: 0,
     prerrequisitos:'',
     correquisitos:'',
     presentacionAsignatura:'',
@@ -304,6 +304,7 @@ function Asignaturas(props: any) {
   const handleCreateAsignatura = async () => {
     let asignaturaToSave = {
       ...asignaturaObject,
+      asignaturaTipo: tipoAsignaturaSelected.id,
       docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
       contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
       equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
@@ -333,6 +334,7 @@ function Asignaturas(props: any) {
   const handleEditAsignatura = async () => {
     let asignaturaToSave = {
       ...asignaturaObject,
+      asignaturaTipo: tipoAsignaturaSelected.id,
       docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
       contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
       equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
@@ -635,7 +637,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       type={'number'}
-                      error={!asignaturaObject.cantidadCredito ? true : false}
+                      error={isNaN(asignaturaObject.cantidadCredito) ? true : false}
                       value={asignaturaObject.cantidadCredito}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -658,7 +660,27 @@ function Asignaturas(props: any) {
                       options={tiposAsignatura}
                       getOptionLabel={(option) => option.title}
                       filterSelectedOptions
-                      onChange={(e, option) => setTipoAsignaturaSelected(option || {})}
+                      onChange={(e, option) => {
+                        if(option.id === 0){
+                          setAsignaturaObject({ ...asignaturaObject, 
+                            intensidadHorariaTeorica: asignaturaObject.intensidadHorariaTeorica,
+                            intensidadHorariaPractica: 0  
+                          })
+                        }
+                        if(option.id === 1){
+                          setAsignaturaObject({ ...asignaturaObject, 
+                            intensidadHorariaTeorica: 0,
+                            intensidadHorariaPractica: asignaturaObject.intensidadHorariaPractica
+                          })
+                        }
+                        if(option.id === 2){
+                          setAsignaturaObject({ ...asignaturaObject, 
+                            intensidadHorariaTeorica: asignaturaObject.intensidadHorariaTeorica,
+                            intensidadHorariaPractica: asignaturaObject.intensidadHorariaPractica
+                          })
+                        }
+                        setTipoAsignaturaSelected(option || {})
+                      }}
                       value={tipoAsignaturaSelected}
                       renderInput={(params) => (
                         <TextField
@@ -683,7 +705,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaTeorica}
-                      error={(tipoAsignaturaSelected.id === 0 || tipoAsignaturaSelected.id === 2)&& !asignaturaObject.intensidadHorariaTeorica ? true : false}
+                      error={(tipoAsignaturaSelected.id === 0 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaTeorica) ? true : false)}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
@@ -709,7 +731,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaPractica}
-                      error={(tipoAsignaturaSelected.id === 1 || tipoAsignaturaSelected.id === 2)&& !asignaturaObject.intensidadHorariaPractica ? true : false}
+                      error={(tipoAsignaturaSelected.id === 1 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaPractica) ? true : false)}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
@@ -734,7 +756,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaIndependiente}
-                      error={!asignaturaObject.intensidadHorariaIndependiente ? true : false}
+                      error={isNaN(asignaturaObject.intensidadHorariaIndependiente) ? true : false}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
@@ -742,16 +764,6 @@ function Asignaturas(props: any) {
                       }}
                       onChange={(event) => {
                         if(event.target.validity.valid){
-                          // var totalHoras:number = 0;
-                          // if (asignaturaObject.intensidadHorariaTeorica) {
-                          //   totalHoras += parseInt(asignaturaObject.intensidadHorariaTeorica, 10)
-                          // }
-                          // if (asignaturaObject.intensidadHorariaPractica){
-                          //   totalHoras += parseInt(asignaturaObject.intensidadHorariaPractica, 10)
-                          // }
-                          // if (asignaturaObject.intensidadHorariaIndependiente){
-                          //   totalHoras += parseInt(asignaturaObject.intensidadHorariaIndependiente, 10)
-                          // } 
                           setAsignaturaObject({ ...asignaturaObject, intensidadHorariaIndependiente: event.target.value})
                         }
                       }}
@@ -1041,7 +1053,7 @@ function Asignaturas(props: any) {
                    <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
-                      label="Objetivos Especificos"
+                      label="Cibergrafia"
                       variant="outlined"
                       minRows={4}
                       maxRows={10}
