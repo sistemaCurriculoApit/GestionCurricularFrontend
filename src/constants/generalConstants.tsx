@@ -30,6 +30,7 @@ export const userProfilesArray=[
 ]
 
 export const estadosHomologacion= [{ id: 0, title: 'Rechazada' },{ id: 1, title: 'Aceptada' }, { id: 2, title: 'Ingresada' } ]
+export const tiposAsignatura= [{ id: 0, title: 'Teorica' },{ id: 1, title: 'Practica' }, { id: 2, title: 'Teorico-Practica' } ]
 
 export interface AnythingObject {
   [key: string]: any;
