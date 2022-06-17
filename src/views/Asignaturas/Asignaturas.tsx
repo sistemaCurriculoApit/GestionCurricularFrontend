@@ -15,6 +15,7 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';   
+import GetApp from '@material-ui/icons/GetApp';
 import moment from "moment";
 import "moment/locale/es";
 
@@ -148,22 +149,6 @@ function Asignaturas(props: any) {
           data.cantidadCredito,
           data.intensidadHoraria,
           data.semestre,
-          // data.intensidadHorariaRelacion,
-          // data.prerrequisitos,
-          // data.correquisitos,
-          // data.asignaturaTipo,
-          // data.presentacionAsignatura,
-          // data.justificacionAsignatura,
-          // data.objetivoGeneral,
-          // data.objetivosEspecificos,
-          // data.competencias,
-          // data.mediosEducativos,
-          // data.evaluacion,
-          // data.bibliografia,
-          // data.cibergrafia,
-          // data.intensidadHorariaPractica,
-          // data.intensidadHorariaTeorica,
-          // data.intensidadHorariaIndependiente,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
@@ -246,6 +231,10 @@ function Asignaturas(props: any) {
     }
     setAsignaturaObject({ ...asignaturaToEdit, equivalencia: equivalenciasSelected });
     setOpenModalLoading(false);
+  }
+
+  const downloadCourseFormat = async() => {
+    console.log("downloadHere")
   }
 
   //Cuando se cambia de pagina se ejecuta el metodo getAsignaturas con la pagina solicitada
@@ -588,6 +577,14 @@ function Asignaturas(props: any) {
             <Card className={classes.containerCardForm}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
+                <div className={classes.headerActions} style={{alignItems:'left'}}>
+                    <Tooltip id='filterTooltip' title="Descargar formato de asignatura" placement='top' classes={{ tooltip: classes.tooltip }}>
+                      <div>
+                      <Button key={'filtersButton'} color={'secondary'} size='md' round variant="outlined" justIcon startIcon={<GetApp />}
+                          onClick={() => { downloadCourseFormat() }} />
+                      </div>
+                    </Tooltip>
+                  </div>
                   <h4 className={classes.cardTitleWhite}>{asignaturaObject._id ? 'Editar' : 'Crear'} asignaturas</h4>
                   <div className={classes.headerActions}>
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>

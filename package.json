@@ -5,7 +5,7 @@
   "private": false,
   "engines": {
     "npm": "8.1.4",
-    "node": "14.17.0" 
+    "node": "14.17.0"
   },
   "main": "dist/index.js",
   "dependencies": {
@@ -36,6 +36,7 @@
     "tslint": "^5.20.1",
     "tslint-react": "^4.1.0",
     "typescript": "^3.9.10",
+    "xlsx": "^0.18.5",
     "xlsx-populate": "^1.21.0"
   },
   "scripts": {
