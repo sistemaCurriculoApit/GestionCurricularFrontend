@@ -161,3 +161,21 @@ export const updateAsignatura = async (data: any, id: any) => {
       }));
   });
 }
+
+export const GetFileAsignatura = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/getFile`, {
+      headers,
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(response => {
+        resolve(response)
+      })
+      .catch(error => resolve({
+        ...error
+      }));
+  });
+}

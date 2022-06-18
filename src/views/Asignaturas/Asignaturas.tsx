@@ -46,12 +46,10 @@ import {
 } from '../../assets/jss/material-dashboard-react'
 
 //formato de asignatura
-import { strTemplateHtml } from '../../constants/templateConstants'
-import { jsPDF } from 'jspdf'
-// import {ReactDOMServer} from "react-dom/server";
+
 
 import { AnythingObject, tiposAsignatura} from '../../constants/generalConstants'
-import { getAsignaturasPaginated, createAsignatura, updateAsignatura, getAllAsignaturas, getAllAsignaturasWithPlanCode } from "../../services/asignaturasServices"
+import { getAsignaturasPaginated, createAsignatura, updateAsignatura, GetFileAsignatura, getAllAsignaturasWithPlanCode } from "../../services/asignaturasServices"
 import { getAllDocentes } from "../../services/docentesServices"
 import { getAllContenidos } from "../../services/contenidosServices"
 
@@ -239,32 +237,19 @@ function Asignaturas(props: any) {
   }
 
   const downloadCourseFormat = async() => {
-    var html_to_pdf = require('html-pdf-node');
+    console.log(asignaturaObject)
+    let asignaturaToGetFile = {
+      ...asignaturaObject,
+      asignaturaTipo: tipoAsignaturaSelected.id,
+      docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
+      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
+      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
+    };
+    let response: any = await GetFileAsignatura(asignaturaToGetFile)
+    if (response){
+      console.log(response)
+    }
     console.log("downloadHere")
-    let options = {format: 'A4'}
-    let file = {content: strTemplateHtml}
-    html_to_pdf.generatePdf(file, options).then((pdfBuffer: any) => {
-      console.log("PDF:-", pdfBuffer);
-    })
-
-    // // var opt={
-    // //   margin : 1,
-    // //   filename: 'FD-GC70.pdf',
-    // //   image: {type:'jpeg', quiality:0.98},
-    // //   jsPDF:{unit:'in', format:'letter', orientation:'portrait'}
-    // // };
-    // // html2pdf().set(opt).from(strTemplateHtml).save();
-    // var templateHtml = new DOMParser().parseFromString(strTemplateHtml, "text/html");
-    // console.log(templateHtml.firstChild);
-    // const doc = new jsPDF("l","mm",[1200, 1210]);
-    // // doc.html(strTemplateHtml, {
-    // //   callback: function(doc) { 
-    // //   doc.save('FD-GC70.pdf');
-    // //   }
-    // // })
-    // doc.html(strTemplateHtml)
-    // // doc.text('prueba', 10, 10)
-    // doc.save('FD-GC70.pdf');
   }
 
   //Cuando se cambia de pagina se ejecuta el metodo getAsignaturas con la pagina solicitada
