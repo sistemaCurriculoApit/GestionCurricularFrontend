@@ -245,7 +245,7 @@ interface PropsMenuItem {
   menuItem: any,
   keyMenuItem: any,
   classesItemMenu: any,
-  color: any
+  color: any,
   location: any
 }
 
