@@ -237,7 +237,7 @@ function Asignaturas(props: any) {
   }
 
   const downloadCourseFormat = async() => {
-    console.log(asignaturaObject)
+    setOpenModalLoading(true);
     let asignaturaToGetFile = {
       ...asignaturaObject,
       asignaturaTipo: tipoAsignaturaSelected.id,
@@ -246,10 +246,23 @@ function Asignaturas(props: any) {
       equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
     };
     let response: any = await GetFileAsignatura(asignaturaToGetFile)
-    if (response){
-      console.log(response)
+    if (!response){
+      setSeverityAlert('error');
+      setShowAlert(true);
+      setMessagesAlert('Ocurrio un error generando el archivo PDF.');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
     }
-    console.log("downloadHere")
+    else{
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('archivo PDF generado satisfactoriamente.');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+    }
+    setOpenModalLoading(false);
   }
 
   //Cuando se cambia de pagina se ejecuta el metodo getAsignaturas con la pagina solicitada

@@ -173,8 +173,10 @@ export const GetFileAsignatura = async (data: any) => {
     })
     .then(response => response.blob())
     .then(blob => 
-      saveAs(blob, `FD-GC70.pdf-${data.codigo}`)
-    )
+      saveAs(blob, `FD-GC70-${data.codigo}.pdf`),
+    ).then(result => resolve({
+      ...result
+    }))
     .catch(err => resolve({
       ...err
     }))
