@@ -259,6 +259,36 @@ function Asignaturas(props: any) {
 
   };
 
+  const cleanAsignaturaObjectAndSetOpenModal = () => {
+    setAsignaturaObject({
+      _id: '',
+      nombre: '',
+      codigo: '',
+      semestre: '',
+      cantidadCredito: 1,
+      asignaturaTipo: {},
+      intensidadHorariaPractica: 0,
+      intensidadHorariaTeorica: 0,
+      intensidadHorariaIndependiente: 0,
+      intensidadHoraria: 0,
+      prerrequisitos:'',
+      correquisitos:'',
+      presentacionAsignatura:'',
+      justificacionAsignatura:'',
+      objetivoGeneral:'',
+      objetivosEspecificos:'',
+      competencias:'',
+      mediosEducativos:'',
+      evaluacion:'',
+      bibliografia:'',
+      cibergrafia:'',
+      contenido: [],
+      docente: [],
+      equivalencia: []
+    })
+    setOpenModal(false)
+  }
+
   //Se establecen los datos de una asignatura a editar en la modal
   const setDataEditAsignatura = (data: any) => {
     try {
@@ -605,7 +635,7 @@ function Asignaturas(props: any) {
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
                         <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                          onClick={() => { cleanAsignaturaObjectAndSetOpenModal() }} />
                       </div>
                     </Tooltip>
                   </div>
