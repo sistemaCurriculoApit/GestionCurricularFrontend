@@ -1,4 +1,5 @@
 import { backendBaseUrl, getHeaders } from './constants'
+import { saveAs } from 'file-saver'
 
 export const getAsignaturasPaginated = async (data: any) => {
   return new Promise(resolve => {
@@ -170,12 +171,12 @@ export const GetFileAsignatura = async (data: any) => {
       method: 'POST',
       body: JSON.stringify(data)
     })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response)
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+    .then(response => response.blob())
+    .then(blob => 
+      saveAs(blob, `FD-GC70.pdf-${data.codigo}`)
+    )
+    .catch(err => resolve({
+      ...err
+    }))
+  })
 }
