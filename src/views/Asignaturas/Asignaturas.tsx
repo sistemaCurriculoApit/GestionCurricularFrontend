@@ -242,7 +242,7 @@ function Asignaturas(props: any) {
       ...asignaturaObject,
       asignaturaTipo: tipoAsignaturaSelected.id,
       docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
-      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
+      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })),
       equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
     };
     let response: any = await GetFileAsignatura(asignaturaToGetFile)
