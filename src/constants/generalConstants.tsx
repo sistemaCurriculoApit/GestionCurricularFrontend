@@ -12,6 +12,10 @@ export const userProfilesObject={
   doc:{
     id:3,
     title:'Docente',
+  },
+  est:{
+    id:4,
+    title:'Estudiante',
   }
 }
 export const userProfilesArray=[
@@ -26,6 +30,10 @@ export const userProfilesArray=[
   {
     id:3,
     title:'Docente',
+  },
+  {
+    id:4,
+    title:'Estudiante',
   }
 ]
 

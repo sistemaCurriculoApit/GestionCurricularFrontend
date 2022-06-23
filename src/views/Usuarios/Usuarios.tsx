@@ -44,7 +44,7 @@ import checkboxAdnRadioStyle from '../../assets/jss/material-dashboard-react/che
 
 
 import { userProfilesArray, AnythingObject } from '../../constants/generalConstants'
-
+import { getAllProgramas } from "../../services/programasServices"
 import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
 
 //Estilos generales usados en el modulo
@@ -80,6 +80,8 @@ function Usuarios(props: any) {
   const [userList, setUserList] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
+  const [programasList, setProgramasList] = useState([]);
+  const [programaSelected, setProgramaSelected] = useState<AnythingObject>({});
   const [userObject, setUserObject] = useState<AnythingObject>({
     _id: '',
     name: '',
@@ -87,6 +89,9 @@ function Usuarios(props: any) {
     role: { id: 0, title: '' },
     password: '',
     passwordConfirm: '',
+    identificacionEstudiante: '',
+    universidadEstudiante: '',
+    programaEstudiante: ''
   });
 
 
@@ -142,9 +147,27 @@ function Usuarios(props: any) {
     } else {
       setTotalUsers(0);
       setUserList([]);
-
     }
     setOpenModalLoading(false);
+  }
+
+   //Obtencion de los programas para la modal, cuando se crea o se edita una homologacion
+   const getProgramas = async (isEdit?: boolean, usuarioToEdit?: any) => {
+    let response: any = await getAllProgramas({
+      search: '',
+    });
+    if (response && response.programas) {
+      setProgramasList(response.programas);
+      if (isEdit && usuarioToEdit.programaId) {
+        let findPrograma = response.programas.find((programa: any) => programa._id === usuarioToEdit.programaId);
+        if (findPrograma) {
+          setProgramaSelected({ ...findPrograma });
+        }
+      }
+    }
+    if (!isEdit) {
+      setOpenModalLoading(false);
+    }
   }
 
   //Cuando se cambia de pagina se ejecuta el metodo getUsers con la pagina solicitada
@@ -165,7 +188,10 @@ function Usuarios(props: any) {
       role: roleItem ? roleItem : { id: 0, title: '' },
       password: '',
       passwordConfirm: '',
+      identificacionEstudiante: data.identificacionEstudiante,
+      universidadEstudiante: data.universidadEstudiante,
     });
+    getProgramas(userObject._id? true: false, userObject)
   };
 
   //Manejador de la accion guardar de la modal, se encarga de crear o editar
@@ -458,6 +484,7 @@ function Usuarios(props: any) {
                   password: '',
                   passwordConfirm: '',
                 })
+                getProgramas()
               }} />
           </div>
         </Tooltip>
@@ -593,6 +620,65 @@ function Usuarios(props: any) {
                         </GridItem>
                       </>
                       : null
+                  }
+
+                  {
+                    userObject.role.id === 4 ?
+                    <>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-password"
+                            label="Identificacion del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            type="password"
+                            error={!userObject.identificacionEstudiante ? true : false}
+                            value={userObject.identificacionEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, identificacionEstudiante: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-password"
+                            label="Universidad del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            type="password"
+                            error={!userObject.identificacionEstudiante ? true : false}
+                            value={userObject.identificacionEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, identificacionEstudiante: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={programasList}
+                      getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
+                      filterSelectedOptions
+                      onChange={(e, option) => {
+                        setProgramaSelected(option || {})
+                      }}
+                      value={programaSelected}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-rol"
+                          label="Programa"
+                          variant="outlined"
+                          margin="dense"
+                          error={programaSelected && !programaSelected._id ? true : false}
+                          className={classes.CustomTextField}
+                          helperText={!programaSelected._id ? 'Primero seleccione un programa.':''}
+                        />
+                      )}
+                    />
+                  </GridItem>
+                    </>
+                    : null
                   }
 
                 </GridContainer>
