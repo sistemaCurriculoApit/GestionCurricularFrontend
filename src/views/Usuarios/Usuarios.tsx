@@ -43,7 +43,7 @@ import { container, containerFormModal, containerFooterModal, modalForm } from '
 import checkboxAdnRadioStyle from '../../assets/jss/material-dashboard-react/checkboxAdnRadioStyle';
 
 
-import { userProfilesArray, AnythingObject } from '../../constants/generalConstants'
+import { userProfilesArray, AnythingObject, userProfilesObject } from '../../constants/generalConstants'
 import { getAllProgramas } from "../../services/programasServices"
 import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
 
@@ -139,7 +139,7 @@ function Usuarios(props: any) {
                 }} />
             </div>
           </Tooltip>
-        ];
+        ]
         return arrayData;
       });
       setTotalUsers(response.totalUsers);
@@ -147,6 +147,7 @@ function Usuarios(props: any) {
     } else {
       setTotalUsers(0);
       setUserList([]);
+
     }
     setOpenModalLoading(false);
   }
@@ -181,6 +182,9 @@ function Usuarios(props: any) {
   const setDataEditUser = (data: any) => {
     setOpenModal(true);
     let roleItem = userProfilesArray.find((item) => item.id === data.rolId);
+    if (roleItem && roleItem.id === userProfilesObject.est.id){
+      //GetEstudent
+    }
     setUserObject({
       _id: data._id,
       name: data.nombreUsuario,
@@ -188,10 +192,11 @@ function Usuarios(props: any) {
       role: roleItem ? roleItem : { id: 0, title: '' },
       password: '',
       passwordConfirm: '',
-      identificacionEstudiante: data.identificacionEstudiante,
-      universidadEstudiante: data.universidadEstudiante,
+      // identificacionEstudiante: userComplete ? userComplete.estudianteData.identificacion : '',
+      // universidadEstudiante: userComplete ? userComplete.estudianteData.universidad : '',
+      // programaId: userComplete ? userComplete.estudianteData.programa._id: ''
     });
-    getProgramas(userObject._id? true: false, userObject)
+    getProgramas(true, userObject)
   };
 
   //Manejador de la accion guardar de la modal, se encarga de crear o editar
@@ -238,7 +243,10 @@ function Usuarios(props: any) {
       nombreUsuario: userObject.name,
       correo: userObject.email,
       contrasena: userObject.password,
-      rolId: userObject.role.id
+      rolId: userObject.role.id,
+      identificacionEstudiante: userObject.identificacionEstudiante,
+      universidadEstudiante: userObject.universidadEstudiante,
+      programa: programaSelected
     };
     let response: any = await createUser(userToSave);
     if (response && response.error) {
@@ -267,7 +275,10 @@ function Usuarios(props: any) {
       nombreUsuario: userObject.name,
       correo: userObject.email,
       contrasena: userObject.password,
-      rolId: userObject.role.id
+      rolId: userObject.role.id,
+      identificacionEstudiante: userObject.identificacionEstudiante,
+      universidadEstudiante: userObject.universidadEstudiante,
+      programa: programaSelected
     };
     let response: any = await updateUser(userToSave, userObject._id);
     if (response && response.error) {
@@ -627,13 +638,12 @@ function Usuarios(props: any) {
                     <>
                         <GridItem xs={12} sm={12} md={6} >
                           <TextField
-                            id="outlined-password"
+                            id="outlined-name"
                             label="Identificacion del estudiante"
                             variant="outlined"
                             margin="dense"
                             inputProps={{ maxLength: 150 }}
                             className={classes.CustomTextField}
-                            type="password"
                             error={!userObject.identificacionEstudiante ? true : false}
                             value={userObject.identificacionEstudiante}
                             onChange={(event) => setUserObject({ ...userObject, identificacionEstudiante: event.target.value })}
@@ -641,16 +651,15 @@ function Usuarios(props: any) {
                         </GridItem>
                         <GridItem xs={12} sm={12} md={6} >
                           <TextField
-                            id="outlined-password"
+                            id="outlined-name"
                             label="Universidad del estudiante"
                             variant="outlined"
                             margin="dense"
                             inputProps={{ maxLength: 150 }}
                             className={classes.CustomTextField}
-                            type="password"
-                            error={!userObject.identificacionEstudiante ? true : false}
-                            value={userObject.identificacionEstudiante}
-                            onChange={(event) => setUserObject({ ...userObject, identificacionEstudiante: event.target.value })}
+                            error={!userObject.universidadEstudiante ? true : false}
+                            value={userObject.universidadEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, universidadEstudiante: event.target.value })}
                           />
                         </GridItem>
                         <GridItem xs={12} sm={12} md={6} >
