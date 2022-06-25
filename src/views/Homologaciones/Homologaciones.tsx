@@ -123,9 +123,7 @@ function Homologaciones(props: any) {
           planId: '',
           asignaturaId: '',
           identificacionSolicitante: '',
-          nombreSolicitante: '',
-          universidadSolicitante: '',
-          programaSolicitante: '',
+          estudianteId: '',
           asignaturaSolicitante: '',
           añoHomologacion: moment(new Date()),
           fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
@@ -471,8 +469,9 @@ function Homologaciones(props: any) {
       asignaturaId: asignaturaSelected._id,
       estadoHomologacion: estadoHomologacionSelected.id,
       añoHomologacion: homologacionObject.añoHomologacion.toDate(),
-      fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null
-
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
+      identificacionSolicitante: estudianteSelected.identificacion,
+      estudianteId: estudianteSelected._id
     };
     let response: any = await createHomologacion(homologacionToSave);
     if (response && response.error) {
@@ -533,10 +532,10 @@ function Homologaciones(props: any) {
     if (programaSelected._id &&
       planSelected._id &&
       asignaturaSelected._id &&
-      homologacionObject.identificacionSolicitante &&
-      homologacionObject.nombreSolicitante &&
-      homologacionObject.universidadSolicitante &&
-      homologacionObject.programaSolicitante &&
+      // homologacionObject.identificacionSolicitante &&
+      // homologacionObject.nombreSolicitante &&
+      // homologacionObject.universidadSolicitante &&
+      // homologacionObject.programaSolicitante &&
       homologacionObject.asignaturaSolicitante &&
       homologacionObject.añoHomologacion &&
       homologacionObject.periodo &&
@@ -798,21 +797,6 @@ function Homologaciones(props: any) {
                       }}
                     />
                   </GridItem>
-                  {/* <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Nombre del estudiante"
-                      variant="outlined"
-                      margin="dense"
-                      disabled={true}
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.nombreSolicitante ? true : false}
-                      value={homologacionObject.nombreSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, nombreSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem> */}
                   <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
