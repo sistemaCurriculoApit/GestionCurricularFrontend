@@ -44,7 +44,6 @@ import checkboxAdnRadioStyle from '../../assets/jss/material-dashboard-react/che
 
 
 import { userProfilesArray, AnythingObject, userProfilesObject } from '../../constants/generalConstants'
-import { getAllProgramas } from "../../services/programasServices"
 import { getEstudianteByEmail } from '../../services/estudiantesServices'
 import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
 
@@ -81,8 +80,6 @@ function Usuarios(props: any) {
   const [userList, setUserList] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
-  const [programasList, setProgramasList] = useState([]);
-  const [programaSelected, setProgramaSelected] = useState<AnythingObject>({});
   const [userObject, setUserObject] = useState<AnythingObject>({
     _id: '',
     name: '',
@@ -92,7 +89,8 @@ function Usuarios(props: any) {
     passwordConfirm: '',
     identificacionEstudiante: '',
     universidadEstudiante: '',
-    programaId: ''
+    programaEstudiante: '',
+    planEstudiante:''
   });
 
 
@@ -153,20 +151,6 @@ function Usuarios(props: any) {
     setOpenModalLoading(false);
   }
 
-   //Obtencion de los programas para la modal, cuando se crea o se edita una homologacion
-   const getProgramas = async (isEdit?: boolean) => {
-    let response: any = await getAllProgramas({
-      search: '',
-    });
-    if (response && response.programas) {
-      setProgramasList(response.programas);
-      return response.programas
-    }
-    if (!isEdit) {
-      setOpenModalLoading(false);
-    }
-  }
-
   //Cuando se cambia de pagina se ejecuta el metodo getUsers con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
@@ -179,12 +163,10 @@ function Usuarios(props: any) {
     setOpenModal(true);
     let roleItem = userProfilesArray.find((item) => item.id === data.rolId);
     if (roleItem && roleItem.id === userProfilesObject.est.id){
-      //GetEstudent
       let estudiante:any = await getEstudianteByEmail({
         correo: data.correo
       });
       if (estudiante){
-        let programas = await getProgramas(true)
         setUserObject({
           _id: data._id,
           name: data.nombreUsuario,
@@ -194,15 +176,9 @@ function Usuarios(props: any) {
           passwordConfirm: '',
           identificacionEstudiante: estudiante.identificacion,
           universidadEstudiante: estudiante.universidad,
-          programaId: estudiante.programa ? estudiante.programa._id : '' 
+          programaEstudiante: estudiante.programa,
+          planEstudiante: estudiante.plan,
         });
-        if (estudiante.programa && estudiante.programa._id){
-          let findPrograma:any = programas.find((programa: any) => programa._id === estudiante.programa._id);
-          if (findPrograma)
-          {
-             setProgramaSelected({ ...findPrograma });
-          }
-        }
       }else{
         setUserObject({
           _id: data._id,
@@ -272,7 +248,8 @@ function Usuarios(props: any) {
       rolId: userObject.role.id,
       identificacionEstudiante: userObject.identificacionEstudiante,
       universidadEstudiante: userObject.universidadEstudiante,
-      programa: programaSelected
+      programa: userObject.programaEstudiante,
+      plan: userObject.planEstudiante
     };
     let response: any = await createUser(userToSave);
     if (response && response.error) {
@@ -304,7 +281,8 @@ function Usuarios(props: any) {
       rolId: userObject.role.id,
       identificacionEstudiante: userObject.identificacionEstudiante,
       universidadEstudiante: userObject.universidadEstudiante,
-      programa: programaSelected
+      programa: userObject.programaEstudiante,
+      plan: userObject.planEstudiante
     };
     let response: any = await updateUser(userToSave, userObject._id);
     if (response && response.error) {
@@ -521,7 +499,6 @@ function Usuarios(props: any) {
                   password: '',
                   passwordConfirm: '',
                 })
-                getProgramas()
               }} />
           </div>
         </Tooltip>
@@ -689,29 +666,31 @@ function Usuarios(props: any) {
                           />
                         </GridItem>
                         <GridItem xs={12} sm={12} md={6} >
-                    <Autocomplete
-                      id="tags-outlined"
-                      options={programasList}
-                      getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
-                      filterSelectedOptions
-                      onChange={(e, option) => {
-                        setProgramaSelected(option || {})
-                      }}
-                      value={programaSelected}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          id="outlined-rol"
-                          label="Programa"
-                          variant="outlined"
-                          margin="dense"
-                          error={programaSelected && !programaSelected._id ? true : false}
-                          className={classes.CustomTextField}
-                          helperText={!programaSelected._id ? 'Primero seleccione un programa.':''}
-                        />
-                      )}
-                    />
-                  </GridItem>
+                          <TextField
+                            id="outlined-name"
+                            label="Programa del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.programaEstudiante ? true : false}
+                            value={userObject.programaEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, programaEstudiante: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Plan del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.planEstudiante ? true : false}
+                            value={userObject.planEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, planEstudiante: event.target.value })}
+                          />
+                        </GridItem>
                     </>
                     : null
                   }

@@ -46,6 +46,7 @@ import { getAllAsignaturasByPlan } from "../../services/asignaturasServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
 import { getAllEquivalenciaByAsignatura } from "../../services/equivalenciasServices"
 import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
+import { getEstudianteByEmail, getAllEstudiantes } from '../../services/estudiantesServices'
 
 
 //Estilos generales usados en el modulo
@@ -85,9 +86,11 @@ function Homologaciones(props: any) {
   const [planSelected, setPlanSelected] = useState<AnythingObject>({});
   const [asignaturasList, setAsignaturasList] = useState([]);
   const [asignaturaSelected, setAsignaturaSelected] = useState<AnythingObject>({});
+  const [estudianteSelected, setEstudianteSelected] = useState<AnythingObject>({});
   const [estadoHomologacionSelected, setEstadoHomologacionSelected] = useState<AnythingObject>({});
   const [contenidosList, setContenidosList] = useState([]);
   const [equivalenciasList, setEquivalenciasList] = useState([]);
+  const [estudiantesList, setEstudiantesList] = useState([]);
 
   const [homologacionList, setHomologacionesList] = useState([]);
   const [totalHomologaciones, setTotalHomologaciones] = useState(0);
@@ -236,6 +239,18 @@ function Homologaciones(props: any) {
       } 
     }
   }
+
+  const getEstudiantes = async () => {
+    setOpenModal(true);
+      let estudiantes:any = await getAllEstudiantes();
+      if (estudiantes){
+        // let programas = await getProgramas(true)
+        setEstudiantesList(estudiantes.estudiantes)
+      }else{
+        setEstudiantesList([])
+      }
+    // getProgramas(false);
+  };
 
   //Metodo de obtencion de homologaciones
   const getHomologaciones = async (page?: any) => {
@@ -409,6 +424,7 @@ function Homologaciones(props: any) {
         setHomologacionObject({...homologacionToEdit, 
           añoHomologacion: moment(new Date()),
           fechaDecision: null });
+        getEstudiantes();
         getProgramas(isEdit, homologacionToEdit);
       } else {
         setHomologacionObject({ ...homologacionToEdit, 
@@ -738,6 +754,124 @@ function Homologaciones(props: any) {
               <div className={classes.containerFormModal} >
                 <GridContainer>
 
+                <GridItem xs={12} sm={12} md={12}>
+                    <h4 className={classes.cardTitleBlack}>Información del solicitante</h4>
+                  </GridItem>
+
+
+                  <GridItem xs={12} sm={12} md={6} >
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={estudiantesList}
+                      getOptionLabel={(option:any) => option._id ? `${option.identificacion} - ${option.nombre}` : ''}
+                      filterSelectedOptions
+                      onChange={(e, option) => {setEstudianteSelected(option || {})}}
+                      // value={userObject.role}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-rol"
+                          label="Estudiante"
+                          variant="outlined"
+                          margin="dense"
+                          // error={userObject.role && !userObject.role.id ? true : false}
+                          error={estudianteSelected && !estudianteSelected._id ? true : false}
+                          className={classes.CustomTextField}
+                          helperText={!estudianteSelected._id ? 'Primero seleccione un estudiante.':''}
+                        />
+                      )}
+                    />
+                  </GridItem>
+
+                <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Correo del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.correo ? true : false}
+                      value={estudianteSelected.correo || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, correoSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  {/* <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Nombre del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!homologacionObject.nombreSolicitante ? true : false}
+                      value={homologacionObject.nombreSolicitante}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, nombreSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem> */}
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Universidad origen del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.universidad ? true : false}
+                      value={estudianteSelected.universidad || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, universidadSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Programa origen del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.programa ? true : false}
+                      value={estudianteSelected.programa || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, programaEstudiante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Plan origen del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.plan ? true : false}
+                      value={estudianteSelected.plan || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, planEstudiante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12} >
+                    <br />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12} >
+                    <hr />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12}>
+                    <h4 className={classes.cardTitleBlack}>Información de asignatura</h4>
+                  </GridItem>
+
                   <GridItem xs={12} sm={12} md={4} >
                     <Autocomplete
                       id="tags-outlined"
@@ -817,7 +951,7 @@ function Homologaciones(props: any) {
                     {
                       contenidosList.length ?
                         <GridItem xs={12} sm={12} md={12}>
-                          <h4 className={classes.cardTitleBlack}>Contenidos</h4>
+                          <h5 className={classes.cardTitleBlack}>Contenidos</h5>
                           {
                             contenidosList.map((contenido: any, index) => <Chip
                               key={index}
@@ -835,7 +969,7 @@ function Homologaciones(props: any) {
                     {
                       equivalenciasList.length ?
                         <GridItem xs={12} sm={12} md={12}>
-                          <h4 className={classes.cardTitleBlack}>Equivalencias</h4>
+                          <h5 className={classes.cardTitleBlack}>Equivalencias</h5>
                           {
                             equivalenciasList.map((equivalencia: any, index) => 
                             <Chip
@@ -857,69 +991,14 @@ function Homologaciones(props: any) {
                   </GridItem>
 
                   <GridItem xs={12} sm={12} md={12}>
-                    <h4 className={classes.cardTitleBlack}>Información del solicitante</h4>
+                    <h4 className={classes.cardTitleBlack}>Detalle de solicitud</h4>
                   </GridItem>
 
+                  
                   <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
-                      label="Identificación del solicitante"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.identificacionSolicitante ? true : false}
-                      value={homologacionObject.identificacionSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, identificacionSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Nombre del solicitante"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.nombreSolicitante ? true : false}
-                      value={homologacionObject.nombreSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, nombreSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Universidad del solicitante"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.universidadSolicitante ? true : false}
-                      value={homologacionObject.universidadSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, universidadSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Programa del solicitante"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.programaSolicitante ? true : false}
-                      value={homologacionObject.programaSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, programaSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Asignatura del solicitante"
+                      label="Asignatura origen de solicitud"
                       variant="outlined"
                       margin="dense"
                       className={classes.CustomTextField}

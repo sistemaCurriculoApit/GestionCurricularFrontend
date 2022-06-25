@@ -18,3 +18,19 @@ export const getEstudianteByEmail = async(data:any)=>{
     });
   }
   
+  export const getAllEstudiantes = async()=>{
+    return new Promise(resolve=>{
+      let headers:any = getHeaders();
+      fetch(`${backendBaseUrl}api/estudiante/all`,{
+        headers,
+        method: 'GET',
+      })
+      .then(response => response.json())
+      .then(response => {
+        resolve(response)
+      })
+      .catch(error => resolve({ 
+        ...error 
+      }));
+    });
+  }
