@@ -91,7 +91,7 @@ function Homologaciones(props: any) {
   const [contenidosList, setContenidosList] = useState([]);
   const [equivalenciasList, setEquivalenciasList] = useState([]);
   const [estudiantesList, setEstudiantesList] = useState([]);
-
+  const [blockEstudienteSelected, setBlockEstudianteSelected] = useState<boolean>()
   const [homologacionList, setHomologacionesList] = useState([]);
   const [totalHomologaciones, setTotalHomologaciones] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -238,16 +238,24 @@ function Homologaciones(props: any) {
     }
   }
 
-  const getEstudiantes = async () => {
-    setOpenModal(true);
+  const getEstudiantes = async (isEdit?: boolean, homologacionToEdit?: any) => {
       let estudiantes:any = await getAllEstudiantes();
       if (estudiantes){
         // let programas = await getProgramas(true)
+        console.log(estudiantes.estudiantes)
         setEstudiantesList(estudiantes.estudiantes)
+        setBlockEstudianteSelected(false);
       }else{
         setEstudiantesList([])
       }
-    // getProgramas(false);
+      if (isEdit && homologacionToEdit.estudiante){
+        let findEstudiante = estudiantes.estudiantes.find((estudiante: any) => estudiante.identificacion === homologacionToEdit.estudiante.identificacion)
+        if (findEstudiante) {
+          setEstudianteSelected({ ...findEstudiante });
+          setBlockEstudianteSelected(true);
+        }
+      }
+      return estudiantes.estudiantes;
   };
 
   //Metodo de obtencion de homologaciones
@@ -259,13 +267,17 @@ function Homologaciones(props: any) {
       dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
       dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
     });
+    let estudiantes: any = await getEstudiantes();
     setPagePagination(page ? page + 1 : 1);
     if (response.homologaciones && response.homologaciones.length) {
+      response.homologaciones.forEach((homologacion:any) => {
+        homologacion.estudiante = estudiantes.find((estudiante: any) => estudiante.homologacion.find(((homologacionEst:any) => homologacionEst._id === homologacion._id) ));
+      })
       //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let homologaciones = response.homologaciones.map((data: any) => {
         let arrayData = [
-          data.identificacionSolicitante,
-          data.nombreSolicitante,
+          data.estudiante ? data.estudiante.identificacion : '',
+          data.estudiante ? data.estudiante.nombre : '',
           data.asignaturaSolicitante,
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
@@ -416,20 +428,23 @@ function Homologaciones(props: any) {
         setAsignaturasList([]);
         setContenidosList([]);
         setEquivalenciasList([]);
+        setEstudianteSelected([]);
         const estado = estadosHomologacion.find((estado: any) => estado.id === 2) ;
         setEstadoHomologacionSelected(estado || {});
         setHomologacionObject(homologacionToEdit);
         setHomologacionObject({...homologacionToEdit, 
           añoHomologacion: moment(new Date()),
           fechaDecision: null });
-        getEstudiantes();
+        getEstudiantes(isEdit, homologacionToEdit);
         getProgramas(isEdit, homologacionToEdit);
       } else {
+        setEstudianteSelected([]);
         setHomologacionObject({ ...homologacionToEdit, 
             añoHomologacion: moment(new Date(homologacionToEdit.añoHomologacion)),
             fechaDecision: homologacionToEdit.fechaDecision ? moment(new Date(homologacionToEdit.fechaDecision)) : null });
         const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion || estado.id === 2);
         setEstadoHomologacionSelected(estado || {});
+        getEstudiantes(isEdit, homologacionToEdit);
       }
     } catch (error) {
       setOpenModalLoading(false);
@@ -504,7 +519,9 @@ function Homologaciones(props: any) {
       asignaturaId: asignaturaSelected._id,
       estadoHomologacion: estadoHomologacionSelected.id,
       añoHomologacion: homologacionObject.añoHomologacion.toDate(),
-      fechaDecision: estadoHomologacionSelected.id !== 2 ? fechaDecisionNew : null
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? fechaDecisionNew : null,
+      identificacionSolicitante: estudianteSelected.identificacion,
+      estudianteId: estudianteSelected._id
     };
     let response: any = await updateHomologacion(homologacionToSave, homologacionObject._id);
     if (response && response.error) {
@@ -532,10 +549,6 @@ function Homologaciones(props: any) {
     if (programaSelected._id &&
       planSelected._id &&
       asignaturaSelected._id &&
-      // homologacionObject.identificacionSolicitante &&
-      // homologacionObject.nombreSolicitante &&
-      // homologacionObject.universidadSolicitante &&
-      // homologacionObject.programaSolicitante &&
       homologacionObject.asignaturaSolicitante &&
       homologacionObject.añoHomologacion &&
       homologacionObject.periodo &&
@@ -765,7 +778,8 @@ function Homologaciones(props: any) {
                       getOptionLabel={(option:any) => option._id ? `${option.identificacion} - ${option.nombre}` : ''}
                       filterSelectedOptions
                       onChange={(e, option) => {setEstudianteSelected(option || {})}}
-                      // value={userObject.role}
+                      value={estudianteSelected}
+                      disabled={blockEstudienteSelected}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -773,7 +787,6 @@ function Homologaciones(props: any) {
                           label="Estudiante"
                           variant="outlined"
                           margin="dense"
-                          // error={userObject.role && !userObject.role.id ? true : false}
                           error={estudianteSelected && !estudianteSelected._id ? true : false}
                           className={classes.CustomTextField}
                           helperText={!estudianteSelected._id ? 'Primero seleccione un estudiante.':''}
