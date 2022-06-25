@@ -45,6 +45,7 @@ import checkboxAdnRadioStyle from '../../assets/jss/material-dashboard-react/che
 
 import { userProfilesArray, AnythingObject, userProfilesObject } from '../../constants/generalConstants'
 import { getAllProgramas } from "../../services/programasServices"
+import { getEstudianteByEmail } from '../../services/estudiantesServices'
 import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
 
 //Estilos generales usados en el modulo
@@ -91,7 +92,7 @@ function Usuarios(props: any) {
     passwordConfirm: '',
     identificacionEstudiante: '',
     universidadEstudiante: '',
-    programaEstudiante: ''
+    programaId: ''
   });
 
 
@@ -153,18 +154,13 @@ function Usuarios(props: any) {
   }
 
    //Obtencion de los programas para la modal, cuando se crea o se edita una homologacion
-   const getProgramas = async (isEdit?: boolean, usuarioToEdit?: any) => {
+   const getProgramas = async (isEdit?: boolean) => {
     let response: any = await getAllProgramas({
       search: '',
     });
     if (response && response.programas) {
       setProgramasList(response.programas);
-      if (isEdit && usuarioToEdit.programaId) {
-        let findPrograma = response.programas.find((programa: any) => programa._id === usuarioToEdit.programaId);
-        if (findPrograma) {
-          setProgramaSelected({ ...findPrograma });
-        }
-      }
+      return response.programas
     }
     if (!isEdit) {
       setOpenModalLoading(false);
@@ -179,24 +175,54 @@ function Usuarios(props: any) {
   };
 
   //Se establecen los datos de un usuario a editar en la modal
-  const setDataEditUser = (data: any) => {
+  const setDataEditUser = async (data: any) => {
     setOpenModal(true);
     let roleItem = userProfilesArray.find((item) => item.id === data.rolId);
     if (roleItem && roleItem.id === userProfilesObject.est.id){
       //GetEstudent
+      let estudiante:any = await getEstudianteByEmail({
+        correo: data.correo
+      });
+      if (estudiante){
+        let programas = await getProgramas(true)
+        setUserObject({
+          _id: data._id,
+          name: data.nombreUsuario,
+          email: data.correo,
+          role: roleItem ? roleItem : { id: 0, title: '' },
+          password: '',
+          passwordConfirm: '',
+          identificacionEstudiante: estudiante.identificacion,
+          universidadEstudiante: estudiante.universidad,
+          programaId: estudiante.programa._id
+        });
+        if (estudiante.programa._id){
+          let findPrograma:any = programas.find((programa: any) => programa._id === estudiante.programa._id);
+          if (findPrograma)
+          {
+             setProgramaSelected({ ...findPrograma });
+          }
+        }
+      }else{
+        setUserObject({
+          _id: data._id,
+          name: data.nombreUsuario,
+          email: data.correo,
+          role: roleItem ? roleItem : { id: 0, title: '' },
+          password: '',
+          passwordConfirm: '',
+        });
+      }
+    }else{
+      setUserObject({
+        _id: data._id,
+        name: data.nombreUsuario,
+        email: data.correo,
+        role: roleItem ? roleItem : { id: 0, title: '' },
+        password: '',
+        passwordConfirm: '',
+      });
     }
-    setUserObject({
-      _id: data._id,
-      name: data.nombreUsuario,
-      email: data.correo,
-      role: roleItem ? roleItem : { id: 0, title: '' },
-      password: '',
-      passwordConfirm: '',
-      // identificacionEstudiante: userComplete ? userComplete.estudianteData.identificacion : '',
-      // universidadEstudiante: userComplete ? userComplete.estudianteData.universidad : '',
-      // programaId: userComplete ? userComplete.estudianteData.programa._id: ''
-    });
-    getProgramas(true, userObject)
   };
 
   //Manejador de la accion guardar de la modal, se encarga de crear o editar
