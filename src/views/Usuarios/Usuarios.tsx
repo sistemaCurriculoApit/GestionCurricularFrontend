@@ -194,9 +194,9 @@ function Usuarios(props: any) {
           passwordConfirm: '',
           identificacionEstudiante: estudiante.identificacion,
           universidadEstudiante: estudiante.universidad,
-          programaId: estudiante.programa._id
+          programaId: estudiante.programa ? estudiante.programa._id : '' 
         });
-        if (estudiante.programa._id){
+        if (estudiante.programa && estudiante.programa._id){
           let findPrograma:any = programas.find((programa: any) => programa._id === estudiante.programa._id);
           if (findPrograma)
           {
