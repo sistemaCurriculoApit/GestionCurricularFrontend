@@ -9,6 +9,7 @@ import Admin from './layouts/Admin';
 import Coordinador from './layouts/Coordinador';
 import Docente from './layouts/Docente';
 import Invitado from './layouts/Invitado';
+import Estudiante from './layouts/Estudiante'
 
 import {userProfilesObject} from './constants/generalConstants';
 
@@ -60,7 +61,16 @@ function IndexApp(props: any) {
 
         );
         break;
+      case userProfilesObject.est.id.toString():
+        return (
 
+          <Switch>
+            <Route path="/estudiante" component={Estudiante} />
+            <Redirect to={'/estudiante/homologacion'} from={'/'} />
+          </Switch>
+
+        );
+        break;
       default:
         return (
           <Switch>

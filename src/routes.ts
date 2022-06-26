@@ -291,6 +291,30 @@ const dashboardRoutes = [
     layout: '/docente'
   },
   
+  //ACCESOS ESTUDIANTE
+  {
+    path: '/homologacion',
+    name: 'Homologación de asignaturas',
+    icon: LibraryBooks,
+    component: Homologaciones,
+    layout: '/estudiante'
+  },
+  {
+    path: '/micrositio',
+    name: 'Micrositio',
+    icon: Web,
+    component: Micrositios,
+    layout: '/estudiante'
+  },
+  {
+    path: '/Manual',
+    name: 'Manual de usuario',
+    icon: Web,
+    component: ManualUsuario,
+    layout: '/estudiante'
+  },
+
+
   //ACCESOS DE INVITADO
   {
     path: '/micrositio',

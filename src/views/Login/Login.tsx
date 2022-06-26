@@ -37,7 +37,7 @@ function Login(props: any) {
     if (guest) {
       //Ingreso con el rol de invitado
       localStorage.setItem('token', '-1');
-      localStorage.setItem('idProfileLoggedUser', '4');
+      localStorage.setItem('idProfileLoggedUser', '5');
       window.location.reload();
     } else {
       if (email && password) {
