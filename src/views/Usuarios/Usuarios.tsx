@@ -151,6 +151,25 @@ function Usuarios(props: any) {
     setOpenModalLoading(false);
   }
 
+  const setUserRoleData =  async (roleSelected:any)=>{
+    if (roleSelected.id === userProfilesObject.est.id){
+      let estudiante:any = await getEstudianteByEmail({
+        correo: userObject.email
+      });
+      if (estudiante){
+        setUserObject({...userObject, 
+          role: roleSelected,
+          identificacionEstudiante: estudiante.identificacion,
+          universidadEstudiante: estudiante.universidad,
+          programaEstudiante: estudiante.programa,
+          planEstudiante: estudiante.plan
+        })
+      }
+    }else{
+      setUserObject({...userObject, role:roleSelected})
+    }
+  };
+
   //Cuando se cambia de pagina se ejecuta el metodo getUsers con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
@@ -569,7 +588,7 @@ function Usuarios(props: any) {
                       options={userProfilesArray}
                       getOptionLabel={(option) => option.title}
                       filterSelectedOptions
-                      onChange={(e, option) => setUserObject({ ...userObject, role: option || {} })}
+                      onChange={(e, option) => {setUserRoleData(option || {})}}
                       value={userObject.role}
                       renderInput={(params) => (
                         <TextField
@@ -637,7 +656,7 @@ function Usuarios(props: any) {
                   }
 
                   {
-                    userObject.role.id === 4 ?
+                    userObject.role.id === userProfilesObject.est.id ?
                     <>
                         <GridItem xs={12} sm={12} md={6} >
                           <TextField
