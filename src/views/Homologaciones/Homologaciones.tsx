@@ -16,6 +16,7 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility'
 import moment from "moment";
 import "moment/locale/es";
 
@@ -47,6 +48,7 @@ import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
 import { getAllEquivalenciaByAsignatura } from "../../services/equivalenciasServices"
 import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
 import { getEstudianteByEmail, getAllEstudiantes } from '../../services/estudiantesServices'
+import { userProfilesObject } from '../../constants/generalConstants'
 
 
 //Estilos generales usados en el modulo
@@ -92,6 +94,7 @@ function Homologaciones(props: any) {
   const [equivalenciasList, setEquivalenciasList] = useState([]);
   const [estudiantesList, setEstudiantesList] = useState([]);
   const [blockEstudienteSelected, setBlockEstudianteSelected] = useState<boolean>()
+  const [isBlockEditByPermissions, setIsBlockEditByPermissions] = useState<boolean>()
   const [homologacionList, setHomologacionesList] = useState([]);
   const [totalHomologaciones, setTotalHomologaciones] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -111,8 +114,26 @@ function Homologaciones(props: any) {
     descripcion: '',
   });
 
+  const blockStudentPermission = () => {
+    var idProfile = localStorage.getItem('idProfileLoggedUser');
+    if (isBlockEditByPermissions !== false && isBlockEditByPermissions !== true){
+      if (!idProfile || idProfile === userProfilesObject.est.id.toString()){
+        setIsBlockEditByPermissions(true)
+        return true
+      }else{
+        setIsBlockEditByPermissions(false)
+        return false
+      }
+    }else{
+      return isBlockEditByPermissions
+    }
+
+  }
+
+
   //Al iniciar el componente se obtienen las homologaciones y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
+    blockStudentPermission()
     setOpenModalLoading(true);
     getHomologaciones();
     if (openModalCreate) {
@@ -282,14 +303,14 @@ function Homologaciones(props: any) {
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
-                onClick={() => {
-                  setDataEditHomologacion(data);
-                }} />
-            </div>
-          </Tooltip>
+        <Tooltip id='filterTooltip' title={!blockStudentPermission() ? "Editar" : "Ver"} placement='top' classes={{ tooltip: classes.tooltip }}>
+          <div className={classes.buttonHeaderContainer}>
+            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={!blockStudentPermission() ? <EditIcon /> : <VisibilityIcon />}
+              onClick={() => {
+                setDataEditHomologacion(data);
+              }} />
+          </div>
+        </Tooltip> 
         ];
         return arrayData;
       });
@@ -713,10 +734,13 @@ function Homologaciones(props: any) {
 
         </GridItem>
       </GridContainer>
-      <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nueva homologación" placement='left' classes={{ tooltip: classes.tooltip }}>
+
+
+        {  !blockStudentPermission() ?
+         <div className={classes.containerFloatButton}>
+          <Tooltip id='addTooltip' title="Crear nueva homologación" placement='left' classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} disabled={blockStudentPermission()} round justIcon startIcon={<AddIcon />}
               onClick={() => {
                 handleOpenModal(false, {
                   programaId: '',
@@ -735,8 +759,8 @@ function Homologaciones(props: any) {
                 })
               }} />
           </div>
-        </Tooltip>
-      </div>
+        </Tooltip> 
+      </div> : null}
 
       {/* Modal de creación y edicion de contenidos */}
 
