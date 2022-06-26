@@ -803,7 +803,7 @@ function Homologaciones(props: any) {
                       filterSelectedOptions
                       onChange={(e, option) => {setEstudianteSelected(option || {})}}
                       value={estudianteSelected}
-                      disabled={blockEstudienteSelected}
+                      disabled={blockEstudienteSelected || isBlockEditByPermissions}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -899,6 +899,7 @@ function Homologaciones(props: any) {
                       options={programasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => {
                         setProgramaSelected(option || {})
                         setPlanSelected({});
@@ -925,6 +926,7 @@ function Homologaciones(props: any) {
                       options={planesList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => {
                         setPlanSelected(option || {})
                         setAsignaturaSelected({});
@@ -951,6 +953,7 @@ function Homologaciones(props: any) {
                       options={asignaturasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => setAsignaturaSelected(option || {})}
                       value={asignaturaSelected}
                       renderInput={(params) => (
@@ -1022,6 +1025,7 @@ function Homologaciones(props: any) {
                       label="Asignatura origen de solicitud"
                       variant="outlined"
                       margin="dense"
+                      disabled={isBlockEditByPermissions}
                       className={classes.CustomTextField}
                       error={!homologacionObject.asignaturaSolicitante ? true : false}
                       value={homologacionObject.asignaturaSolicitante}
@@ -1040,6 +1044,7 @@ function Homologaciones(props: any) {
                           margin='dense'
                           className={classes.CustomTextField}
                           format="MMM DD, YYYY"
+                          disabled={isBlockEditByPermissions}
                           value={homologacionObject.añoHomologacion}
                           onChange={(newValue: any) => {
                             setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue })
@@ -1086,6 +1091,7 @@ function Homologaciones(props: any) {
                       options={["1", "2"]}
                       getOptionLabel={(option) => option}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => setHomologacionObject({ ...homologacionObject, periodo: option })}
                       value={homologacionObject.periodo}
                       renderInput={(params) => (
@@ -1108,6 +1114,7 @@ function Homologaciones(props: any) {
                       options={estadosHomologacion}
                       getOptionLabel={(option) => option.title}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => setEstadoHomologacionSelected(option || {})}
                       value={estadoHomologacionSelected}
                       renderInput={(params) => (
@@ -1134,6 +1141,7 @@ function Homologaciones(props: any) {
                       minRows={4}
                       maxRows={10}
                       multiline
+                      disabled={isBlockEditByPermissions}
                       value={homologacionObject.descripcion}
                       onChange={(event) => {
                         setHomologacionObject({ ...homologacionObject, descripcion: event.target.value })
@@ -1145,13 +1153,14 @@ function Homologaciones(props: any) {
               </div>
 
 
+              { !isBlockEditByPermissions ?
               <div className={classes.containerFooterModal} >
                 <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
                   onClick={() => { handleSaveHomologacion() }} >
                   {'Guardar'}
                 </Button>
-
               </div>
+              : null}
 
             </Card>
           </GridItem>
