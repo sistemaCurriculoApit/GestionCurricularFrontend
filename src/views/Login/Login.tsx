@@ -51,6 +51,7 @@ function Login(props: any) {
           //almacenamiento de token y del perfil logeado
           localStorage.setItem('token', body.token);
           localStorage.setItem('idProfileLoggedUser', body.user.rolId);
+          localStorage.setItem('userEmail', email);
           window.location.reload();
         } else {
           setSeverityAlert('error');

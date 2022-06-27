@@ -263,7 +263,6 @@ function Homologaciones(props: any) {
       let estudiantes:any = await getAllEstudiantes();
       if (estudiantes){
         // let programas = await getProgramas(true)
-        console.log(estudiantes.estudiantes)
         setEstudiantesList(estudiantes.estudiantes)
         setBlockEstudianteSelected(false);
       }else{
@@ -294,8 +293,19 @@ function Homologaciones(props: any) {
       response.homologaciones.forEach((homologacion:any) => {
         homologacion.estudiante = estudiantes.find((estudiante: any) => estudiante.homologacion.find(((homologacionEst:any) => homologacionEst._id === homologacion._id) ));
       })
+      let idProfile:any = localStorage.getItem('idProfileLoggedUser');
+      let emailUser:any = localStorage.getItem('userEmail');
+      let homologacionesNew: any = []
+      if (idProfile === userProfilesObject.est.id.toString()){
+        homologacionesNew = response.homologaciones.filter((homologacion:any) =>  homologacion.estudiante && homologacion.estudiante.correo === emailUser )
+        // console.log(response.homologaciones.find((h:any) => h.estudiante.correo === emailUser))
+      }else {
+        homologacionesNew = response.homologaciones
+      }
+
       //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-      let homologaciones = response.homologaciones.map((data: any) => {
+
+      let homologaciones = homologacionesNew.map((data: any) => {
         let arrayData = [
           data.estudiante ? data.estudiante.identificacion : '',
           data.estudiante ? data.estudiante.nombre : '',
