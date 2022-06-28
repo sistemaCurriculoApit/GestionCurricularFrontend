@@ -126,11 +126,13 @@ const MenuItemsBuild: React.FC<PropsMenuItem> = ({ menuItem, keyMenuItem, classe
 
 const Sidebar = ({ ...props }) => {
 
-  const { classes, color, logo, logoText, routes } = props;
+  const { classes, color, logo, logoText, routes, userName, userEmail } = props;
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('idProfileLoggedUser');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userName');
     window.location.assign("/login");
   }
 
@@ -140,6 +142,12 @@ const Sidebar = ({ ...props }) => {
         <img src={logo} alt="logo" className={classes.img} />
         <span className={classNames(classes.logoLink)}>
           {logoText}
+        </span >
+        <span className={classNames(classes.logoUserDataLink)}>
+          {userName}
+        </span>
+        <span className={classNames(classes.logoUserDataLink)}>
+          {userEmail}
         </span>
       </div>
       <Tooltip id='addTooltip' title="Cerrar sesión" placement='bottom' classes={{ tooltip: classes.tooltip }}>

@@ -116,12 +116,16 @@ class DashboardCoordinador extends React.Component<Props, State> {
 
   render() {
     const { classes, ...rest } = this.props;
+    var userName = localStorage.getItem('userName') ? localStorage.getItem('userName') : '';
+    var userEmail = localStorage.getItem('userEmail') ? localStorage.getItem('userEmail') : '';
     return (
       <div className={classes.wrapper}>
         <Sidebar
           routes={routesFilter}
           logoText={'Currículo APIT'}
           logo={logo}
+          userName={`Bienvenido, ${userName}`} 
+          userEmail={`${userEmail}`} 
           image={this.state.image}
           handleDrawerToggle={this.handleDrawerToggle}
           open={this.state.mobileOpen}

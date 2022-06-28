@@ -94,6 +94,20 @@ const sidebarStyle = (theme: Theme) => createStyles({
       color: whiteColor
     }
   },
+  logoUserDataLink: {
+    ...defaultFont,
+    padding: '4px 4px 4px 4px',
+    display: 'block',
+    fontSize: '15px',
+    textAlign: 'center',
+    fontWeight: 300,
+    lineHeight: '15px',
+    textDecoration: 'none',
+    backgroundColor: 'transparent',
+    '&,&:hover': {
+      color: whiteColor
+    }
+  },
   logoLinkRTL: {
     textAlign: 'right'
   },
