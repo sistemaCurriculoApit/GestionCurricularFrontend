@@ -90,7 +90,10 @@ function Usuarios(props: any) {
     identificacionEstudiante: '',
     universidadEstudiante: '',
     programaEstudiante: '',
-    planEstudiante:''
+    planEstudiante:'',
+    universidadEstudianteOrigen: '',
+    programaEstudianteOrigen: '',
+    planEstudianteOrigen:''
   });
 
 
@@ -162,7 +165,10 @@ function Usuarios(props: any) {
           identificacionEstudiante: estudiante.identificacion,
           universidadEstudiante: estudiante.universidad,
           programaEstudiante: estudiante.programa,
-          planEstudiante: estudiante.plan
+          planEstudiante: estudiante.plan,
+          universidadEstudianteOrigen: estudiante.universidadOrigen,
+          programaEstudianteOrigen: estudiante.programaOrigen,
+          planEstudianteOrigen: estudiante.planOrigen
         })
       }
     }else{
@@ -193,10 +199,13 @@ function Usuarios(props: any) {
           role: roleItem ? roleItem : { id: 0, title: '' },
           password: '',
           passwordConfirm: '',
-          identificacionEstudiante: estudiante.identificacion,
-          universidadEstudiante: estudiante.universidad,
-          programaEstudiante: estudiante.programa,
-          planEstudiante: estudiante.plan,
+          identificacionEstudiante: estudiante.identificacion ? estudiante.identificacion : '',
+          universidadEstudiante: estudiante.universidad ? estudiante.universidad : '',
+          programaEstudiante: estudiante.programa ? estudiante.programa : '',
+          planEstudiante: estudiante.plan ? estudiante.plan : '',
+          universidadEstudianteOrigen: estudiante.universidadOrigen ? estudiante.universidadOrigen : '',
+          programaEstudianteOrigen: estudiante.programaOrigen ? estudiante.programaOrigen : '',
+          planEstudianteOrigen: estudiante.planOrigen ? estudiante.planOrigen : '',
         });
       }else{
         setUserObject({
@@ -206,6 +215,13 @@ function Usuarios(props: any) {
           role: roleItem ? roleItem : { id: 0, title: '' },
           password: '',
           passwordConfirm: '',
+          identificacionEstudiante: '',
+          universidadEstudiante: '',
+          programaEstudiante: '',
+          planEstudiante: '',
+          universidadEstudianteOrigen: '',
+          programaEstudianteOrigen: '',
+          planEstudianteOrigen: '',
         });
       }
     }else{
@@ -216,6 +232,13 @@ function Usuarios(props: any) {
         role: roleItem ? roleItem : { id: 0, title: '' },
         password: '',
         passwordConfirm: '',
+        identificacionEstudiante: '',
+        universidadEstudiante: '',
+        programaEstudiante: '',
+        planEstudiante: '',
+        universidadEstudianteOrigen: '',
+        programaEstudianteOrigen: '',
+        planEstudianteOrigen: '',
       });
     }
   };
@@ -268,7 +291,10 @@ function Usuarios(props: any) {
       identificacionEstudiante: userObject.identificacionEstudiante,
       universidadEstudiante: userObject.universidadEstudiante,
       programa: userObject.programaEstudiante,
-      plan: userObject.planEstudiante
+      plan: userObject.planEstudiante,
+      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
+      programaOrigen: userObject.programaEstudianteOrigen,
+      planOrigen: userObject.planEstudianteOrigen,
     };
     let response: any = await createUser(userToSave);
     if (response && response.error) {
@@ -301,7 +327,10 @@ function Usuarios(props: any) {
       identificacionEstudiante: userObject.identificacionEstudiante,
       universidadEstudiante: userObject.universidadEstudiante,
       programa: userObject.programaEstudiante,
-      plan: userObject.planEstudiante
+      plan: userObject.planEstudiante,
+      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
+      programaOrigen: userObject.programaEstudianteOrigen,
+      planOrigen: userObject.planEstudianteOrigen,
     };
     let response: any = await updateUser(userToSave, userObject._id);
     if (response && response.error) {
@@ -679,7 +708,6 @@ function Usuarios(props: any) {
                             margin="dense"
                             inputProps={{ maxLength: 150 }}
                             className={classes.CustomTextField}
-                            error={!userObject.universidadEstudiante ? true : false}
                             value={userObject.universidadEstudiante}
                             onChange={(event) => setUserObject({ ...userObject, universidadEstudiante: event.target.value })}
                           />
@@ -692,7 +720,6 @@ function Usuarios(props: any) {
                             margin="dense"
                             inputProps={{ maxLength: 150 }}
                             className={classes.CustomTextField}
-                            error={!userObject.programaEstudiante ? true : false}
                             value={userObject.programaEstudiante}
                             onChange={(event) => setUserObject({ ...userObject, programaEstudiante: event.target.value })}
                           />
@@ -705,9 +732,47 @@ function Usuarios(props: any) {
                             margin="dense"
                             inputProps={{ maxLength: 150 }}
                             className={classes.CustomTextField}
-                            error={!userObject.planEstudiante ? true : false}
                             value={userObject.planEstudiante}
                             onChange={(event) => setUserObject({ ...userObject, planEstudiante: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Universidad origen del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.universidadEstudianteOrigen ? true : false}
+                            value={userObject.universidadEstudianteOrigen}
+                            onChange={(event) => setUserObject({ ...userObject, universidadEstudianteOrigen: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Programa origen del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.programaEstudianteOrigen ? true : false}
+                            value={userObject.programaEstudianteOrigen}
+                            onChange={(event) => setUserObject({ ...userObject, programaEstudianteOrigen: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Plan origen del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.planEstudianteOrigen ? true : false}
+                            value={userObject.planEstudianteOrigen}
+                            onChange={(event) => setUserObject({ ...userObject, planEstudianteOrigen: event.target.value })}
                           />
                         </GridItem>
                     </>

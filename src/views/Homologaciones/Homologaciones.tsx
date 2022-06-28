@@ -298,7 +298,6 @@ function Homologaciones(props: any) {
       let homologacionesNew: any = []
       if (idProfile === userProfilesObject.est.id.toString()){
         homologacionesNew = response.homologaciones.filter((homologacion:any) =>  homologacion.estudiante && homologacion.estudiante.correo === emailUser )
-        // console.log(response.homologaciones.find((h:any) => h.estudiante.correo === emailUser))
       }else {
         homologacionesNew = response.homologaciones
       }
@@ -852,8 +851,8 @@ function Homologaciones(props: any) {
                       margin="dense"
                       disabled={true}
                       className={classes.CustomTextField}
-                      error={!estudianteSelected.universidad ? true : false}
-                      value={estudianteSelected.universidad || ''}
+                      error={!estudianteSelected.universidadOrigen ? true : false}
+                      value={estudianteSelected.universidadOrigen || ''}
                       onChange={(event) => {
                         setHomologacionObject({ ...homologacionObject, universidadSolicitante: event.target.value })
                       }}
@@ -867,8 +866,8 @@ function Homologaciones(props: any) {
                       margin="dense"
                       disabled={true}
                       className={classes.CustomTextField}
-                      error={!estudianteSelected.programa ? true : false}
-                      value={estudianteSelected.programa || ''}
+                      error={!estudianteSelected.programaOrigen ? true : false}
+                      value={estudianteSelected.programaOrigen || ''}
                       onChange={(event) => {
                         setHomologacionObject({ ...homologacionObject, programaEstudiante: event.target.value })
                       }}
@@ -883,8 +882,8 @@ function Homologaciones(props: any) {
                       margin="dense"
                       disabled={true}
                       className={classes.CustomTextField}
-                      error={!estudianteSelected.plan ? true : false}
-                      value={estudianteSelected.plan || ''}
+                      error={!estudianteSelected.planOrigen ? true : false}
+                      value={estudianteSelected.planOrigen || ''}
                       onChange={(event) => {
                         setHomologacionObject({ ...homologacionObject, planEstudiante: event.target.value })
                       }}
