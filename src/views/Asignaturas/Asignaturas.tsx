@@ -161,7 +161,15 @@ function Asignaturas(props: any) {
                   setDataEditAsignatura(data);
                 }} />
             </div>
-          </Tooltip>
+          </Tooltip>,
+          <Tooltip id='filterTooltip' title="Descargar formato asignatura" placement='top' classes={{ tooltip: classes.tooltip }}>
+          <div className={classes.buttonHeaderContainer}>
+            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<GetApp />}
+              onClick={() => {
+                getDataToDownloadFormat(data);
+              }} />
+          </div>
+        </Tooltip>
         ];
         return arrayData;
       });
@@ -174,6 +182,19 @@ function Asignaturas(props: any) {
     }
     setOpenModalLoading(false);
   }
+
+
+  const getDataToDownloadFormat = async (asignaturaToDownload?: any) =>{
+    try {
+      setOpenModalLoading(true);
+      setTipoAsignaturaSelected(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === asignaturaToDownload.asignaturaTipo) || {});
+      let asignaturaData = await getDocentes(true, asignaturaToDownload);
+      downloadCourseFormat(asignaturaData)
+    } catch (error) {
+      setOpenModalLoading(false);
+    }
+  }
+
 
   //Obtencion de los docentes para la modal, cuando se crea o se edita una asignatura
   const getDocentes = async (isEdit?: boolean, asignaturaToEdit?: any) => {
@@ -192,7 +213,8 @@ function Asignaturas(props: any) {
         }
       }
     }
-    getContenidos(isEdit, { ...asignaturaToEdit, docente: docentesSelected });
+    const result = await getContenidos(isEdit, { ...asignaturaToEdit, docente: docentesSelected });
+    return result;
   }
 
   //Obtencion de los docentes para la modal, cuando se crea o se edita una asignatura
@@ -212,7 +234,8 @@ function Asignaturas(props: any) {
         }
       }
     }
-    getEquivalencias(isEdit, { ...asignaturaToEdit, contenido: contenidosSelected });
+    const result = await getEquivalencias(isEdit, { ...asignaturaToEdit, contenido: contenidosSelected });
+    return result;
   }
 
   const getEquivalencias = async (isEdit?: boolean, asignaturaToEdit?: any) => {
@@ -233,18 +256,31 @@ function Asignaturas(props: any) {
       }
     }
     setAsignaturaObject({ ...asignaturaToEdit, equivalencia: equivalenciasSelected });
+    const result = {...asignaturaToEdit, equivalencia: equivalenciasSelected} 
     setOpenModalLoading(false);
+    return result;
   }
 
-  const downloadCourseFormat = async() => {
+  const downloadCourseFormat = async(asignaturaToDownload?:any) => {
     setOpenModalLoading(true);
-    let asignaturaToGetFile = {
-      ...asignaturaObject,
-      asignaturaTipo: tipoAsignaturaSelected.id,
-      docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
-      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })),
-      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
-    };
+    let asignaturaToGetFile:any
+    if (asignaturaObject && asignaturaObject._id !== ''){
+      asignaturaToGetFile = {
+        ...asignaturaObject,
+        asignaturaTipo: tipoAsignaturaSelected.id,
+        docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
+        contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })),
+        equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
+      };
+    }else{
+      asignaturaToGetFile = {
+        ...asignaturaToDownload,
+        asignaturaTipo: tipoAsignaturaSelected.id,
+        docente: asignaturaToDownload.docente.map((docente: any) => ({ _id: docente._id })),
+        contenido: asignaturaToDownload.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })),
+        equivalencia: asignaturaToDownload.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
+      };
+    }
     let response: any = await GetFileAsignatura(asignaturaToGetFile)
     if (!response){
       setSeverityAlert('error');
@@ -569,7 +605,8 @@ function Asignaturas(props: any) {
                       'Semestre',
                       'Fecha de creación',
                       'Fecha ultima actualización',
-                      'Acciones'
+                      'Acciones',
+                      'Descargas'
                     ]}
                     tableData={asignaturaList}
                   />

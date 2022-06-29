@@ -89,6 +89,7 @@ const containerFooterModal = {
 const modalForm = {
   overflow:'scroll',
   height:'100%',
+  display:'block'
 }
 
 const defaultFont = {
