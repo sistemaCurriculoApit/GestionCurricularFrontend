@@ -186,10 +186,11 @@ function Asignaturas(props: any) {
 
   const getDataToDownloadFormat = async (asignaturaToDownload?: any) =>{
     try {
+      cleanAsignaturaObjectAndSetOpenModal()
       setOpenModalLoading(true);
       setTipoAsignaturaSelected(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === asignaturaToDownload.asignaturaTipo) || {});
       let asignaturaData = await getDocentes(true, asignaturaToDownload);
-      downloadCourseFormat(asignaturaData)
+      downloadCourseFormat(asignaturaData, false)
     } catch (error) {
       setOpenModalLoading(false);
     }
@@ -261,24 +262,24 @@ function Asignaturas(props: any) {
     return result;
   }
 
-  const downloadCourseFormat = async(asignaturaToDownload?:any) => {
+  const downloadCourseFormat = async(asignaturaToDownload?:any, fromObject?:boolean) => {
     setOpenModalLoading(true);
     let asignaturaToGetFile:any
-    if (asignaturaObject && asignaturaObject._id !== ''){
+    if (fromObject){
       asignaturaToGetFile = {
         ...asignaturaObject,
         asignaturaTipo: tipoAsignaturaSelected.id,
-        docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
-        contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })),
-        equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
+        docente: asignaturaObject.docente ? asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })) : null,
+        contenido: asignaturaObject.contenido ? asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })) : null,
+        equivalencia: asignaturaObject.equivalencia ? asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id})) : null
       };
     }else{
       asignaturaToGetFile = {
         ...asignaturaToDownload,
         asignaturaTipo: tipoAsignaturaSelected.id,
-        docente: asignaturaToDownload.docente.map((docente: any) => ({ _id: docente._id })),
-        contenido: asignaturaToDownload.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })),
-        equivalencia: asignaturaToDownload.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
+        docente: asignaturaToDownload.docente ? asignaturaToDownload.docente.map((docente: any) => ({ _id: docente._id })) : null,
+        contenido:  asignaturaToDownload.contenido ? asignaturaToDownload.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })) : null,
+        equivalencia: asignaturaToDownload.equivalencia ? asignaturaToDownload.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id})) : null
       };
     }
     let response: any = await GetFileAsignatura(asignaturaToGetFile)
@@ -676,7 +677,7 @@ function Asignaturas(props: any) {
                     <Tooltip id='filterTooltip' title="Descargar formato de asignatura" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div>
                       <Button key={'filtersButton'} color={'secondary'} size='md' round variant="outlined" justIcon startIcon={<GetApp />}
-                          onClick={() => { downloadCourseFormat() }} />
+                          onClick={() => { downloadCourseFormat(null, true) }} />
                       </div>
                     </Tooltip>
                   </div>
