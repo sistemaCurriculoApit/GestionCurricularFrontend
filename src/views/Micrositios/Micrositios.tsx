@@ -87,7 +87,7 @@ function Micrositios(props: any) {
   //Al iniciar el modulo se obtienen los programas para el filtro inicial
   useEffect(() => {
     setOpenModalLoading(true);
-    getProgramas();
+    getProgramas(true);
   }, []);
 
   //Al seleccionar un programa se obtienen los planes
@@ -134,45 +134,77 @@ function Micrositios(props: any) {
   }, [areaSelected]);
 
   //Metodo para la obtencion de programas
-  const getProgramas = async () => {
+  const getProgramas = async (setByDefault?:boolean) => {
     let response: any = await getAllProgramasNoToken({
       search: '',
     });
     if (response && response.programas) {
       setProgramasList(response.programas);
+      if (setByDefault){
+        var findIngeniriaProgram = response.programas.find((programa:any) => programa.codigo==="1")
+        if (findIngeniriaProgram){
+          setProgramaSelected(findIngeniriaProgram)
+          getPlanes(setByDefault, findIngeniriaProgram)
+        }
+      }
     }
     setOpenModalLoading(false);
   }
 
   //Metodo para la obtencion de planes
-  const getPlanes = async () => {
-    const planIds = programaSelected.plan.map((option: any) => option._id);
+  const getPlanes = async (setByDefault?:boolean, programa?:any) => {
+    var planIds : any 
+    if (!setByDefault){
+      planIds = programaSelected.plan.map((option: any) => option._id);
+    }else{
+      planIds = programa.plan.map((option: any) => option._id);
+    }
+    
     let response: any = await getPlanesByListIdsNoToken({
       search: '',
       planIds
     });
     if (response && response.planes) {
       setPlanesList(response.planes);
+      if (setByDefault){
+        var find8210Plan = response.planes.find((plan:any)=> plan.codigo === "8210")
+        if (find8210Plan){
+          await setPlanSelected(find8210Plan)
+          getAreas(setByDefault, find8210Plan)
+        }
+      }
     }
     setOpenModalLoading(false);
   }
 
   //Metodo para la obtencion de areas
-  const getAreas = async () => {
-    const areaIds = planSelected.area.map((option: any) => option._id);
+  const getAreas = async (setByDefault?:boolean, plan?:any) => {
+    var areaIds
+    if (!setByDefault){
+      areaIds = planSelected.area.map((option: any) => option._id);
+    }else{
+      areaIds = plan.area.map((option: any) => option._id);
+    }
+    
     let response: any = await getAreasByListIdsNoToken({
       search: '',
       areaIds
     });
     if (response && response.areas) {
       setAreasList(response.areas);
+      if (setByDefault){
+        var findIngArea = response.areas.find((area:any)=> area.codigo === "1")
+        if (findIngArea){
+          setAreaSelected(findIngArea)
+        }
+      }
     }
     setOpenModalLoading(false);
   }
 
   //Metodo para la obtencion de asignaturas
   const getAsignaturas = async (page?: any) => {
-    const asignaturaIds = areaSelected.asignatura.map((option: any) => option._id);
+    var asignaturaIds = areaSelected.asignatura.map((option: any) => option._id);
     let response: any = await getAsignaturaByListIdsPaginatedNoToken({
       page: page ? page : 0,
       asignaturaIds
