@@ -218,8 +218,10 @@ function Micrositios(props: any) {
           data.cantidadCredito,
           data.intensidadHoraria,
           data.semestre,
-          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          data.prerrequisitos,
+          data.correquisitos,
+          // moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+          // moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           <Tooltip id='filterTooltip' title="Ver contenidos" placement='top' classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<VisibilityIcon />}
@@ -410,8 +412,8 @@ function Micrositios(props: any) {
                       'Créditos',
                       'Horas semanales',
                       'Semestre',
-                      'Fecha de creación',
-                      'Fecha ultima actualización',
+                      'Prerrequisitos',
+                      'Correquisitos',
                       'Acciones'
                     ]}
                     tableData={asignaturasList}
