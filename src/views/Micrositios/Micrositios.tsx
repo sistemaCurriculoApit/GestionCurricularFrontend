@@ -42,8 +42,8 @@ import { getAllProgramasNoToken } from "../../services/programasServices"
 import { getPlanesByListIdsNoToken } from "../../services/planesServices"
 import { getAreasByListIdsNoToken } from "../../services/areasServices"
 import { getAllContenidoByAsignaturaNoToken } from "../../services/contenidosServices"
-import { getAsignaturaByListIdsPaginatedNoToken, GetFileAsignatura, getAllAsignaturasWithPlanCode } from "../../services/asignaturasServices" //TODO no token
-import { getAllDocentes } from "../../services/docentesServices"  //TODO no token
+import { getAsignaturaByListIdsPaginatedNoToken, GetFileAsignatura, getAllAsignaturasWithPlanCodeNT } from "../../services/asignaturasServices" 
+import { getAllDocentesNT } from "../../services/docentesServices" 
 
 //Estilos generales usados en el modulo
 const styles = createStyles({
@@ -217,7 +217,7 @@ function Micrositios(props: any) {
   }
 
   const getDocentes = async (asignaturaSelected?: any) => {
-    let response: any = await getAllDocentes({
+    let response: any = await getAllDocentesNT({
       search: '',
     });
     let docentesSelected = [];
@@ -412,7 +412,7 @@ function Micrositios(props: any) {
   }
 
   const getEquivalencias = async (asignaturaSelected?: any) => {
-    let response: any = await getAllAsignaturasWithPlanCode({
+    let response: any = await getAllAsignaturasWithPlanCodeNT({
       search: '',
     });
     let equivalenciasSelected = [];

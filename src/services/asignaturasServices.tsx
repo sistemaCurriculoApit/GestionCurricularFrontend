@@ -55,6 +55,24 @@ export const getAllAsignaturasWithPlanCode = async(data:any)=>{
   });
 }
 
+export const getAllAsignaturasWithPlanCodeNT = async(data:any)=>{
+  return new Promise(resolve=>{
+    let headers:any = getHeaders();
+    let query = `search=${data.search}`;
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCodeNoToken?${query}`,{
+      headers,
+      method: 'GET'
+    })
+    .then(response => response.json())
+    .then(response => {
+      resolve(response)
+    })
+    .catch(error => resolve({ 
+      ...error 
+    }));
+  });
+}
+
 export const getAllAsignaturasByPlan = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();

@@ -36,6 +36,24 @@ export const getAllDocentes = async(data:any)=>{
   });
 }
 
+export const getAllDocentesNT = async(data:any)=>{
+  return new Promise(resolve=>{
+    let headers:any = getHeaders();
+    let query = `search=${data.search}`;
+    fetch(`${backendBaseUrl}api/docente/allNotPaginatedNT?${query}`,{
+      headers,
+      method: 'GET'
+    })
+    .then(response => response.json())
+    .then(response => {
+      resolve(response)
+    })
+    .catch(error => resolve({ 
+      ...error 
+    }));
+  });
+}
+
 export const getDocentesByListIds = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
