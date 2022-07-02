@@ -119,7 +119,7 @@ function Docentes(props: any) {
           data.correo,
           data.documento,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaactualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
