@@ -327,7 +327,7 @@ function Micrositios(props: any) {
     if (response && response.areas) {
       setAreasList(response.areas);
       if (setByDefault){
-        var findIngArea = response.areas.find((area:any)=> area.codigo === "1")
+        var findIngArea = response.areas.find((area:any)=> area.codigo === "3")
         if (findIngArea){
           setAreaSelected(findIngArea)
         }
