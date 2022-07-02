@@ -39,6 +39,7 @@ export const userProfilesArray=[
 
 export const estadosHomologacion= [{ id: 0, title: 'Rechazada' },{ id: 1, title: 'Aceptada' }, { id: 2, title: 'Ingresada' } ]
 export const tiposAsignatura= [{ id: 0, title: 'Teorica' },{ id: 1, title: 'Practica' }, { id: 2, title: 'Teorico-Practica' } ]
+export const emailDomainRegexValidation = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z]{6,6}?.)+[a-z]{3,3}?.(?:[a-z]{2,2})";
 
 export interface AnythingObject {
   [key: string]: any;

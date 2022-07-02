@@ -43,7 +43,7 @@ import { container, containerFormModal, containerFooterModal, modalForm } from '
 import checkboxAdnRadioStyle from '../../assets/jss/material-dashboard-react/checkboxAdnRadioStyle';
 
 
-import { userProfilesArray, AnythingObject, userProfilesObject } from '../../constants/generalConstants'
+import { userProfilesArray, AnythingObject, userProfilesObject, emailDomainRegexValidation } from '../../constants/generalConstants'
 import { getEstudianteByEmail } from '../../services/estudiantesServices'
 import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
 
@@ -80,6 +80,7 @@ function Usuarios(props: any) {
   const [userList, setUserList] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
+  const [errorEmail, setErrorEmail] = useState<any>({error:false, mensaje:""});
   const [userObject, setUserObject] = useState<AnythingObject>({
     _id: '',
     name: '',
@@ -356,7 +357,7 @@ function Usuarios(props: any) {
   //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (userObject._id) {
-      if (userObject.name && userObject.email && userObject.role.id) {
+      if (userObject.name && userObject.email && userObject.role.id && userObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
         return false;
@@ -366,7 +367,8 @@ function Usuarios(props: any) {
         userObject.email &&
         userObject.password &&
         userObject.passwordConfirm &&
-        userObject.role.id) {
+        userObject.role.id &&
+        userObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
         return false;
@@ -604,10 +606,19 @@ function Usuarios(props: any) {
                       margin="dense"
                       inputProps={{ maxLength: 150 }}
                       inputMode='email'
-                      error={!userObject.email ? true : false}
+                      error={errorEmail.error}
+                      helperText={errorEmail.mensaje}
                       className={classes.CustomTextField}
                       value={userObject.email}
-                      onChange={(event) => setUserObject({ ...userObject, email: event.target.value })}
+                      onChange={(event) => {
+                        if (!event.target.value.match(emailDomainRegexValidation)){
+                          setErrorEmail({error:true, mensaje:"Formato de correo invalido"})
+                        }
+                        else{
+                          setErrorEmail({error:false, mensaje:""})
+                        }
+                        setUserObject({ ...userObject, email: event.target.value })
+                      }}
                     />
                   </GridItem>
 

@@ -38,7 +38,7 @@ import { containerFloatButton } from '../../assets/jss/material-dashboard-react/
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
 import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
 
-import { AnythingObject, tiposAsignatura } from '../../constants/generalConstants'
+import { AnythingObject, tiposAsignatura, emailDomainRegexValidation } from '../../constants/generalConstants'
 
 import { getDocentePaginated, createDocente, updateDocente } from "../../services/docentesServices"
 import { getAsignaturasByDocente } from "../../services/asignaturasServices"
@@ -77,6 +77,7 @@ function Docentes(props: any) {
   const [totalDocentes, setTotalDocentes] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
   const [asignaturasList, setAsignaturasList] = useState([]);
+  const [errorEmail, setErrorEmail] = useState<any>({error:false, mensaje:""});
 
   const [docenteObject, setDocenteObject] = useState<AnythingObject>({
     _id: '',
@@ -265,14 +266,14 @@ function Docentes(props: any) {
   //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (docenteObject._id) {
-      if (docenteObject.name && docenteObject.email) {
+      if (docenteObject.name && docenteObject.email && docenteObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
         return false;
       }
     } else {
       if (docenteObject.name &&
-        docenteObject.email) {
+        docenteObject.email && docenteObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
         return false;
@@ -501,10 +502,18 @@ function Docentes(props: any) {
                     variant="outlined"
                     margin="dense"
                     className={classes.CustomTextField}
-                    error={!docenteObject.email ? true : false}
+                    error={errorEmail.error}
+                    helperText={errorEmail.mensaje}
                     value={docenteObject.email}
                     onChange={(event) => {
+                    if (!event.target.value.match(emailDomainRegexValidation)){
+                        setErrorEmail({error:true, mensaje:"Formato de correo invalido"})
+                      }
+                      else{
+                        setErrorEmail({error:false, mensaje:""})
+                      }
                       setDocenteObject({ ...docenteObject, email: event.target.value })
+                      
                     }}
                   />
                   <TextField
