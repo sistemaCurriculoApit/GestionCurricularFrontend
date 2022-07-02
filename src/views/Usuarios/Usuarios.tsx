@@ -88,7 +88,7 @@ function Usuarios(props: any) {
     role: { id: 0, title: '' },
     password: '',
     passwordConfirm: '',
-    identificacionEstudiante: '',
+    identificacion: '',
     universidadEstudiante: '',
     programaEstudiante: '',
     planEstudiante:'',
@@ -131,6 +131,7 @@ function Usuarios(props: any) {
         let arrayData = [
           data.correo,
           data.nombreUsuario,
+          data.identificacion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
@@ -163,7 +164,7 @@ function Usuarios(props: any) {
       if (estudiante){
         setUserObject({...userObject, 
           role: roleSelected,
-          identificacionEstudiante: estudiante.identificacion,
+          identificacion: estudiante.identificacion,
           universidadEstudiante: estudiante.universidad,
           programaEstudiante: estudiante.programa,
           planEstudiante: estudiante.plan,
@@ -192,39 +193,39 @@ function Usuarios(props: any) {
       let estudiante:any = await getEstudianteByEmail({
         correo: data.correo
       });
-      if (estudiante){
-        setUserObject({
-          _id: data._id,
-          name: data.nombreUsuario,
-          email: data.correo,
-          role: roleItem ? roleItem : { id: 0, title: '' },
-          password: '',
-          passwordConfirm: '',
-          identificacionEstudiante: estudiante.identificacion ? estudiante.identificacion : '',
-          universidadEstudiante: estudiante.universidad ? estudiante.universidad : '',
-          programaEstudiante: estudiante.programa ? estudiante.programa : '',
-          planEstudiante: estudiante.plan ? estudiante.plan : '',
-          universidadEstudianteOrigen: estudiante.universidadOrigen ? estudiante.universidadOrigen : '',
-          programaEstudianteOrigen: estudiante.programaOrigen ? estudiante.programaOrigen : '',
-          planEstudianteOrigen: estudiante.planOrigen ? estudiante.planOrigen : '',
-        });
-      }else{
-        setUserObject({
-          _id: data._id,
-          name: data.nombreUsuario,
-          email: data.correo,
-          role: roleItem ? roleItem : { id: 0, title: '' },
-          password: '',
-          passwordConfirm: '',
-          identificacionEstudiante: '',
-          universidadEstudiante: '',
-          programaEstudiante: '',
-          planEstudiante: '',
-          universidadEstudianteOrigen: '',
-          programaEstudianteOrigen: '',
-          planEstudianteOrigen: '',
-        });
-      }
+        if (estudiante){
+          setUserObject({
+            _id: data._id,
+            name: data.nombreUsuario,
+            email: data.correo,
+            role: roleItem ? roleItem : { id: 0, title: '' },
+            password: '',
+            passwordConfirm: '',
+            universidadEstudiante: estudiante.universidad ? estudiante.universidad : '',
+            programaEstudiante: estudiante.programa ? estudiante.programa : '',
+            identificacion: data.identificacion ? data.identificacion : '',
+            planEstudiante: estudiante.plan ? estudiante.plan : '',
+            universidadEstudianteOrigen: estudiante.universidadOrigen ? estudiante.universidadOrigen : '',
+            programaEstudianteOrigen: estudiante.programaOrigen ? estudiante.programaOrigen : '',
+            planEstudianteOrigen: estudiante.planOrigen ? estudiante.planOrigen : '',
+          });
+        }else{
+          setUserObject({
+            _id: data._id,
+            name: data.nombreUsuario,
+            email: data.correo,
+            role: roleItem ? roleItem : { id: 0, title: '' },
+            password: '',
+            passwordConfirm: '',
+            identificacion: data.identificacion ? data.identificacion : '',
+            universidadEstudiante: '',
+            programaEstudiante: '',
+            planEstudiante: '',
+            universidadEstudianteOrigen: '',
+            programaEstudianteOrigen: '',
+            planEstudianteOrigen: '',
+          });
+        }
     }else{
       setUserObject({
         _id: data._id,
@@ -233,7 +234,7 @@ function Usuarios(props: any) {
         role: roleItem ? roleItem : { id: 0, title: '' },
         password: '',
         passwordConfirm: '',
-        identificacionEstudiante: '',
+        identificacion: '',
         universidadEstudiante: '',
         programaEstudiante: '',
         planEstudiante: '',
@@ -289,7 +290,7 @@ function Usuarios(props: any) {
       correo: userObject.email,
       contrasena: userObject.password,
       rolId: userObject.role.id,
-      identificacionEstudiante: userObject.identificacionEstudiante,
+      identificacion: userObject.identificacion,
       universidadEstudiante: userObject.universidadEstudiante,
       programa: userObject.programaEstudiante,
       plan: userObject.planEstudiante,
@@ -325,7 +326,7 @@ function Usuarios(props: any) {
       correo: userObject.email,
       contrasena: userObject.password,
       rolId: userObject.role.id,
-      identificacionEstudiante: userObject.identificacionEstudiante,
+      identificacion: userObject.identificacion,
       universidadEstudiante: userObject.universidadEstudiante,
       programa: userObject.programaEstudiante,
       plan: userObject.planEstudiante,
@@ -519,6 +520,7 @@ function Usuarios(props: any) {
                     tableHead={[
                       'Correo',
                       'Nombre',
+                      'Identificaion',
                       'Fecha de creación',
                       'Fecha ultima actualización',
                       'Acciones'
@@ -596,6 +598,19 @@ function Usuarios(props: any) {
                         setUserObject({ ...userObject, name: event.target.value })
                       }}
                     />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                      <TextField
+                        id="outlined-name"
+                        label="Identificacion"
+                        variant="outlined"
+                        margin="dense"
+                        inputProps={{ maxLength: 150 }}
+                        className={classes.CustomTextField}
+                        error={!userObject.identificacion ? true : false}
+                        value={userObject.identificacion}
+                        onChange={(event) => setUserObject({ ...userObject, identificacion: event.target.value })}
+                      />
                   </GridItem>
 
                   <GridItem xs={12} sm={12} md={6} >
@@ -698,19 +713,6 @@ function Usuarios(props: any) {
                   {
                     userObject.role.id === userProfilesObject.est.id ?
                     <>
-                        <GridItem xs={12} sm={12} md={6} >
-                          <TextField
-                            id="outlined-name"
-                            label="Identificacion del estudiante"
-                            variant="outlined"
-                            margin="dense"
-                            inputProps={{ maxLength: 150 }}
-                            className={classes.CustomTextField}
-                            error={!userObject.identificacionEstudiante ? true : false}
-                            value={userObject.identificacionEstudiante}
-                            onChange={(event) => setUserObject({ ...userObject, identificacionEstudiante: event.target.value })}
-                          />
-                        </GridItem>
                         <GridItem xs={12} sm={12} md={6} >
                           <TextField
                             id="outlined-name"
