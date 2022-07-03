@@ -234,7 +234,7 @@ function Usuarios(props: any) {
         role: roleItem ? roleItem : { id: 0, title: '' },
         password: '',
         passwordConfirm: '',
-        identificacion: '',
+        identificacion: data.identificacion,
         universidadEstudiante: '',
         programaEstudiante: '',
         planEstudiante: '',
