@@ -95,7 +95,7 @@ function AvancesAsignaturas(props: any) {
   const [docenteSelected, setDocenteSelected] = useState<AnythingObject>({});
   const [contenidosList, setContenidosList] = useState([]);
   const [contenidoChecked, setContenidoChecked] = useState<any[]>([]);
-
+  const [blockByEditAvance, setBlockByEditAvance] = useState<boolean>(false);
 
   const [avancesList, setAvancesList] = useState([]);
   const [totalAvances, setTotalAvances] = useState(0);
@@ -118,10 +118,8 @@ function AvancesAsignaturas(props: any) {
     var emailDocente = localStorage.getItem('userEmail')
     setOpenModalLoading(true);
     if (!idProfile || idProfile === userProfilesObject.doc.id.toString()){
-      console.log(true, emailDocente)
       getAvances(0, true, emailDocente);
     }else{
-      console.log(false, emailDocente)
       getAvances(0, false, null);
     }
     if (openModalCreate) {
@@ -320,6 +318,7 @@ function AvancesAsignaturas(props: any) {
     }
     if (!isEdit) {
       setOpenModalLoading(false);
+      setBlockByEditAvance(false);
     }
   }
 
@@ -341,6 +340,7 @@ function AvancesAsignaturas(props: any) {
     }
     if (!isEdit) {
       setOpenModalLoading(false);
+      setBlockByEditAvance(false);
     }
   }
 
@@ -360,8 +360,12 @@ function AvancesAsignaturas(props: any) {
         }
       }
     }
-    if (!isEdit) {
+    if (isEdit) {
+      setBlockByEditAvance(true);
       setOpenModalLoading(false);
+    }
+    else if (!isEdit){
+      setBlockByEditAvance(false);
     }
   }
 
@@ -382,7 +386,11 @@ function AvancesAsignaturas(props: any) {
       }
     }
     if (isEdit) {
+      setBlockByEditAvance(true);
       setOpenModalLoading(false);
+    }
+    else if (!isEdit){
+      setBlockByEditAvance(false);
     }
   }
 
@@ -403,7 +411,11 @@ function AvancesAsignaturas(props: any) {
       }
     }
     if (isEdit) {
+      setBlockByEditAvance(true);
       setOpenModalLoading(false);
+    }
+    else if (!isEdit){
+      setBlockByEditAvance(false);
     }
   }
 
@@ -809,6 +821,7 @@ function AvancesAsignaturas(props: any) {
                       options={programasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={blockByEditAvance && programaSelected._id}
                       onChange={(e, option) => {
                         setProgramaSelected(option || {})
                         //Inicializacion de objetos
@@ -846,6 +859,7 @@ function AvancesAsignaturas(props: any) {
                       options={planesList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={blockByEditAvance && planSelected._id}
                       onChange={(e, option) => {
                         setPlanSelected(option || {})
                         //Inicializacion de objetos
@@ -883,6 +897,7 @@ function AvancesAsignaturas(props: any) {
                       options={areasList}
                       getOptionLabel={(option) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={blockByEditAvance && areaSelected._id}
                       onChange={(e, option) => {
                         setAreaSelected(option || {});
                         //Inicializacion de objetos
@@ -918,6 +933,7 @@ function AvancesAsignaturas(props: any) {
                       options={asignaturasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={blockByEditAvance && asignaturaSelected._id}
                       onChange={(e, option) => {
                         setAsignaturaSelected(option || {});
                         //Inicializacion de objetos
@@ -950,6 +966,7 @@ function AvancesAsignaturas(props: any) {
                       options={docentesList}
                       getOptionLabel={(option) => option._id ? `${option.nombre} - ${option.documento}` : ''}
                       filterSelectedOptions
+                      disabled={blockByEditAvance && docenteSelected._id}
                       onChange={(e, option) => setDocenteSelected(option || {})}
                       value={docenteSelected}
                       renderInput={(params) => (
