@@ -43,14 +43,14 @@ import { containerFloatButton } from '../../assets/jss/material-dashboard-react/
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
 import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
 
-import { AnythingObject } from '../../constants/generalConstants'
+import { AnythingObject, userProfilesObject } from '../../constants/generalConstants'
 import { getAllProgramas } from "../../services/programasServices"
 import { getPlanesByListIds } from "../../services/planesServices"
 import { getAreasByListIds } from "../../services/areasServices"
 import { getAsignaturaByListIds } from "../../services/asignaturasServices"
 import { getDocentesByListIds } from "../../services/docentesServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
-import { getAvancesPaginated, createAvance, updateAvance } from "../../services/avancesServices"
+import { getAvancesPaginated, createAvance, updateAvance, getAllAvancesByDocenteEmail } from "../../services/avancesServices"
 
 //Estilos generales usados en el modulo
 const styles = createStyles({
@@ -114,8 +114,16 @@ function AvancesAsignaturas(props: any) {
 
   //Al iniciar el componente se obtienen los avances y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
+    var idProfile = localStorage.getItem('idProfileLoggedUser');
+    var emailDocente = localStorage.getItem('userEmail')
     setOpenModalLoading(true);
-    getAvances();
+    if (!idProfile || idProfile === userProfilesObject.doc.id.toString()){
+      console.log(true, emailDocente)
+      getAvances(0, true, emailDocente);
+    }else{
+      console.log(false, emailDocente)
+      getAvances(0, false, null);
+    }
     if (openModalCreate) {
       handleOpenModal(
         false,
@@ -245,14 +253,25 @@ function AvancesAsignaturas(props: any) {
   }, [avanceObject]);
 
   //Metodo de obtencion de homologaciones
-  const getAvances = async (page?: any) => {
+  const getAvances = async (page?: any, byEmailDocente?: boolean, emailDocente?: any) => {
     //Llamado al backend y construcción de los parametros de consulta
-    let response: any = await getAvancesPaginated({
-      page: page ? page : 0,
-      search: searchField,
-      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
-      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
-    });
+    let response : any
+    if (byEmailDocente){
+      response = await getAllAvancesByDocenteEmail({
+        page: page ? page : 0,
+        search: searchField,
+        emailDocente: emailDocente,
+        dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+        dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+      })
+    }else {
+      response = await getAvancesPaginated({
+        page: page ? page : 0,
+        search: searchField,
+        dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+        dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+      });
+    }
     setPagePagination(page ? page + 1 : 1);
     if (response.avances && response.avances.length) {
       //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla

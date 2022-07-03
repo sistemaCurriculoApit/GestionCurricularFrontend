@@ -436,6 +436,7 @@ function Docentes(props: any) {
             <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
               onClick={() => {
                 setOpenModal(!openModal)
+                setAsignaturasList([])
                 setDocenteObject({
                   _id: '',
                   name: '',

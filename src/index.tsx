@@ -56,7 +56,7 @@ function IndexApp(props: any) {
 
           <Switch>
             <Route path="/docente" component={Docente} />
-            <Redirect to={'/docente/actas'} from={'/'} />
+            <Redirect to={'/docente/avancesAsignatura'} from={'/'} />
           </Switch>
 
         );

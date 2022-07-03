@@ -36,6 +36,7 @@ export const getAllAvances = async(data:any)=>{
   });
 }
 
+
 export const getAllAvancesByAsignatura = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
@@ -43,6 +44,26 @@ export const getAllAvancesByAsignatura = async(data:any)=>{
       headers,
       method: 'POST',
       body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(response => {
+      resolve(response)
+    })
+    .catch(error => resolve({ 
+      ...error 
+    }));
+  });
+}
+
+
+export const getAllAvancesByDocenteEmail = async(data:any)=>{
+  return new Promise(resolve=>{
+    let headers:any = getHeaders();
+    let query = `search=${data.search}`;
+    let emailDocente = `emailDocente=${data.emailDocente}`
+    fetch(`${backendBaseUrl}api/avance/allByDocenteEmail?${emailDocente}&${query}`,{
+      headers,
+      method: 'GET',
     })
     .then(response => response.json())
     .then(response => {
@@ -71,6 +92,8 @@ export const getAllAvancesByDocente = async(data:any)=>{
     }));
   });
 }
+
+
 
 export const getAllAvancesByPerido = async(data:any)=>{
   return new Promise(resolve=>{

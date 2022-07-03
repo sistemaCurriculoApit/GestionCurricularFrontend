@@ -263,6 +263,13 @@ const dashboardRoutes = [
 
   //ACCESOS DE  DOCENTE
   {
+    path: '/avancesAsignatura',
+    name: 'Avances de asignaturas',
+    icon: HourglassEmpty,
+    component: AvancesAsignaturas,
+    layout: '/docente'
+  },
+  {
     path: '/actas',
     name: 'Actas',
     icon: Description,
