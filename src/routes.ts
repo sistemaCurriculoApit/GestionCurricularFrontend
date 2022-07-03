@@ -176,49 +176,6 @@ const dashboardRoutes = [
 
   //ACCESOS DE  COORDINADOR
   {
-    path: '/curriculo',
-    name: 'Currículo',
-    icon: Assignment,
-    layout: '/coordinador',
-    subItems:[
-      {
-        path: '/curriculo/programas',
-        name: 'Programas',
-        icon: School,
-        component: ProgramasPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/planes',
-        name: 'Planes',
-        icon: School,
-        component: PlanesPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/areas',
-        name: 'Áreas',
-        icon: School,
-        component: AreasPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/asignaturas',
-        name: 'Asignaturas',
-        icon: School,
-        component: AsignaturasPage,
-        layout: '/admin'
-      },
-      {
-        path: '/curriculo/contenidos',
-        name: 'Contenidos',
-        icon: School,
-        component: ContenidosPage,
-        layout: '/admin'
-      },
-    ]
-  },
-  {
     path: '/homologacion',
     name: 'Homologación de asignaturas',
     icon: LibraryBooks,

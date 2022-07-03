@@ -20,6 +20,7 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility'
 import moment from "moment";
 import "moment/locale/es";
 
@@ -96,6 +97,7 @@ function AvancesAsignaturas(props: any) {
   const [contenidosList, setContenidosList] = useState([]);
   const [contenidoChecked, setContenidoChecked] = useState<any[]>([]);
   const [blockByEditAvance, setBlockByEditAvance] = useState<boolean>(false);
+  const [blockCoordinatorPermissions, setBlockCoordinatorPermissions] = useState<boolean>()
 
   const [avancesList, setAvancesList] = useState([]);
   const [totalAvances, setTotalAvances] = useState(0);
@@ -112,12 +114,38 @@ function AvancesAsignaturas(props: any) {
     descripcion: '',
   });
 
+
+  const blockCoordinatorPermission = (idProfile?:any) => {
+    if (!idProfile) idProfile = localStorage.getItem('idProfileLoggedUser');
+
+    if (blockCoordinatorPermissions !== false && blockCoordinatorPermissions !== true){
+      if (!idProfile || idProfile === userProfilesObject.coor.id.toString()){
+        setBlockCoordinatorPermissions(true)
+        return true
+      }else{
+        setBlockCoordinatorPermissions(false)
+        return false
+      }
+    }else{
+      return blockCoordinatorPermissions
+    }
+
+  }
+
   //Al iniciar el componente se obtienen los avances y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
     var idProfile = localStorage.getItem('idProfileLoggedUser');
     var emailDocente = localStorage.getItem('userEmail')
     setOpenModalLoading(true);
-    if (!idProfile || idProfile === userProfilesObject.doc.id.toString()){
+
+    //Bloquear permisos de coordinador
+    if (idProfile === userProfilesObject.coor.id.toString()){
+      setBlockCoordinatorPermissions(true)
+    }else{
+      setBlockCoordinatorPermissions(false)
+    }
+
+    if (idProfile === userProfilesObject.doc.id.toString()){
       getAvances(0, true, emailDocente);
     }else{
       getAvances(0, false, null);
@@ -283,7 +311,8 @@ function AvancesAsignaturas(props: any) {
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
+              {/* <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />} */}
+            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={!blockCoordinatorPermission() ? <EditIcon /> : <VisibilityIcon />}
                 onClick={() => {
                   setDataEditAvance(data);
                 }} />
@@ -821,7 +850,7 @@ function AvancesAsignaturas(props: any) {
                       options={programasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
-                      disabled={blockByEditAvance && programaSelected._id}
+                      disabled={(blockByEditAvance && programaSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setProgramaSelected(option || {})
                         //Inicializacion de objetos
@@ -859,7 +888,7 @@ function AvancesAsignaturas(props: any) {
                       options={planesList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
-                      disabled={blockByEditAvance && planSelected._id}
+                      disabled={(blockByEditAvance && planSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setPlanSelected(option || {})
                         //Inicializacion de objetos
@@ -897,7 +926,7 @@ function AvancesAsignaturas(props: any) {
                       options={areasList}
                       getOptionLabel={(option) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
-                      disabled={blockByEditAvance && areaSelected._id}
+                      disabled={(blockByEditAvance && areaSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setAreaSelected(option || {});
                         //Inicializacion de objetos
@@ -933,7 +962,7 @@ function AvancesAsignaturas(props: any) {
                       options={asignaturasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
-                      disabled={blockByEditAvance && asignaturaSelected._id}
+                      disabled={(blockByEditAvance && asignaturaSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setAsignaturaSelected(option || {});
                         //Inicializacion de objetos
@@ -966,7 +995,7 @@ function AvancesAsignaturas(props: any) {
                       options={docentesList}
                       getOptionLabel={(option) => option._id ? `${option.nombre} - ${option.documento}` : ''}
                       filterSelectedOptions
-                      disabled={blockByEditAvance && docenteSelected._id}
+                      disabled={(blockByEditAvance && docenteSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => setDocenteSelected(option || {})}
                       value={docenteSelected}
                       renderInput={(params) => (
@@ -1006,6 +1035,7 @@ function AvancesAsignaturas(props: any) {
                                   <ListItemSecondaryAction>
                                     <Checkbox
                                       edge="end"
+                                      disabled={blockCoordinatorPermissions}
                                       onChange={handleToggleCheck(contenido)}
                                       checked={contenidoChecked.findIndex((check: any) => (check._id === contenido._id)) !== -1}
                                       inputProps={{ 'aria-labelledby': labelId }}
@@ -1037,6 +1067,7 @@ function AvancesAsignaturas(props: any) {
                                 label="Año del avance"
                                 inputVariant='outlined'
                                 margin='dense'
+                                disabled={blockCoordinatorPermissions}
                                 className={classes.CustomTextField}
                                 format="YYYY"
                                 value={avanceObject.añoAvance}
@@ -1047,7 +1078,7 @@ function AvancesAsignaturas(props: any) {
                                 clearLabel='Limpiar'
                               />
                               {
-                                avanceObject.añoAvance ? (
+                                avanceObject.añoAvance && !blockCoordinatorPermissions ? (
                                   <CloseIcon onClick={(e) => setAvanceObject({ ...avanceObject, añoAvance: null })} />
                                 ) : null
                               }
@@ -1061,6 +1092,7 @@ function AvancesAsignaturas(props: any) {
                             id="tags-outlined"
                             options={["1", "2"]}
                             getOptionLabel={(option) => option}
+                            disabled={blockCoordinatorPermissions}
                             filterSelectedOptions
                             onChange={(e, option) => setAvanceObject({ ...avanceObject, periodo: option })}
                             value={avanceObject.periodo}
@@ -1084,6 +1116,7 @@ function AvancesAsignaturas(props: any) {
                             label="Porcentaje aproximado"
                             variant="outlined"
                             margin="dense"
+                            disabled={blockCoordinatorPermissions}
                             type={'number'}
                             className={classes.CustomTextField}
                             error={!avanceObject.porcentajeAvance || avanceObject.porcentajeAvance < 0 || avanceObject.porcentajeAvance > 100 ? true : false}
@@ -1099,6 +1132,7 @@ function AvancesAsignaturas(props: any) {
                           <TextField
                             id="outlined-email"
                             label="Descripción"
+                            disabled={blockCoordinatorPermissions}
                             variant="outlined"
                             margin="dense"
                             className={classes.CustomTextField}
@@ -1118,14 +1152,16 @@ function AvancesAsignaturas(props: any) {
                 </GridContainer>
 
               </div>
+              { blockCoordinatorPermissions? 
+               null : 
               <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                <Button key={'filtersButton'} color={'primary'} round variant="outlined" disabled={blockCoordinatorPermissions} endIcon={<SendIcon />}
                   onClick={() => { handleSaveAvance() }} >
                   {'Guardar'}
                 </Button>
 
               </div>
-
+            }
             </Card>
           </GridItem>
         </div>
