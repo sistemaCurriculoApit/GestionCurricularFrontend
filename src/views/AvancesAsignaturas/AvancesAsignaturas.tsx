@@ -134,6 +134,8 @@ function AvancesAsignaturas(props: any) {
 
   //Al iniciar el componente se obtienen los avances y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
+    setTotalAvances(0);
+    setAvancesList([]);
     var idProfile = localStorage.getItem('idProfileLoggedUser');
     var emailDocente = localStorage.getItem('userEmail')
     setOpenModalLoading(true);
@@ -309,7 +311,7 @@ function AvancesAsignaturas(props: any) {
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
+          <Tooltip id='filterTooltip' title={!blockCoordinatorPermission() ? "Editar" : "Ver detalles"} placement='top' classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               {/* <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />} */}
             <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={!blockCoordinatorPermission() ? <EditIcon /> : <VisibilityIcon />}
@@ -791,30 +793,34 @@ function AvancesAsignaturas(props: any) {
 
         </GridItem>
       </GridContainer>
-      <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nuevo avance" placement='left' classes={{ tooltip: classes.tooltip }}>
-          <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
-              onClick={() => {
-                handleOpenModal(
-                  false,
-                  {
-                    programaId: '',
-                    planId: '',
-                    asignaturaId: '',
-                    docenteId: '',
-                    contenido: [],
-                    añoAvance: moment(new Date(new Date().getFullYear(), 0, 1)),
-                    periodo: '1',
-                    porcentajeAvance: null,
-                    descripcion: '',
-                  }
-                )
-              }}
-            />
-          </div>
-        </Tooltip>
-      </div>
+      {
+        blockCoordinatorPermissions ? null :
+          <div className={classes.containerFloatButton}>
+          <Tooltip id='addTooltip' title="Crear nuevo avance" placement='left' classes={{ tooltip: classes.tooltip }}>
+            <div>
+              <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+                onClick={() => {
+                  handleOpenModal(
+                    false,
+                    {
+                      programaId: '',
+                      planId: '',
+                      asignaturaId: '',
+                      docenteId: '',
+                      contenido: [],
+                      añoAvance: moment(new Date(new Date().getFullYear(), 0, 1)),
+                      periodo: '1',
+                      porcentajeAvance: null,
+                      descripcion: '',
+                    }
+                  )
+                }}
+              />
+            </div>
+          </Tooltip>
+        </div>
+      }
+
       
       {/* Modal de creación y edicion de contenidos */}
       
@@ -830,7 +836,13 @@ function AvancesAsignaturas(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{avanceObject._id ? 'Editar': 'Crear'} avance</h4>
+                  { 
+                    blockCoordinatorPermissions ?
+                    <h4 className={classes.cardTitleWhite}>Detalles de avance</h4>
+                    :
+                    <h4 className={classes.cardTitleWhite}>{avanceObject._id ? 'Editar': 'Crear'} avance</h4>
+                  }
+                  
                   <div className={classes.headerActions}>
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
