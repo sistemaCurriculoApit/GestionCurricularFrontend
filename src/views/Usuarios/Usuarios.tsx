@@ -626,7 +626,7 @@ function Usuarios(props: any) {
                       className={classes.CustomTextField}
                       value={userObject.email}
                       onChange={(event) => {
-                        if (!event.target.value.match(emailDomainRegexValidation)){
+                        if (!event.target.value.match(emailDomainRegexValidation))  {
                           setErrorEmail({error:true, mensaje:"Formato de correo invalido"})
                         }
                         else{
