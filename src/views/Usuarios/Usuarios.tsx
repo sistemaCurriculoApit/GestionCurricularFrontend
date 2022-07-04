@@ -520,7 +520,7 @@ function Usuarios(props: any) {
                     tableHead={[
                       'Correo',
                       'Nombre',
-                      'Identificaion',
+                      'Identificación',
                       'Fecha de creación',
                       'Fecha ultima actualización',
                       'Acciones'
@@ -602,7 +602,7 @@ function Usuarios(props: any) {
                   <GridItem xs={12} sm={12} md={6} >
                       <TextField
                         id="outlined-name"
-                        label="Identificacion"
+                        label="Identificación"
                         variant="outlined"
                         margin="dense"
                         inputProps={{ maxLength: 150 }}
