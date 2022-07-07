@@ -565,7 +565,7 @@ function Homologaciones(props: any) {
     } else {
       setSeverityAlert('success');
       setShowAlert(true);
-      setMessagesAlert('Homologación editado satisfactoriamente');
+      setMessagesAlert('Homologación editada satisfactoriamente');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
