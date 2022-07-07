@@ -256,6 +256,10 @@ function Asignaturas(props: any) {
         }
       }
     }
+    if (!asignaturaToEdit.intensidadHorariaPractica) asignaturaToEdit.intensidadHorariaPractica = 0;
+    if (!asignaturaToEdit.intensidadHorariaTeorica) asignaturaToEdit.intensidadHorariaTeorica = 0;
+    if (!asignaturaToEdit.intensidadHorariaIndependiente) asignaturaToEdit.intensidadHorariaIndependiente = 0;
+    if (!asignaturaToEdit.intensidadHoraria) asignaturaToEdit.intensidadHoraria = 0;
     setAsignaturaObject({ ...asignaturaToEdit, equivalencia: equivalenciasSelected });
     const result = {...asignaturaToEdit, equivalencia: equivalenciasSelected} 
     setOpenModalLoading(false);
@@ -797,10 +801,10 @@ function Asignaturas(props: any) {
                       label="Horas Trabajo Presencial Teorico"
                       variant="outlined"
                       margin="dense"
-                      disabled={(tipoAsignaturaSelected.id !== 0 && tipoAsignaturaSelected.id !== 2)}
+                      disabled={(!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 0 && tipoAsignaturaSelected.id !== 2)}
                       className={classes.CustomTextField}
                       type={'number'}
-                      value={asignaturaObject.intensidadHorariaTeorica || 0}
+                      value={asignaturaObject.intensidadHorariaTeorica}
                       error={(tipoAsignaturaSelected.id === 0 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaTeorica) ? true : false)}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -823,10 +827,10 @@ function Asignaturas(props: any) {
                       label="Horas Trabajo Presencial Practico"
                       variant="outlined"
                       margin="dense"
-                      disabled={tipoAsignaturaSelected.id !== 1 && tipoAsignaturaSelected.id !== 2}
+                      disabled={!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 1 && tipoAsignaturaSelected.id !== 2}
                       className={classes.CustomTextField}
                       type={'number'}
-                      value={asignaturaObject.intensidadHorariaPractica || 0}
+                      value={asignaturaObject.intensidadHorariaPractica}
                       error={(tipoAsignaturaSelected.id === 1 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaPractica) ? true : false)}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -851,7 +855,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       type={'number'}
-                      value={asignaturaObject.intensidadHorariaIndependiente || 0}
+                      value={asignaturaObject.intensidadHorariaIndependiente}
                       error={isNaN(asignaturaObject.intensidadHorariaIndependiente) ? true : false}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -878,7 +882,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       type={'number'}
                       error={!asignaturaObject.intensidadHoraria ? true : false}
-                      value={asignaturaObject.intensidadHoraria || 0}
+                      value={asignaturaObject.intensidadHoraria}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
