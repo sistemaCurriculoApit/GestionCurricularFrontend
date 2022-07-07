@@ -785,7 +785,13 @@ function Homologaciones(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{homologacionObject._id ? 'Editar': 'Crear'} homologación</h4>
+                  {
+                    isBlockEditByPermissions? 
+                    <h4 className={classes.cardTitleWhite}>Ver detalles de homologación</h4>
+                    :
+                    <h4 className={classes.cardTitleWhite}>{homologacionObject._id ? 'Editar': 'Crear'} homologación</h4>
+                  }
+                  
                   <div className={classes.headerActions}>
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
