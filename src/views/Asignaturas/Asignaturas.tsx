@@ -906,6 +906,11 @@ function Asignaturas(props: any) {
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, semestre: event.target.value })
                       }}
+                      onKeyPress={(event) => {
+                        if (!/[0-9]/.test(event.key)) {
+                          event.preventDefault();
+                        }
+                      }}
                     />
                    </GridItem>
                    <GridItem xs={12} sm={12} md={6} >
