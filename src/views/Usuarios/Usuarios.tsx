@@ -627,7 +627,7 @@ function Usuarios(props: any) {
                       value={userObject.email}
                       onChange={(event) => {
                         if (!event.target.value.match(emailDomainRegexValidation))  {
-                          setErrorEmail({error:true, mensaje:"Formato de correo invalido"})
+                          setErrorEmail({error:true, mensaje:"El formato del correo no es válido"})
                         }
                         else{
                           setErrorEmail({error:false, mensaje:""})
