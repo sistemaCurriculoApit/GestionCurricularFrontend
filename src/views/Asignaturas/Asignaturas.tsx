@@ -98,7 +98,7 @@ function Asignaturas(props: any) {
     semestre: '',
     cantidadCredito: 1,
     asignaturaTipo: {},
-    intensidadHorariaPractica: 0,
+    intensidadHorariaPractica: 1,
     intensidadHorariaTeorica: 0,
     intensidadHorariaIndependiente: 0,
     intensidadHoraria: 0,
@@ -797,7 +797,7 @@ function Asignaturas(props: any) {
                       disabled={(tipoAsignaturaSelected.id !== 0 && tipoAsignaturaSelected.id !== 2)}
                       className={classes.CustomTextField}
                       type={'number'}
-                      value={asignaturaObject.intensidadHorariaTeorica}
+                      value={asignaturaObject.intensidadHorariaTeorica || 0}
                       error={(tipoAsignaturaSelected.id === 0 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaTeorica) ? true : false)}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -810,7 +810,7 @@ function Asignaturas(props: any) {
                         }
                       }}
                       InputProps={{
-                        inputProps: { min: 0, pattern: "[0-9]*", }
+                        inputProps: { min: 1, pattern: "[0-9]*", }
                       }}
                     />
                   </GridItem>
@@ -823,7 +823,7 @@ function Asignaturas(props: any) {
                       disabled={tipoAsignaturaSelected.id !== 1 && tipoAsignaturaSelected.id !== 2}
                       className={classes.CustomTextField}
                       type={'number'}
-                      value={asignaturaObject.intensidadHorariaPractica}
+                      value={asignaturaObject.intensidadHorariaPractica || 0}
                       error={(tipoAsignaturaSelected.id === 1 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaPractica) ? true : false)}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -848,7 +848,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       type={'number'}
-                      value={asignaturaObject.intensidadHorariaIndependiente}
+                      value={asignaturaObject.intensidadHorariaIndependiente || 0}
                       error={isNaN(asignaturaObject.intensidadHorariaIndependiente) ? true : false}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -875,7 +875,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       type={'number'}
                       error={!asignaturaObject.intensidadHoraria ? true : false}
-                      value={asignaturaObject.intensidadHoraria}
+                      value={asignaturaObject.intensidadHoraria || 0}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
