@@ -452,8 +452,7 @@ function Asignaturas(props: any) {
       asignaturaObject.semestre &&
       asignaturaObject.cantidadCredito &&
       asignaturaObject.intensidadHorariaIndependiente &&
-      asignaturaObject.prerrequisitos &&
-      asignaturaObject.correquisitos &&
+      asignaturaObject.cantidadCredito &&
       asignaturaObject.presentacionAsignatura &&
       asignaturaObject.justificacionAsignatura &&
       asignaturaObject.objetivoGeneral &&
@@ -674,12 +673,16 @@ function Asignaturas(props: any) {
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
                 <div className={classes.headerActions} style={{alignItems:'left'}}>
-                    <Tooltip id='filterTooltip' title="Descargar formato de asignatura" placement='top' classes={{ tooltip: classes.tooltip }}>
-                      <div>
-                      <Button key={'filtersButton'} color={'secondary'} size='md' round variant="outlined" justIcon startIcon={<GetApp />}
-                          onClick={() => { downloadCourseFormat(null, true) }} />
-                      </div>
-                    </Tooltip>
+                    {
+                          asignaturaObject._id ?
+                          <Tooltip id='filterTooltip' title="Descargar formato de asignatura" placement='top' classes={{ tooltip: classes.tooltip }}>
+                            <div>
+                            <Button key={'filtersButton'} color={'secondary'} size='md' round variant="outlined" justIcon startIcon={<GetApp />}
+                                onClick={() => { downloadCourseFormat(null, true) }} />
+                            </div>
+                          </Tooltip>
+                          : null
+                    }
                   </div>
                   <h4 className={classes.cardTitleWhite}>{asignaturaObject._id ? 'Editar' : 'Crear'} asignaturas</h4>
                   <div className={classes.headerActions}>
@@ -730,7 +733,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       type={'number'}
-                      error={isNaN(asignaturaObject.cantidadCredito) ? true : false}
+                      error={isNaN(asignaturaObject.cantidadCredito) || !asignaturaObject.cantidadCredito ? true : false}
                       value={asignaturaObject.cantidadCredito}
                       onKeyPress={ event => {
                         if(event.key === '-' || event.key === '+' || event.key === 'e') {
@@ -915,7 +918,6 @@ function Asignaturas(props: any) {
                       multiline
                       margin="dense"
                       className={classes.CustomTextField}
-                      error={!asignaturaObject.prerrequisitos ? true : false}
                       value={asignaturaObject.prerrequisitos}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, prerrequisitos: event.target.value })
@@ -932,7 +934,6 @@ function Asignaturas(props: any) {
                       multiline
                       margin="dense"
                       className={classes.CustomTextField}
-                      error={!asignaturaObject.correquisitos ? true : false}
                       value={asignaturaObject.correquisitos}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, correquisitos: event.target.value })
