@@ -1,10 +1,11 @@
 import { backendBaseUrl, getHeaders } from './constants'
 
-export const getAvancesPaginated = async (data: any) => {
+
+export const getEquivalenciasPaginated = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    let query = `page=${data.page}&search=${data.search}&dateCreationFrom=${data.dateCreationFrom}&dateCreationTo=${data.dateCreationTo}`;
-    fetch(`${backendBaseUrl}api/avance/all?${query}`, {
+    let query = `page=${data.page}&search=${data.search}`;
+    fetch(`${backendBaseUrl}api/equivalencia/all?${query}`, {
       headers,
       method: 'GET'
     })
@@ -18,11 +19,11 @@ export const getAvancesPaginated = async (data: any) => {
   });
 }
 
-export const getAllAvances = async(data:any)=>{
+export const getAllEquivalencias = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/avance/allNotPaginated?${query}`,{
+    fetch(`${backendBaseUrl}api/equivalencia/allNotPaginated?${query}`,{
       headers,
       method: 'GET'
     })
@@ -36,11 +37,10 @@ export const getAllAvances = async(data:any)=>{
   });
 }
 
-
-export const getAllAvancesByAsignatura = async(data:any)=>{
+export const getAllEquivalenciaByAsignatura = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/allByAsignatura`,{
+    fetch(`${backendBaseUrl}api/asignatura/getEquivalenciaByAsignatura`,{
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -55,30 +55,10 @@ export const getAllAvancesByAsignatura = async(data:any)=>{
   });
 }
 
-
-export const getAllAvancesByDocenteEmail = async(data:any)=>{
+export const getAllEquivalenciaByAsignaturaNoToken = async(data:any)=>{
   return new Promise(resolve=>{
     let headers:any = getHeaders();
-    let query = `search=${data.search}`;
-    let emailDocente = `emailDocente=${data.emailDocente}`
-    fetch(`${backendBaseUrl}api/avance/allByDocenteEmail?${emailDocente}&${query}`,{
-      headers,
-      method: 'GET',
-    })
-    .then(response => response.json())
-    .then(response => {
-      resolve(response)
-    })
-    .catch(error => resolve({ 
-      ...error 
-    }));
-  });
-}
-
-export const getAllAvancesByDocente = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/allByDocente`,{
+    fetch(`${backendBaseUrl}api/asignatura/getEquivalenciaByAsignaturaNT`,{
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -93,30 +73,10 @@ export const getAllAvancesByDocente = async(data:any)=>{
   });
 }
 
-
-
-export const getAllAvancesByPerido = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/allByPeriodo`,{
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(response => {
-      resolve(response)
-    })
-    .catch(error => resolve({ 
-      ...error 
-    }));
-  });
-}
-
-export const createAvance = async (data: any) => {
+export const createEquivalencia = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/add`, {
+    fetch(`${backendBaseUrl}api/equivalencia/add`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -131,10 +91,10 @@ export const createAvance = async (data: any) => {
   });
 }
 
-export const updateAvance = async (data: any, id: any) => {
+export const updateEquivalencia = async (data: any, id: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/${id}`, {
+    fetch(`${backendBaseUrl}api/equivalencia/${id}`, {
       headers,
       method: 'PATCH',
       body: JSON.stringify(data)

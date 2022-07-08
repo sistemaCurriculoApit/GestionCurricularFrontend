@@ -16,6 +16,7 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility'
 import moment from "moment";
 import "moment/locale/es";
 
@@ -44,7 +45,10 @@ import { getAllProgramas } from "../../services/programasServices"
 import { getPlanesByListIds } from "../../services/planesServices"
 import { getAllAsignaturasByPlan } from "../../services/asignaturasServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
+import { getAllEquivalenciaByAsignatura } from "../../services/equivalenciasServices"
 import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from "../../services/homologacionesServices"
+import { getEstudianteByEmail, getAllEstudiantes } from '../../services/estudiantesServices'
+import { userProfilesObject } from '../../constants/generalConstants'
 
 
 //Estilos generales usados en el modulo
@@ -84,9 +88,13 @@ function Homologaciones(props: any) {
   const [planSelected, setPlanSelected] = useState<AnythingObject>({});
   const [asignaturasList, setAsignaturasList] = useState([]);
   const [asignaturaSelected, setAsignaturaSelected] = useState<AnythingObject>({});
+  const [estudianteSelected, setEstudianteSelected] = useState<AnythingObject>({});
   const [estadoHomologacionSelected, setEstadoHomologacionSelected] = useState<AnythingObject>({});
   const [contenidosList, setContenidosList] = useState([]);
-
+  const [equivalenciasList, setEquivalenciasList] = useState([]);
+  const [estudiantesList, setEstudiantesList] = useState([]);
+  const [blockEstudienteSelected, setBlockEstudianteSelected] = useState<boolean>()
+  const [isBlockEditByPermissions, setIsBlockEditByPermissions] = useState<boolean>()
   const [homologacionList, setHomologacionesList] = useState([]);
   const [totalHomologaciones, setTotalHomologaciones] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -99,14 +107,33 @@ function Homologaciones(props: any) {
     universidadSolicitante: '',
     programaSolicitante: '',
     asignaturaSolicitante: '',
-    añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+    añoHomologacion: moment(new Date()),
+    fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
     periodo: '1',
     estadoHomologacion: {},
     descripcion: '',
   });
 
+  const blockStudentPermission = () => {
+    var idProfile = localStorage.getItem('idProfileLoggedUser');
+    if (isBlockEditByPermissions !== false && isBlockEditByPermissions !== true){
+      if (!idProfile || idProfile === userProfilesObject.est.id.toString()){
+        setIsBlockEditByPermissions(true)
+        return true
+      }else{
+        setIsBlockEditByPermissions(false)
+        return false
+      }
+    }else{
+      return isBlockEditByPermissions
+    }
+
+  }
+
+
   //Al iniciar el componente se obtienen las homologaciones y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
+    blockStudentPermission()
     setOpenModalLoading(true);
     getHomologaciones();
     if (openModalCreate) {
@@ -117,11 +144,10 @@ function Homologaciones(props: any) {
           planId: '',
           asignaturaId: '',
           identificacionSolicitante: '',
-          nombreSolicitante: '',
-          universidadSolicitante: '',
-          programaSolicitante: '',
+          estudianteId: '',
           asignaturaSolicitante: '',
-          añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+          añoHomologacion: moment(new Date()),
+          fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
           periodo: '1',
           estadoHomologacion: {},
           descripcion: ''
@@ -152,6 +178,7 @@ function Homologaciones(props: any) {
       setPlanesList([]);
       setAsignaturasList([]);
       setContenidosList([]);
+      setEquivalenciasList([]);
     }
   }, [programaSelected]);
 
@@ -167,6 +194,7 @@ function Homologaciones(props: any) {
       setAsignaturaSelected({});
       setAsignaturasList([]);
       setContenidosList([]);
+      setEquivalenciasList([]);
     }
   }, [planSelected]);
 
@@ -183,12 +211,91 @@ function Homologaciones(props: any) {
     }
   }, [asignaturaSelected]);
 
-  //Accion al seleccionar una homologacion para ser editada, carga programas planes y asginaturas
+  //Accion para obtener equivalencias en el moda de creacion y edicion
+  useEffect(() => {
+    if (asignaturaSelected._id) {
+      if (homologacionObject._id) {
+        getEquivalencias(homologacionObject._id ? true : false, homologacionObject);
+      } else {
+        getEquivalencias();
+      }
+    } else {
+      setEquivalenciasList([]);
+    }
+  }, [asignaturaSelected]);
+
+
+  useEffect(()=> {
+    if (equivalenciasList.length > 0){
+      setDescription()
+    }
+  })
+
+  //Accion al seleccionar una homologacion para ser editada, carga programas planes, asginaturas y equivalencias
   useEffect(() => {
     if (homologacionObject._id) {
       getProgramas(true, homologacionObject)
     }
   }, [homologacionObject]);
+
+
+  const cleanAndCloseModal = () =>{
+    setHomologacionObject({
+      programaId: '',
+      planId: '',
+      asignaturaId: '',
+      identificacionSolicitante: '',
+      nombreSolicitante: '',
+      universidadSolicitante: '',
+      programaSolicitante: '',
+      asignaturaSolicitante: '',
+      añoHomologacion: moment(new Date()),
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
+      periodo: '1',
+      estadoHomologacion: {},
+      descripcion: '',
+    })
+    setOpenModal(false);
+  }
+
+  //Metodo para asignar las equivalencias por default a la descripcion de la homologacion. 
+  const setDescription = async () => {
+    let PlanCodeList = equivalenciasList.map((equivalencia:any) => equivalencia.codigoPlan)
+    for (var i=0; i < PlanCodeList.length; i++){
+      if (!homologacionObject.descripcion.includes(PlanCodeList[i])){
+        if (homologacionObject.descripcion.length > 0 || i > 0){
+          setHomologacionObject({ ...homologacionObject, 
+            descripcion: homologacionObject.descripcion 
+            + equivalenciasList.map((equivalencia:any) => `\n ${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
+          });
+        }else{
+          setHomologacionObject({ ...homologacionObject, 
+            descripcion: homologacionObject.descripcion 
+            + equivalenciasList.map((equivalencia:any) => `${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
+          });
+        }
+      } 
+    }
+  }
+
+  const getEstudiantes = async (isEdit?: boolean, homologacionToEdit?: any) => {
+      let estudiantes:any = await getAllEstudiantes();
+      if (estudiantes){
+        // let programas = await getProgramas(true)
+        setEstudiantesList(estudiantes.estudiantes)
+        setBlockEstudianteSelected(false);
+      }else{
+        setEstudiantesList([])
+      }
+      if (isEdit && homologacionToEdit.estudiante){
+        let findEstudiante = estudiantes.estudiantes.find((estudiante: any) => estudiante.identificacion === homologacionToEdit.estudiante.identificacion)
+        if (findEstudiante) {
+          setEstudianteSelected({ ...findEstudiante });
+          setBlockEstudianteSelected(true);
+        }
+      }
+      return estudiantes.estudiantes;
+  };
 
   //Metodo de obtencion de homologaciones
   const getHomologaciones = async (page?: any) => {
@@ -199,25 +306,39 @@ function Homologaciones(props: any) {
       dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
       dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
     });
+    let estudiantes: any = await getEstudiantes();
     setPagePagination(page ? page + 1 : 1);
     if (response.homologaciones && response.homologaciones.length) {
+      response.homologaciones.forEach((homologacion:any) => {
+        homologacion.estudiante = estudiantes.find((estudiante: any) => estudiante.homologacion.find(((homologacionEst:any) => homologacionEst._id === homologacion._id) ));
+      })
+      let idProfile:any = localStorage.getItem('idProfileLoggedUser');
+      let emailUser:any = localStorage.getItem('userEmail');
+      let homologacionesNew: any = []
+      if (idProfile === userProfilesObject.est.id.toString()){
+        homologacionesNew = response.homologaciones.filter((homologacion:any) =>  homologacion.estudiante && homologacion.estudiante.correo === emailUser )
+      }else {
+        homologacionesNew = response.homologaciones
+      }
+
       //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-      let homologaciones = response.homologaciones.map((data: any) => {
+
+      let homologaciones = homologacionesNew.map((data: any) => {
         let arrayData = [
-          data.identificacionSolicitante,
-          data.nombreSolicitante,
+          data.estudiante ? data.estudiante.identificacion : '',
+          data.estudiante ? data.estudiante.nombre : '',
           data.asignaturaSolicitante,
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
-                onClick={() => {
-                  setDataEditHomologacion(data);
-                }} />
-            </div>
-          </Tooltip>
+        <Tooltip id='filterTooltip' title={!blockStudentPermission() ? "Editar" : "Ver"} placement='top' classes={{ tooltip: classes.tooltip }}>
+          <div className={classes.buttonHeaderContainer}>
+            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={!blockStudentPermission() ? <EditIcon /> : <VisibilityIcon />}
+              onClick={() => {
+                setDataEditHomologacion(data);
+              }} />
+          </div>
+        </Tooltip> 
         ];
         return arrayData;
       });
@@ -308,6 +429,26 @@ function Homologaciones(props: any) {
     }
   }
 
+  //Metodo para obtener el listado de equivalencias.
+  const getEquivalencias = async (isEdit?: boolean, homologacionToEdit?: any) => {
+    const equivalenciasIds = asignaturaSelected.equivalencia.map((option: any) => option._id);
+    let response: any = await getAllEquivalenciaByAsignatura({
+      search: '',
+      equivalenciasIds
+    });
+    if (response && response.equivalencias) {
+      setEquivalenciasList(response.equivalencias);
+      setHomologacionObject({ ...homologacionObject, 
+        descripcion: homologacionObject.descripcion 
+        + equivalenciasList.map((equivalencia:any) => `\n ${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre} `)
+      });
+    }
+    if (isEdit) {
+      setHomologacionObject({ ...homologacionObject, programaId: '', planId: '', asignaturaId: '' });
+      setOpenModalLoading(false);
+    }
+  }
+
   //Cuando se cambia de pagina se ejecuta el metodo getHomologaciones con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
@@ -335,13 +476,24 @@ function Homologaciones(props: any) {
         setPlanesList([]);
         setAsignaturasList([]);
         setContenidosList([]);
-        setEstadoHomologacionSelected({});
+        setEquivalenciasList([]);
+        setEstudianteSelected([]);
+        const estado = estadosHomologacion.find((estado: any) => estado.id === 2) ;
+        setEstadoHomologacionSelected(estado || {});
         setHomologacionObject(homologacionToEdit);
+        setHomologacionObject({...homologacionToEdit, 
+          añoHomologacion: moment(new Date()),
+          fechaDecision: null });
+        getEstudiantes(isEdit, homologacionToEdit);
         getProgramas(isEdit, homologacionToEdit);
       } else {
-        setHomologacionObject({ ...homologacionToEdit, añoHomologacion: moment(new Date(new Date(homologacionToEdit.añoHomologacion).getFullYear(), 0, 1)) });
-        const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion);
+        setEstudianteSelected([]);
+        setHomologacionObject({ ...homologacionToEdit, 
+            añoHomologacion: moment(new Date(homologacionToEdit.añoHomologacion)),
+            fechaDecision: homologacionToEdit.fechaDecision ? moment(new Date(homologacionToEdit.fechaDecision)) : null });
+        const estado = estadosHomologacion.find((estado: any) => estado.id === homologacionToEdit.estadoHomologacion || estado.id === 2);
         setEstadoHomologacionSelected(estado || {});
+        getEstudiantes(isEdit, homologacionToEdit);
       }
     } catch (error) {
       setOpenModalLoading(false);
@@ -380,8 +532,10 @@ function Homologaciones(props: any) {
       planId: planSelected._id,
       asignaturaId: asignaturaSelected._id,
       estadoHomologacion: estadoHomologacionSelected.id,
-      añoHomologacion: homologacionObject.añoHomologacion.toDate()
-
+      añoHomologacion: homologacionObject.añoHomologacion.toDate(),
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
+      identificacionSolicitante: estudianteSelected.identificacion,
+      estudianteId: estudianteSelected._id
     };
     let response: any = await createHomologacion(homologacionToSave);
     if (response && response.error) {
@@ -395,7 +549,7 @@ function Homologaciones(props: any) {
     } else {
       setSeverityAlert('success');
       setShowAlert(true);
-      setMessagesAlert('Homologación creado satisfactoriamente');
+      setMessagesAlert('Homologación creada satisfactoriamente');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -406,13 +560,17 @@ function Homologaciones(props: any) {
 
   //Metodo para editar una Homologacion
   const handleEditHomologacion = async () => {
+    let fechaDecisionNew = homologacionObject.fechaDecision ? homologacionObject.fechaDecision.toDate() : moment(new Date());
     let homologacionToSave = {
       ...homologacionObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
       asignaturaId: asignaturaSelected._id,
       estadoHomologacion: estadoHomologacionSelected.id,
-      añoHomologacion: homologacionObject.añoHomologacion.toDate()
+      añoHomologacion: homologacionObject.añoHomologacion.toDate(),
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? fechaDecisionNew : null,
+      identificacionSolicitante: estudianteSelected.identificacion,
+      estudianteId: estudianteSelected._id
     };
     let response: any = await updateHomologacion(homologacionToSave, homologacionObject._id);
     if (response && response.error) {
@@ -426,7 +584,7 @@ function Homologaciones(props: any) {
     } else {
       setSeverityAlert('success');
       setShowAlert(true);
-      setMessagesAlert('Homologación editado satisfactoriamente');
+      setMessagesAlert('Homologación editada satisfactoriamente');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -440,10 +598,6 @@ function Homologaciones(props: any) {
     if (programaSelected._id &&
       planSelected._id &&
       asignaturaSelected._id &&
-      homologacionObject.identificacionSolicitante &&
-      homologacionObject.nombreSolicitante &&
-      homologacionObject.universidadSolicitante &&
-      homologacionObject.programaSolicitante &&
       homologacionObject.asignaturaSolicitante &&
       homologacionObject.añoHomologacion &&
       homologacionObject.periodo &&
@@ -608,10 +762,13 @@ function Homologaciones(props: any) {
 
         </GridItem>
       </GridContainer>
-      <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nueva homologación" placement='left' classes={{ tooltip: classes.tooltip }}>
+
+
+        {  !blockStudentPermission() ?
+         <div className={classes.containerFloatButton}>
+          <Tooltip id='addTooltip' title="Crear nueva homologación" placement='left' classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} disabled={blockStudentPermission()} round justIcon startIcon={<AddIcon />}
               onClick={() => {
                 handleOpenModal(false, {
                   programaId: '',
@@ -622,15 +779,16 @@ function Homologaciones(props: any) {
                   universidadSolicitante: '',
                   programaSolicitante: '',
                   asignaturaSolicitante: '',
-                  añoHomologacion: moment(new Date(new Date().getFullYear(), 0, 1)),
+                  añoHomologacion: moment(new Date()),
+                  fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null ,
                   periodo: '1',
                   estadoHomologacion: {},
                   descripcion: ''
                 })
               }} />
           </div>
-        </Tooltip>
-      </div>
+        </Tooltip> 
+      </div> : null}
 
       {/* Modal de creación y edicion de contenidos */}
 
@@ -646,12 +804,18 @@ function Homologaciones(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{homologacionObject._id ? 'Editar': 'Crear'} homologación</h4>
+                  {
+                    isBlockEditByPermissions? 
+                    <h4 className={classes.cardTitleWhite}>Ver detalles de homologación</h4>
+                    :
+                    <h4 className={classes.cardTitleWhite}>{homologacionObject._id ? 'Editar': 'Crear'} homologación</h4>
+                  }
+                  
                   <div className={classes.headerActions}>
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
                         <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                          onClick={() => { cleanAndCloseModal() }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -660,12 +824,116 @@ function Homologaciones(props: any) {
               <div className={classes.containerFormModal} >
                 <GridContainer>
 
+                <GridItem xs={12} sm={12} md={12}>
+                    <h4 className={classes.cardTitleBlack}>Información del solicitante</h4>
+                  </GridItem>
+
+
+                  <GridItem xs={12} sm={12} md={6} >
+                    <Autocomplete
+                      id="tags-outlined"
+                      options={estudiantesList}
+                      getOptionLabel={(option:any) => option._id ? `${option.identificacion} - ${option.nombre}` : ''}
+                      filterSelectedOptions
+                      onChange={(e, option) => {setEstudianteSelected(option || {})}}
+                      value={estudianteSelected}
+                      disabled={blockEstudienteSelected || isBlockEditByPermissions}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          id="outlined-rol"
+                          label="Estudiante"
+                          variant="outlined"
+                          margin="dense"
+                          error={estudianteSelected && !estudianteSelected._id ? true : false}
+                          className={classes.CustomTextField}
+                          helperText={!estudianteSelected._id ? 'Primero seleccione un estudiante.':''}
+                        />
+                      )}
+                    />
+                  </GridItem>
+
+                <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Correo del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.correo ? true : false}
+                      value={estudianteSelected.correo || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, correoSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Universidad origen del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.universidadOrigen ? true : false}
+                      value={estudianteSelected.universidadOrigen || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, universidadSolicitante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Programa origen del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.programaOrigen ? true : false}
+                      value={estudianteSelected.programaOrigen || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, programaEstudiante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={4} >
+                    <TextField
+                      id="outlined-email"
+                      label="Plan origen del estudiante"
+                      variant="outlined"
+                      margin="dense"
+                      disabled={true}
+                      className={classes.CustomTextField}
+                      error={!estudianteSelected.planOrigen ? true : false}
+                      value={estudianteSelected.planOrigen || ''}
+                      onChange={(event) => {
+                        setHomologacionObject({ ...homologacionObject, planEstudiante: event.target.value })
+                      }}
+                    />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12} >
+                    <br />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12} >
+                    <hr />
+                  </GridItem>
+
+                  <GridItem xs={12} sm={12} md={12}>
+                    <h4 className={classes.cardTitleBlack}>Información de asignatura</h4>
+                  </GridItem>
+
                   <GridItem xs={12} sm={12} md={4} >
                     <Autocomplete
                       id="tags-outlined"
                       options={programasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => {
                         setProgramaSelected(option || {})
                         setPlanSelected({});
@@ -692,6 +960,7 @@ function Homologaciones(props: any) {
                       options={planesList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => {
                         setPlanSelected(option || {})
                         setAsignaturaSelected({});
@@ -718,6 +987,7 @@ function Homologaciones(props: any) {
                       options={asignaturasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => setAsignaturaSelected(option || {})}
                       value={asignaturaSelected}
                       renderInput={(params) => (
@@ -735,22 +1005,41 @@ function Homologaciones(props: any) {
                     />
                   </GridItem>
 
-
-                  {
-                    contenidosList.length ?
-                      <GridItem xs={12} sm={12} md={12}>
-                        <h4 className={classes.cardTitleBlack}>Contenidos</h4>
-                        {
-                          contenidosList.map((contenido: any, index) => <Chip
-                            key={index}
-                            color={'primary'}
-                            label={`${contenido.codigo} - ${contenido.nombre}`}
-                          />)
-                        }
-                      </GridItem>
-                      : null
-                  }
-
+                    {/* Visualizacion de contenidos */}
+                    {
+                      contenidosList.length ?
+                        <GridItem xs={12} sm={12} md={12}>
+                          <h5 className={classes.cardTitleBlack}>Contenidos</h5>
+                          {
+                            contenidosList.map((contenido: any, index) => <Chip
+                              key={index}
+                              color={'primary'}
+                              label={`${contenido.codigo} - ${contenido.nombre}`}
+                            />)
+                          }
+                        </GridItem>
+                        : null
+                    }
+                    <GridItem xs={12} sm={12} md={12} >
+                      <br />
+                    </GridItem>
+                    {/* Visualizacion de equivalencias */}
+                    {
+                      equivalenciasList.length ?
+                        <GridItem xs={12} sm={12} md={12}>
+                          <h5 className={classes.cardTitleBlack}>Equivalencias</h5>
+                          {
+                            equivalenciasList.map((equivalencia: any, index) => 
+                            <Chip
+                              key={index}
+                              color={'primary'}
+                              label={`${equivalencia.codigoPlan}: ${equivalencia.equivalencia.codigo} - ${equivalencia.equivalencia.nombre}`}
+                            />)
+                          }
+                        </GridItem>
+                        : null
+                    }
+            
                   <GridItem xs={12} sm={12} md={12} >
                     <br />
                   </GridItem>
@@ -760,71 +1049,17 @@ function Homologaciones(props: any) {
                   </GridItem>
 
                   <GridItem xs={12} sm={12} md={12}>
-                    <h4 className={classes.cardTitleBlack}>Información del solicitante</h4>
+                    <h4 className={classes.cardTitleBlack}>Detalle de solicitud</h4>
                   </GridItem>
 
+                  
                   <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
-                      label="Identificación del solicitante"
+                      label="Asignatura origen de solicitud"
                       variant="outlined"
                       margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.identificacionSolicitante ? true : false}
-                      value={homologacionObject.identificacionSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, identificacionSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Nombre del solicitante"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.nombreSolicitante ? true : false}
-                      value={homologacionObject.nombreSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, nombreSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Universidad del solicitante"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.universidadSolicitante ? true : false}
-                      value={homologacionObject.universidadSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, universidadSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Programa del solicitante"
-                      variant="outlined"
-                      margin="dense"
-                      className={classes.CustomTextField}
-                      error={!homologacionObject.programaSolicitante ? true : false}
-                      value={homologacionObject.programaSolicitante}
-                      onChange={(event) => {
-                        setHomologacionObject({ ...homologacionObject, programaSolicitante: event.target.value })
-                      }}
-                    />
-                  </GridItem>
-                  <GridItem xs={12} sm={12} md={6} >
-                    <TextField
-                      id="outlined-email"
-                      label="Asignatura del solicitante"
-                      variant="outlined"
-                      margin="dense"
+                      disabled={isBlockEditByPermissions}
                       className={classes.CustomTextField}
                       error={!homologacionObject.asignaturaSolicitante ? true : false}
                       value={homologacionObject.asignaturaSolicitante}
@@ -833,20 +1068,19 @@ function Homologaciones(props: any) {
                       }}
                     />
                   </GridItem>
-                  <GridItem xs={12} sm={12} md={6}>
+                  <GridItem xs={6} sm={6} md={3}>
                     <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <DatePicker
                           views={["year"]}
-                          label="Año"
+                          label="Fecha de la solicitud"
                           inputVariant='outlined'
                           margin='dense'
                           className={classes.CustomTextField}
-                          format="YYYY"
+                          format="MMM DD, YYYY"
+                          disabled={isBlockEditByPermissions}
                           value={homologacionObject.añoHomologacion}
                           onChange={(newValue: any) => {
-                            console.log(newValue);
-
                             setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue })
                           }}
                           clearable
@@ -862,12 +1096,36 @@ function Homologaciones(props: any) {
                     </MuiPickersUtilsProvider>
                   </GridItem>
 
+                  <GridItem xs={6} sm={6} md={3}>
+                    <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <DatePicker
+                          views={["year"]}
+                          label="Fecha de la decisión"
+                          inputVariant='outlined'
+                          disabled={true}
+                          margin='dense'
+                          className={classes.CustomTextField}
+                          format="MMM DD, YYYY"
+                          value={homologacionObject.fechaDecision}
+                          onChange={(newValue: any) => {
+                            setHomologacionObject({ ...homologacionObject, fechaDecision: newValue })
+                          }}
+                          clearable
+                          clearLabel='Limpiar'
+                        />
+
+                      </div>
+                    </MuiPickersUtilsProvider>
+                  </GridItem>
+
                   <GridItem xs={12} sm={12} md={6}>
                     <Autocomplete
                       id="tags-outlined"
                       options={["1", "2"]}
                       getOptionLabel={(option) => option}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => setHomologacionObject({ ...homologacionObject, periodo: option })}
                       value={homologacionObject.periodo}
                       renderInput={(params) => (
@@ -890,6 +1148,7 @@ function Homologaciones(props: any) {
                       options={estadosHomologacion}
                       getOptionLabel={(option) => option.title}
                       filterSelectedOptions
+                      disabled={isBlockEditByPermissions}
                       onChange={(e, option) => setEstadoHomologacionSelected(option || {})}
                       value={estadoHomologacionSelected}
                       renderInput={(params) => (
@@ -916,6 +1175,7 @@ function Homologaciones(props: any) {
                       minRows={4}
                       maxRows={10}
                       multiline
+                      disabled={isBlockEditByPermissions}
                       value={homologacionObject.descripcion}
                       onChange={(event) => {
                         setHomologacionObject({ ...homologacionObject, descripcion: event.target.value })
@@ -927,13 +1187,14 @@ function Homologaciones(props: any) {
               </div>
 
 
+              { !isBlockEditByPermissions ?
               <div className={classes.containerFooterModal} >
                 <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
                   onClick={() => { handleSaveHomologacion() }} >
                   {'Guardar'}
                 </Button>
-
               </div>
+              : null}
 
             </Card>
           </GridItem>

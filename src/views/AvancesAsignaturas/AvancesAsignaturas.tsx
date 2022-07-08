@@ -20,6 +20,7 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility'
 import moment from "moment";
 import "moment/locale/es";
 
@@ -43,14 +44,14 @@ import { containerFloatButton } from '../../assets/jss/material-dashboard-react/
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
 import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
 
-import { AnythingObject } from '../../constants/generalConstants'
+import { AnythingObject, userProfilesObject } from '../../constants/generalConstants'
 import { getAllProgramas } from "../../services/programasServices"
 import { getPlanesByListIds } from "../../services/planesServices"
 import { getAreasByListIds } from "../../services/areasServices"
 import { getAsignaturaByListIds } from "../../services/asignaturasServices"
 import { getDocentesByListIds } from "../../services/docentesServices"
 import { getAllContenidoByAsignatura } from "../../services/contenidosServices"
-import { getAvancesPaginated, createAvance, updateAvance } from "../../services/avancesServices"
+import { getAvancesPaginated, createAvance, updateAvance, getAllAvancesByDocenteEmail } from "../../services/avancesServices"
 
 //Estilos generales usados en el modulo
 const styles = createStyles({
@@ -95,7 +96,10 @@ function AvancesAsignaturas(props: any) {
   const [docenteSelected, setDocenteSelected] = useState<AnythingObject>({});
   const [contenidosList, setContenidosList] = useState([]);
   const [contenidoChecked, setContenidoChecked] = useState<any[]>([]);
-
+  const [blockByEditAvance, setBlockByEditAvance] = useState<boolean>(false);
+  const [blockCoordinatorPermissions, setBlockCoordinatorPermissions] = useState<boolean>()
+  const [blockDocentePermissions, setBlockDocentePermissions] = useState<boolean>()
+  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true)
 
   const [avancesList, setAvancesList] = useState([]);
   const [totalAvances, setTotalAvances] = useState(0);
@@ -112,10 +116,47 @@ function AvancesAsignaturas(props: any) {
     descripcion: '',
   });
 
+
+  const blockCoordinatorPermission = (idProfile?:any) => {
+    if (!idProfile) idProfile = localStorage.getItem('idProfileLoggedUser');
+
+    if (blockCoordinatorPermissions !== false && blockCoordinatorPermissions !== true){
+      if (!idProfile || idProfile === userProfilesObject.coor.id.toString()){
+        setBlockCoordinatorPermissions(true)
+        return true
+      }else{
+        setBlockCoordinatorPermissions(false)
+        return false
+      }
+    }else{
+      return blockCoordinatorPermissions
+    }
+
+  }
+
   //Al iniciar el componente se obtienen los avances y si tiene redireccion del dashboard se abre la modal de creacion
   useEffect(() => {
+    setTotalAvances(0);
+    setAvancesList([]);
+    var idProfile = localStorage.getItem('idProfileLoggedUser');
+    var emailDocente = localStorage.getItem('userEmail')
     setOpenModalLoading(true);
-    getAvances();
+
+    //Bloquear permisos de coordinador
+    if (idProfile === userProfilesObject.coor.id.toString()){
+      setBlockCoordinatorPermissions(true)
+    }else{
+      setBlockCoordinatorPermissions(false)
+    }
+
+    if (idProfile === userProfilesObject.doc.id.toString()){
+      setAvancesList([]);
+      getAvances(0, true, emailDocente);
+      setBlockDocentePermissions(true)
+      setIsFirstLoading(true)
+    }else{
+      getAvances(0, false, null);
+    }
     if (openModalCreate) {
       handleOpenModal(
         false,
@@ -133,6 +174,14 @@ function AvancesAsignaturas(props: any) {
       );
     }
   }, []);
+
+  useEffect(() => {
+    if(blockDocentePermissions===true && isFirstLoading===true){
+      var emailDocente = localStorage.getItem('userEmail');
+      getAvances(0, true, emailDocente);
+      setIsFirstLoading(false);
+    }
+  })
 
   //Actualizacion de la lista de asingaturas si el componente de busqueda es modificado
   useEffect(() => {
@@ -189,8 +238,6 @@ function AvancesAsignaturas(props: any) {
       setContenidosList([]);
       setContenidoChecked([]);
       setContenidoChecked([]);
-
-
     }
   }, [planSelected]);
 
@@ -245,16 +292,28 @@ function AvancesAsignaturas(props: any) {
   }, [avanceObject]);
 
   //Metodo de obtencion de homologaciones
-  const getAvances = async (page?: any) => {
+  const getAvances = async (page?: any, byEmailDocente?: boolean, emailDocente?: any) => {
     //Llamado al backend y construcción de los parametros de consulta
-    let response: any = await getAvancesPaginated({
-      page: page ? page : 0,
-      search: searchField,
-      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
-      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
-    });
+    let response : any
+    if (byEmailDocente){
+      response = await getAllAvancesByDocenteEmail({
+        page: page ? page : 0,
+        search: searchField,
+        emailDocente: emailDocente,
+        dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+        dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+      })
+    }else {
+      response = await getAvancesPaginated({
+        page: page ? page : 0,
+        search: searchField,
+        dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+        dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+      });
+    }
     setPagePagination(page ? page + 1 : 1);
     if (response.avances && response.avances.length) {
+      setAvancesList([]);
       //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let avances = response.avances.map((data: any) => {
         let arrayData = [
@@ -264,9 +323,10 @@ function AvancesAsignaturas(props: any) {
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
+          <Tooltip id='filterTooltip' title={!blockCoordinatorPermission() ? "Editar" : "Ver detalles"} placement='top' classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
+              {/* <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />} */}
+            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={!blockCoordinatorPermission() ? <EditIcon /> : <VisibilityIcon />}
                 onClick={() => {
                   setDataEditAvance(data);
                 }} />
@@ -301,6 +361,7 @@ function AvancesAsignaturas(props: any) {
     }
     if (!isEdit) {
       setOpenModalLoading(false);
+      setBlockByEditAvance(false);
     }
   }
 
@@ -322,6 +383,7 @@ function AvancesAsignaturas(props: any) {
     }
     if (!isEdit) {
       setOpenModalLoading(false);
+      setBlockByEditAvance(false);
     }
   }
 
@@ -341,8 +403,12 @@ function AvancesAsignaturas(props: any) {
         }
       }
     }
-    if (!isEdit) {
+    if (isEdit) {
+      setBlockByEditAvance(true);
       setOpenModalLoading(false);
+    }
+    else if (!isEdit){
+      setBlockByEditAvance(false);
     }
   }
 
@@ -363,7 +429,11 @@ function AvancesAsignaturas(props: any) {
       }
     }
     if (isEdit) {
+      setBlockByEditAvance(true);
       setOpenModalLoading(false);
+    }
+    else if (!isEdit){
+      setBlockByEditAvance(false);
     }
   }
 
@@ -384,7 +454,11 @@ function AvancesAsignaturas(props: any) {
       }
     }
     if (isEdit) {
+      setBlockByEditAvance(true);
       setOpenModalLoading(false);
+    }
+    else if (!isEdit){
+      setBlockByEditAvance(false);
     }
   }
 
@@ -515,8 +589,17 @@ function AvancesAsignaturas(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
+      var idProfile = localStorage.getItem('idProfileLoggedUser');
+      var emailDocente = localStorage.getItem('userEmail')
+      if (idProfile === userProfilesObject.doc.id.toString()){
+        setAvancesList([]);
+        getAvances(0, true, emailDocente);
+        setBlockDocentePermissions(true)
+        setIsFirstLoading(true)
+      }else{
+        getAvances(0, false, null);
+      }
       setOpenModal(false);
-      getAvances();
     }
   }
 
@@ -548,8 +631,17 @@ function AvancesAsignaturas(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
+      var idProfile = localStorage.getItem('idProfileLoggedUser');
+      var emailDocente = localStorage.getItem('userEmail')
+      if (idProfile === userProfilesObject.doc.id.toString()){
+        setAvancesList([]);
+        getAvances(0, true, emailDocente);
+        setBlockDocentePermissions(true)
+        setIsFirstLoading(true)
+      }else{
+        getAvances(0, false, null);
+      }
       setOpenModal(false);
-      getAvances();
     }
   }
 
@@ -731,30 +823,34 @@ function AvancesAsignaturas(props: any) {
 
         </GridItem>
       </GridContainer>
-      <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nuevo avance" placement='left' classes={{ tooltip: classes.tooltip }}>
-          <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
-              onClick={() => {
-                handleOpenModal(
-                  false,
-                  {
-                    programaId: '',
-                    planId: '',
-                    asignaturaId: '',
-                    docenteId: '',
-                    contenido: [],
-                    añoAvance: moment(new Date(new Date().getFullYear(), 0, 1)),
-                    periodo: '1',
-                    porcentajeAvance: null,
-                    descripcion: '',
-                  }
-                )
-              }}
-            />
-          </div>
-        </Tooltip>
-      </div>
+      {
+        blockCoordinatorPermissions ? null :
+          <div className={classes.containerFloatButton}>
+          <Tooltip id='addTooltip' title="Crear nuevo avance" placement='left' classes={{ tooltip: classes.tooltip }}>
+            <div>
+              <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+                onClick={() => {
+                  handleOpenModal(
+                    false,
+                    {
+                      programaId: '',
+                      planId: '',
+                      asignaturaId: '',
+                      docenteId: '',
+                      contenido: [],
+                      añoAvance: moment(new Date(new Date().getFullYear(), 0, 1)),
+                      periodo: '1',
+                      porcentajeAvance: null,
+                      descripcion: '',
+                    }
+                  )
+                }}
+              />
+            </div>
+          </Tooltip>
+        </div>
+      }
+
       
       {/* Modal de creación y edicion de contenidos */}
       
@@ -770,7 +866,13 @@ function AvancesAsignaturas(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{avanceObject._id ? 'Editar': 'Crear'} avance</h4>
+                  { 
+                    blockCoordinatorPermissions ?
+                    <h4 className={classes.cardTitleWhite}>Detalles de avance</h4>
+                    :
+                    <h4 className={classes.cardTitleWhite}>{avanceObject._id ? 'Editar': 'Crear'} avance</h4>
+                  }
+                  
                   <div className={classes.headerActions}>
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -790,6 +892,7 @@ function AvancesAsignaturas(props: any) {
                       options={programasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={(blockByEditAvance && programaSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setProgramaSelected(option || {})
                         //Inicializacion de objetos
@@ -827,6 +930,7 @@ function AvancesAsignaturas(props: any) {
                       options={planesList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={(blockByEditAvance && planSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setPlanSelected(option || {})
                         //Inicializacion de objetos
@@ -864,6 +968,7 @@ function AvancesAsignaturas(props: any) {
                       options={areasList}
                       getOptionLabel={(option) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={(blockByEditAvance && areaSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setAreaSelected(option || {});
                         //Inicializacion de objetos
@@ -899,6 +1004,7 @@ function AvancesAsignaturas(props: any) {
                       options={asignaturasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions
+                      disabled={(blockByEditAvance && asignaturaSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => {
                         setAsignaturaSelected(option || {});
                         //Inicializacion de objetos
@@ -931,6 +1037,7 @@ function AvancesAsignaturas(props: any) {
                       options={docentesList}
                       getOptionLabel={(option) => option._id ? `${option.nombre} - ${option.documento}` : ''}
                       filterSelectedOptions
+                      disabled={(blockByEditAvance && docenteSelected._id) || blockCoordinatorPermissions}
                       onChange={(e, option) => setDocenteSelected(option || {})}
                       value={docenteSelected}
                       renderInput={(params) => (
@@ -970,6 +1077,7 @@ function AvancesAsignaturas(props: any) {
                                   <ListItemSecondaryAction>
                                     <Checkbox
                                       edge="end"
+                                      disabled={blockCoordinatorPermissions}
                                       onChange={handleToggleCheck(contenido)}
                                       checked={contenidoChecked.findIndex((check: any) => (check._id === contenido._id)) !== -1}
                                       inputProps={{ 'aria-labelledby': labelId }}
@@ -1001,6 +1109,7 @@ function AvancesAsignaturas(props: any) {
                                 label="Año del avance"
                                 inputVariant='outlined'
                                 margin='dense'
+                                disabled={blockCoordinatorPermissions}
                                 className={classes.CustomTextField}
                                 format="YYYY"
                                 value={avanceObject.añoAvance}
@@ -1011,7 +1120,7 @@ function AvancesAsignaturas(props: any) {
                                 clearLabel='Limpiar'
                               />
                               {
-                                avanceObject.añoAvance ? (
+                                avanceObject.añoAvance && !blockCoordinatorPermissions ? (
                                   <CloseIcon onClick={(e) => setAvanceObject({ ...avanceObject, añoAvance: null })} />
                                 ) : null
                               }
@@ -1025,6 +1134,7 @@ function AvancesAsignaturas(props: any) {
                             id="tags-outlined"
                             options={["1", "2"]}
                             getOptionLabel={(option) => option}
+                            disabled={blockCoordinatorPermissions}
                             filterSelectedOptions
                             onChange={(e, option) => setAvanceObject({ ...avanceObject, periodo: option })}
                             value={avanceObject.periodo}
@@ -1048,6 +1158,7 @@ function AvancesAsignaturas(props: any) {
                             label="Porcentaje aproximado"
                             variant="outlined"
                             margin="dense"
+                            disabled={blockCoordinatorPermissions}
                             type={'number'}
                             className={classes.CustomTextField}
                             error={!avanceObject.porcentajeAvance || avanceObject.porcentajeAvance < 0 || avanceObject.porcentajeAvance > 100 ? true : false}
@@ -1063,6 +1174,7 @@ function AvancesAsignaturas(props: any) {
                           <TextField
                             id="outlined-email"
                             label="Descripción"
+                            disabled={blockCoordinatorPermissions}
                             variant="outlined"
                             margin="dense"
                             className={classes.CustomTextField}
@@ -1082,14 +1194,16 @@ function AvancesAsignaturas(props: any) {
                 </GridContainer>
 
               </div>
+              { blockCoordinatorPermissions? 
+               null : 
               <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                <Button key={'filtersButton'} color={'primary'} round variant="outlined" disabled={blockCoordinatorPermissions} endIcon={<SendIcon />}
                   onClick={() => { handleSaveAvance() }} >
                   {'Guardar'}
                 </Button>
 
               </div>
-
+            }
             </Card>
           </GridItem>
         </div>

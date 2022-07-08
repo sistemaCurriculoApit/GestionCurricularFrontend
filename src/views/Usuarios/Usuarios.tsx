@@ -43,8 +43,8 @@ import { container, containerFormModal, containerFooterModal, modalForm } from '
 import checkboxAdnRadioStyle from '../../assets/jss/material-dashboard-react/checkboxAdnRadioStyle';
 
 
-import { userProfilesArray, AnythingObject } from '../../constants/generalConstants'
-
+import { userProfilesArray, AnythingObject, userProfilesObject, emailDomainRegexValidation } from '../../constants/generalConstants'
+import { getEstudianteByEmail } from '../../services/estudiantesServices'
 import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
 
 //Estilos generales usados en el modulo
@@ -80,6 +80,7 @@ function Usuarios(props: any) {
   const [userList, setUserList] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
+  const [errorEmail, setErrorEmail] = useState<any>({error:false, mensaje:""});
   const [userObject, setUserObject] = useState<AnythingObject>({
     _id: '',
     name: '',
@@ -87,6 +88,13 @@ function Usuarios(props: any) {
     role: { id: 0, title: '' },
     password: '',
     passwordConfirm: '',
+    identificacion: '',
+    universidadEstudiante: '',
+    programaEstudiante: '',
+    planEstudiante:'',
+    universidadEstudianteOrigen: '',
+    programaEstudianteOrigen: '',
+    planEstudianteOrigen:''
   });
 
 
@@ -123,6 +131,7 @@ function Usuarios(props: any) {
         let arrayData = [
           data.correo,
           data.nombreUsuario,
+          data.identificacion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
@@ -134,7 +143,7 @@ function Usuarios(props: any) {
                 }} />
             </div>
           </Tooltip>
-        ];
+        ]
         return arrayData;
       });
       setTotalUsers(response.totalUsers);
@@ -147,6 +156,28 @@ function Usuarios(props: any) {
     setOpenModalLoading(false);
   }
 
+  const setUserRoleData =  async (roleSelected:any)=>{
+    if (roleSelected.id === userProfilesObject.est.id){
+      let estudiante:any = await getEstudianteByEmail({
+        correo: userObject.email
+      });
+      if (estudiante){
+        setUserObject({...userObject, 
+          role: roleSelected,
+          identificacion: estudiante.identificacion,
+          universidadEstudiante: estudiante.universidad,
+          programaEstudiante: estudiante.programa,
+          planEstudiante: estudiante.plan,
+          universidadEstudianteOrigen: estudiante.universidadOrigen,
+          programaEstudianteOrigen: estudiante.programaOrigen,
+          planEstudianteOrigen: estudiante.planOrigen
+        })
+      }
+    }else{
+      setUserObject({...userObject, role:roleSelected})
+    }
+  };
+
   //Cuando se cambia de pagina se ejecuta el metodo getUsers con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
@@ -155,17 +186,63 @@ function Usuarios(props: any) {
   };
 
   //Se establecen los datos de un usuario a editar en la modal
-  const setDataEditUser = (data: any) => {
+  const setDataEditUser = async (data: any) => {
     setOpenModal(true);
     let roleItem = userProfilesArray.find((item) => item.id === data.rolId);
-    setUserObject({
-      _id: data._id,
-      name: data.nombreUsuario,
-      email: data.correo,
-      role: roleItem ? roleItem : { id: 0, title: '' },
-      password: '',
-      passwordConfirm: '',
-    });
+    if (roleItem && roleItem.id === userProfilesObject.est.id){
+      let estudiante:any = await getEstudianteByEmail({
+        correo: data.correo
+      });
+        if (estudiante){
+          setUserObject({
+            _id: data._id,
+            name: data.nombreUsuario,
+            email: data.correo,
+            role: roleItem ? roleItem : { id: 0, title: '' },
+            password: '',
+            passwordConfirm: '',
+            universidadEstudiante: estudiante.universidad ? estudiante.universidad : '',
+            programaEstudiante: estudiante.programa ? estudiante.programa : '',
+            identificacion: data.identificacion ? data.identificacion : '',
+            planEstudiante: estudiante.plan ? estudiante.plan : '',
+            universidadEstudianteOrigen: estudiante.universidadOrigen ? estudiante.universidadOrigen : '',
+            programaEstudianteOrigen: estudiante.programaOrigen ? estudiante.programaOrigen : '',
+            planEstudianteOrigen: estudiante.planOrigen ? estudiante.planOrigen : '',
+          });
+        }else{
+          setUserObject({
+            _id: data._id,
+            name: data.nombreUsuario,
+            email: data.correo,
+            role: roleItem ? roleItem : { id: 0, title: '' },
+            password: '',
+            passwordConfirm: '',
+            identificacion: data.identificacion ? data.identificacion : '',
+            universidadEstudiante: '',
+            programaEstudiante: '',
+            planEstudiante: '',
+            universidadEstudianteOrigen: '',
+            programaEstudianteOrigen: '',
+            planEstudianteOrigen: '',
+          });
+        }
+    }else{
+      setUserObject({
+        _id: data._id,
+        name: data.nombreUsuario,
+        email: data.correo,
+        role: roleItem ? roleItem : { id: 0, title: '' },
+        password: '',
+        passwordConfirm: '',
+        identificacion: data.identificacion,
+        universidadEstudiante: '',
+        programaEstudiante: '',
+        planEstudiante: '',
+        universidadEstudianteOrigen: '',
+        programaEstudianteOrigen: '',
+        planEstudianteOrigen: '',
+      });
+    }
   };
 
   //Manejador de la accion guardar de la modal, se encarga de crear o editar
@@ -212,7 +289,14 @@ function Usuarios(props: any) {
       nombreUsuario: userObject.name,
       correo: userObject.email,
       contrasena: userObject.password,
-      rolId: userObject.role.id
+      rolId: userObject.role.id,
+      identificacion: userObject.identificacion,
+      universidadEstudiante: userObject.universidadEstudiante,
+      programa: userObject.programaEstudiante,
+      plan: userObject.planEstudiante,
+      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
+      programaOrigen: userObject.programaEstudianteOrigen,
+      planOrigen: userObject.planEstudianteOrigen,
     };
     let response: any = await createUser(userToSave);
     if (response && response.error) {
@@ -241,7 +325,14 @@ function Usuarios(props: any) {
       nombreUsuario: userObject.name,
       correo: userObject.email,
       contrasena: userObject.password,
-      rolId: userObject.role.id
+      rolId: userObject.role.id,
+      identificacion: userObject.identificacion,
+      universidadEstudiante: userObject.universidadEstudiante,
+      programa: userObject.programaEstudiante,
+      plan: userObject.planEstudiante,
+      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
+      programaOrigen: userObject.programaEstudianteOrigen,
+      planOrigen: userObject.planEstudianteOrigen,
     };
     let response: any = await updateUser(userToSave, userObject._id);
     if (response && response.error) {
@@ -267,7 +358,7 @@ function Usuarios(props: any) {
   //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (userObject._id) {
-      if (userObject.name && userObject.email && userObject.role.id) {
+      if (userObject.name && userObject.email && userObject.role.id && userObject.email.match(emailDomainRegexValidation) && userObject.identificacion) {
         return true;
       } else {
         return false;
@@ -277,7 +368,9 @@ function Usuarios(props: any) {
         userObject.email &&
         userObject.password &&
         userObject.passwordConfirm &&
-        userObject.role.id) {
+        userObject.role.id &&
+        userObject.identification &&
+        userObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
         return false;
@@ -428,6 +521,7 @@ function Usuarios(props: any) {
                     tableHead={[
                       'Correo',
                       'Nombre',
+                      'Identificación',
                       'Fecha de creación',
                       'Fecha ultima actualización',
                       'Acciones'
@@ -506,6 +600,19 @@ function Usuarios(props: any) {
                       }}
                     />
                   </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                      <TextField
+                        id="outlined-name"
+                        label="Identificación"
+                        variant="outlined"
+                        margin="dense"
+                        inputProps={{ maxLength: 150 }}
+                        className={classes.CustomTextField}
+                        error={!userObject.identificacion ? true : false}
+                        value={userObject.identificacion}
+                        onChange={(event) => setUserObject({ ...userObject, identificacion: event.target.value })}
+                      />
+                  </GridItem>
 
                   <GridItem xs={12} sm={12} md={6} >
                     <TextField
@@ -515,10 +622,19 @@ function Usuarios(props: any) {
                       margin="dense"
                       inputProps={{ maxLength: 150 }}
                       inputMode='email'
-                      error={!userObject.email ? true : false}
+                      error={errorEmail.error}
+                      helperText={errorEmail.mensaje}
                       className={classes.CustomTextField}
                       value={userObject.email}
-                      onChange={(event) => setUserObject({ ...userObject, email: event.target.value })}
+                      onChange={(event) => {
+                        if (!event.target.value.match(emailDomainRegexValidation))  {
+                          setErrorEmail({error:true, mensaje:"El formato del correo no es válido"})
+                        }
+                        else{
+                          setErrorEmail({error:false, mensaje:""})
+                        }
+                        setUserObject({ ...userObject, email: event.target.value })
+                      }}
                     />
                   </GridItem>
 
@@ -528,7 +644,7 @@ function Usuarios(props: any) {
                       options={userProfilesArray}
                       getOptionLabel={(option) => option.title}
                       filterSelectedOptions
-                      onChange={(e, option) => setUserObject({ ...userObject, role: option || {} })}
+                      onChange={(e, option) => {setUserRoleData(option || {})}}
                       value={userObject.role}
                       renderInput={(params) => (
                         <TextField
@@ -593,6 +709,88 @@ function Usuarios(props: any) {
                         </GridItem>
                       </>
                       : null
+                  }
+
+                  {
+                    userObject.role.id === userProfilesObject.est.id ?
+                    <>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Universidad del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            value={userObject.universidadEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, universidadEstudiante: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Programa del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            value={userObject.programaEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, programaEstudiante: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Plan del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            value={userObject.planEstudiante}
+                            onChange={(event) => setUserObject({ ...userObject, planEstudiante: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Universidad origen del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.universidadEstudianteOrigen ? true : false}
+                            value={userObject.universidadEstudianteOrigen}
+                            onChange={(event) => setUserObject({ ...userObject, universidadEstudianteOrigen: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Programa origen del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.programaEstudianteOrigen ? true : false}
+                            value={userObject.programaEstudianteOrigen}
+                            onChange={(event) => setUserObject({ ...userObject, programaEstudianteOrigen: event.target.value })}
+                          />
+                        </GridItem>
+                        <GridItem xs={12} sm={12} md={6} >
+                          <TextField
+                            id="outlined-name"
+                            label="Plan origen del estudiante"
+                            variant="outlined"
+                            margin="dense"
+                            inputProps={{ maxLength: 150 }}
+                            className={classes.CustomTextField}
+                            error={!userObject.planEstudianteOrigen ? true : false}
+                            value={userObject.planEstudianteOrigen}
+                            onChange={(event) => setUserObject({ ...userObject, planEstudianteOrigen: event.target.value })}
+                          />
+                        </GridItem>
+                    </>
+                    : null
                   }
 
                 </GridContainer>

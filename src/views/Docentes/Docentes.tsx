@@ -38,9 +38,10 @@ import { containerFloatButton } from '../../assets/jss/material-dashboard-react/
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
 import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
 
-import { AnythingObject } from '../../constants/generalConstants'
+import { AnythingObject, tiposAsignatura, emailDomainRegexValidation } from '../../constants/generalConstants'
 
 import { getDocentePaginated, createDocente, updateDocente } from "../../services/docentesServices"
+import { getAsignaturasByDocente } from "../../services/asignaturasServices"
 
 
 //Estilos generales usados en el modulo
@@ -75,6 +76,8 @@ function Docentes(props: any) {
   const [docentesList, setDocentesList] = useState([]);
   const [totalDocentes, setTotalDocentes] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
+  const [asignaturasList, setAsignaturasList] = useState([]);
+  const [errorEmail, setErrorEmail] = useState<any>({error:false, mensaje:""});
 
   const [docenteObject, setDocenteObject] = useState<AnythingObject>({
     _id: '',
@@ -119,7 +122,7 @@ function Docentes(props: any) {
           data.correo,
           data.documento,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaactualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
@@ -145,6 +148,7 @@ function Docentes(props: any) {
   //Se establecen los datos de un docente a editar en la modal
   const setDataEditDocente = (data: any) => {
     setOpenModal(true);
+    getAsignaturas({docenteId: data._id})
     setDocenteObject({
       _id: data._id,
       name: data.nombre,
@@ -152,6 +156,25 @@ function Docentes(props: any) {
       document: data.documento,
     });
   };
+
+
+  const getAsignaturas = async (data:any) => {
+    let asignaturas:any = await getAsignaturasByDocente(data);
+    if (asignaturas.asignaturas){
+      let AsignaturasList = asignaturas.asignaturas.map((asignatura:any) => {
+        let tipoAsignatura = tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === asignatura.asignaturaTipo)
+        let arr = [
+        asignatura.codigo,
+        asignatura.nombre,
+        asignatura.cantidadCredito,
+        tipoAsignatura? tipoAsignatura.title : '',
+        asignatura.intensidadHoraria
+      ];
+        return arr;
+      })
+      setAsignaturasList(AsignaturasList);
+    }
+  }
 
   //Cuando se cambia de pagina se ejecuta el metodo getDocentes con la pagina solicitada
   const onChangePage = (page: number) => {
@@ -243,14 +266,14 @@ function Docentes(props: any) {
   //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (docenteObject._id) {
-      if (docenteObject.name && docenteObject.email) {
+      if (docenteObject.name && docenteObject.email && docenteObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
         return false;
       }
     } else {
       if (docenteObject.name &&
-        docenteObject.email) {
+        docenteObject.email && docenteObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
         return false;
@@ -413,6 +436,7 @@ function Docentes(props: any) {
             <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
               onClick={() => {
                 setOpenModal(!openModal)
+                setAsignaturasList([])
                 setDocenteObject({
                   _id: '',
                   name: '',
@@ -433,68 +457,123 @@ function Docentes(props: any) {
         aria-describedby="modal-modal-description"
       >
         <div className={classes.centerContent}>
-          <GridItem xs={12} sm={8} md={8} >
-            <Card className={classes.container}>
-              <CardHeader color="success">
-                <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{docenteObject._id ? 'Editar' : 'Crear'} docente</h4>
-                  <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
-                      <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
-                      </div>
-                    </Tooltip>
+        <GridContainer>
+            <GridItem xs={12} sm={12} md={12} >
+              <Card className={classes.container}>
+                <CardHeader color="success">
+                  <div className={classes.TitleFilterContainer}>
+                    <h4 className={classes.cardTitleWhite}>{docenteObject._id ? 'Editar' : 'Crear'} docente</h4>
+                    <div className={classes.headerActions}>
+                      <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                        <div className={classes.buttonHeaderContainer}>
+                          <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
+                            onClick={() => { setOpenModal(false) }} />
+                        </div>
+                      </Tooltip>
+                    </div>
                   </div>
+                </CardHeader >
+                <div className={classes.containerFormModal} >
+                
+                <GridItem xs={12} sm={12} md={12}>
+                  <h5 className={classes.cardTitleBlack}>Información del docente</h5>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={12} >
+                  <hr />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={12} >
+                  <br />
+                </GridItem>
+
+                <TextField
+                    id="outlined-email"
+                    label="Nombre"
+                    variant="outlined"
+                    margin="dense"
+                    className={classes.CustomTextField}
+                    error={!docenteObject.name ? true : false}
+                    value={docenteObject.name}
+                    onChange={(event) => {
+                      setDocenteObject({ ...docenteObject, name: event.target.value })
+                    }}
+                  />
+                  <TextField
+                    id="outlined-email"
+                    label="Correo Electrónico"
+                    variant="outlined"
+                    margin="dense"
+                    className={classes.CustomTextField}
+                    error={errorEmail.error}
+                    helperText={errorEmail.mensaje}
+                    value={docenteObject.email}
+                    onChange={(event) => {
+                    if (!event.target.value.match(emailDomainRegexValidation)){
+                        setErrorEmail({error:true, mensaje:"El formato del correo no es válido"})
+                      }
+                      else{
+                        setErrorEmail({error:false, mensaje:""})
+                      }
+                      setDocenteObject({ ...docenteObject, email: event.target.value })
+                      
+                    }}
+                  />
+                  <TextField
+                    id="outlined-email"
+                    label="Número de documento"
+                    variant="outlined"
+                    margin="dense"
+                    className={classes.CustomTextField}
+                    value={docenteObject.document}
+                    onChange={(event) => {
+                      setDocenteObject({ ...docenteObject, document: event.target.value })
+                    }}
+                  />
                 </div>
-              </CardHeader >
-              <div className={classes.containerFormModal} >
-                <TextField
-                  id="outlined-email"
-                  label="Nombre"
-                  variant="outlined"
-                  margin="dense"
-                  className={classes.CustomTextField}
-                  error={!docenteObject.name ? true : false}
-                  value={docenteObject.name}
-                  onChange={(event) => {
-                    setDocenteObject({ ...docenteObject, name: event.target.value })
-                  }}
-                />
-                <TextField
-                  id="outlined-email"
-                  label="Correo Electrónico"
-                  variant="outlined"
-                  margin="dense"
-                  className={classes.CustomTextField}
-                  error={!docenteObject.email ? true : false}
-                  value={docenteObject.email}
-                  onChange={(event) => {
-                    setDocenteObject({ ...docenteObject, email: event.target.value })
-                  }}
-                />
-                <TextField
-                  id="outlined-email"
-                  label="Número de documento"
-                  variant="outlined"
-                  margin="dense"
-                  className={classes.CustomTextField}
-                  value={docenteObject.document}
-                  onChange={(event) => {
-                    setDocenteObject({ ...docenteObject, document: event.target.value })
-                  }}
-                />
-              </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveDocente() }} >
-                  {'Guardar'}
-                </Button>
 
-              </div>
+                <GridItem xs={12} sm={12} md={12} >
+                  <br />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={12}>
+                  <h5 className={classes.cardTitleBlack}>Asignaturas del docente</h5>
+                </GridItem>
+                <GridItem xs={12} sm={12} md={12} >
+                  <hr />
+                </GridItem>
+                <GridItem xs={12} sm={12} md={12} >
+                  <br />
+                </GridItem>
 
-            </Card>
-          </GridItem>
+                {
+                !asignaturasList.length ?
+                  <h6 style={{ textAlign: 'center' }}>No se encontraron asignaturas para el docente seleccionado</h6>
+                  :
+                  <Table
+                    tableHeaderColor="success"
+                    tableHead={[
+                      'Código',
+                      'Nombre',
+                      'Créditos',
+                      'Tipo de asignatura',
+                      'Horas semanales'
+                    ]}
+                    tableData={asignaturasList}
+                  />
+              } 
+                  
+                <GridItem xs={12} sm={12} md={12} >
+                  <br />
+                </GridItem>
+                <div className={classes.containerFooterModal} >
+                  <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSaveDocente() }} >
+                    {'Guardar'}
+                  </Button>
+
+                </div>
+
+              </Card>
+            </GridItem>
+          </GridContainer>
         </div>
       </Modal>
       <ModalLoading showModal={openModalLoading} />

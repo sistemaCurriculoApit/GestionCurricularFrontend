@@ -123,6 +123,7 @@ class DashboardInvitado extends React.Component<Props, State> {
           logoText={'Currículo APIT'}
           logo={logo}
           image={this.state.image}
+          userName={`Bienvenido, usuario invitado`} 
           handleDrawerToggle={this.handleDrawerToggle}
           open={this.state.mobileOpen}
           color={this.state.color}

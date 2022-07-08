@@ -1,4 +1,5 @@
 import { backendBaseUrl, getHeaders } from './constants'
+import { saveAs } from 'file-saver'
 
 export const getAsignaturasPaginated = async (data: any) => {
   return new Promise(resolve => {
@@ -23,6 +24,42 @@ export const getAllAsignaturas = async(data:any)=>{
     let headers:any = getHeaders();
     let query = `search=${data.search}`;
     fetch(`${backendBaseUrl}api/asignatura/allNotPaginated?${query}`,{
+      headers,
+      method: 'GET'
+    })
+    .then(response => response.json())
+    .then(response => {
+      resolve(response)
+    })
+    .catch(error => resolve({ 
+      ...error 
+    }));
+  });
+}
+
+export const getAllAsignaturasWithPlanCode = async(data:any)=>{
+  return new Promise(resolve=>{
+    let headers:any = getHeaders();
+    let query = `search=${data.search}`;
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCode?${query}`,{
+      headers,
+      method: 'GET'
+    })
+    .then(response => response.json())
+    .then(response => {
+      resolve(response)
+    })
+    .catch(error => resolve({ 
+      ...error 
+    }));
+  });
+}
+
+export const getAllAsignaturasWithPlanCodeNT = async(data:any)=>{
+  return new Promise(resolve=>{
+    let headers:any = getHeaders();
+    let query = `search=${data.search}`;
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCodeNoToken?${query}`,{
       headers,
       method: 'GET'
     })
@@ -141,5 +178,44 @@ export const updateAsignatura = async (data: any, id: any) => {
       .catch(error => resolve({
         ...error
       }));
+  });
+}
+
+export const GetFileAsignatura = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/getFile`, {
+      headers,
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then(response => response.blob())
+    .then(blob => 
+      saveAs(blob, `FD-GC70-${data.codigo}.pdf`),
+    ).then(result => resolve({
+      ...result
+    }))
+    .catch(err => resolve({
+      ...err
+    }))
+  })
+}
+
+
+export const getAsignaturasByDocente = async(data:any)=>{
+  return new Promise(resolve=>{
+    let headers:any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/getAllAsignaturasByDocente`,{
+      headers,
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(response => {
+      resolve(response)
+    })
+    .catch(error => resolve({ 
+      ...error 
+    }));
   });
 }

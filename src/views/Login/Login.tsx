@@ -37,7 +37,7 @@ function Login(props: any) {
     if (guest) {
       //Ingreso con el rol de invitado
       localStorage.setItem('token', '-1');
-      localStorage.setItem('idProfileLoggedUser', '4');
+      localStorage.setItem('idProfileLoggedUser', '5');
       window.location.reload();
     } else {
       if (email && password) {
@@ -51,6 +51,8 @@ function Login(props: any) {
           //almacenamiento de token y del perfil logeado
           localStorage.setItem('token', body.token);
           localStorage.setItem('idProfileLoggedUser', body.user.rolId);
+          localStorage.setItem('userEmail', body.user.correo);
+          localStorage.setItem('userName', body.user.nombreUsuario);
           window.location.reload();
         } else {
           setSeverityAlert('error');

@@ -22,7 +22,7 @@ import logo from 'assets/img/logoPoli.png';
 const switchRoutes = (
   <Switch>
     {routes.map((prop, key) => {
-      if (prop.layout === '/coordinador') {
+      if (prop.layout === '/estudiante') {
         return (
           <Route
             path={prop.layout + prop.path}
@@ -35,7 +35,7 @@ const switchRoutes = (
   </Switch>
 );
 
-const routesFilter = routes.filter(route => (route.layout === '/coordinador'));
+const routesFilter = routes.filter(route => (route.layout === '/estudiante'));
 
 
 interface Props {
@@ -51,7 +51,7 @@ interface State {
   mobileOpen: boolean;
 }
 
-class DashboardCoordinador extends React.Component<Props, State> {
+class DashboardEstudiante extends React.Component<Props, State> {
   refs: any;
   constructor(props: Props) {
     super(props);
@@ -125,7 +125,7 @@ class DashboardCoordinador extends React.Component<Props, State> {
           logoText={'Currículo APIT'}
           logo={logo}
           userName={`Bienvenido, ${userName}`} 
-          userEmail={`${userEmail}`} 
+          userEmail={`${userEmail}`}    
           image={this.state.image}
           handleDrawerToggle={this.handleDrawerToggle}
           open={this.state.mobileOpen}
@@ -161,4 +161,4 @@ class DashboardCoordinador extends React.Component<Props, State> {
   }
 }
 
-export default withStyles(dashboardStyle)(DashboardCoordinador);
+export default withStyles(dashboardStyle)(DashboardEstudiante);
