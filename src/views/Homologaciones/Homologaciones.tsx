@@ -98,6 +98,7 @@ function Homologaciones(props: any) {
   const [homologacionList, setHomologacionesList] = useState([]);
   const [totalHomologaciones, setTotalHomologaciones] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
+  const [firstLoading, setFirstLoading] = useState<boolean>(true);
   const [homologacionObject, setHomologacionObject] = useState<AnythingObject>({
     programaId: '',
     planId: '',
@@ -226,8 +227,9 @@ function Homologaciones(props: any) {
 
 
   useEffect(()=> {
-    if (equivalenciasList.length > 0){
+    if (equivalenciasList.length > 0 && firstLoading===true){
       setDescription()
+      setFirstLoading(false)
     }
   })
 
@@ -255,12 +257,15 @@ function Homologaciones(props: any) {
       estadoHomologacion: {},
       descripcion: '',
     })
+    setEquivalenciasList([]);
     setOpenModal(false);
   }
 
   //Metodo para asignar las equivalencias por default a la descripcion de la homologacion. 
   const setDescription = async () => {
     let PlanCodeList = equivalenciasList.map((equivalencia:any) => equivalencia.codigoPlan)
+    setHomologacionObject({ ...homologacionObject, 
+      descripcion: homologacionObject.descripcion })
     for (var i=0; i < PlanCodeList.length; i++){
       if (!homologacionObject.descripcion.includes(PlanCodeList[i])){
         if (homologacionObject.descripcion.length > 0 || i > 0){
@@ -510,7 +515,7 @@ function Homologaciones(props: any) {
         handleEditHomologacion();
       } else {
         //CREAR
-        handleCreateHomologacion();
+        handleCreateHomologacion(); 
       }
 
     } else {
@@ -553,7 +558,7 @@ function Homologaciones(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
-      setOpenModal(false);
+      cleanAndCloseModal();
       getHomologaciones();
     }
   }
@@ -588,7 +593,7 @@ function Homologaciones(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
-      setOpenModal(false);
+      cleanAndCloseModal();
       getHomologaciones();
     }
   }

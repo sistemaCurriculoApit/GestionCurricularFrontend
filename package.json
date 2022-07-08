@@ -68,7 +68,7 @@
   "bugs": {
     "url": "https://github.com/creativetimofficial/material-dashboard-react/issues"
   },
-  "homepage": "https://curriculo-apit-frontend-stg.herokuapp.com/",
+  "homepage": "https://curriculo-apit-frontend.herokuapp.com/",
   "optionalDependencies": {
     "@types/googlemaps": "3.30.16",
     "@types/markerclustererplus": "2.1.33",
