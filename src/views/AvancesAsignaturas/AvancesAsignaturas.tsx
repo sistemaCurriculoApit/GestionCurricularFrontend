@@ -98,6 +98,8 @@ function AvancesAsignaturas(props: any) {
   const [contenidoChecked, setContenidoChecked] = useState<any[]>([]);
   const [blockByEditAvance, setBlockByEditAvance] = useState<boolean>(false);
   const [blockCoordinatorPermissions, setBlockCoordinatorPermissions] = useState<boolean>()
+  const [blockDocentePermissions, setBlockDocentePermissions] = useState<boolean>()
+  const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true)
 
   const [avancesList, setAvancesList] = useState([]);
   const [totalAvances, setTotalAvances] = useState(0);
@@ -148,7 +150,10 @@ function AvancesAsignaturas(props: any) {
     }
 
     if (idProfile === userProfilesObject.doc.id.toString()){
+      setAvancesList([]);
       getAvances(0, true, emailDocente);
+      setBlockDocentePermissions(true)
+      setIsFirstLoading(true)
     }else{
       getAvances(0, false, null);
     }
@@ -169,6 +174,14 @@ function AvancesAsignaturas(props: any) {
       );
     }
   }, []);
+
+  useEffect(() => {
+    if(blockDocentePermissions===true && isFirstLoading===true){
+      var emailDocente = localStorage.getItem('userEmail');
+      getAvances(0, true, emailDocente);
+      setIsFirstLoading(false);
+    }
+  })
 
   //Actualizacion de la lista de asingaturas si el componente de busqueda es modificado
   useEffect(() => {
@@ -302,6 +315,7 @@ function AvancesAsignaturas(props: any) {
     }
     setPagePagination(page ? page + 1 : 1);
     if (response.avances && response.avances.length) {
+      setAvancesList([]);
       //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let avances = response.avances.map((data: any) => {
         let arrayData = [
