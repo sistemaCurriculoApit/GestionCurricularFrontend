@@ -239,6 +239,25 @@ function Homologaciones(props: any) {
   }, [homologacionObject]);
 
 
+  const cleanAndCloseModal = () =>{
+    setHomologacionObject({
+      programaId: '',
+      planId: '',
+      asignaturaId: '',
+      identificacionSolicitante: '',
+      nombreSolicitante: '',
+      universidadSolicitante: '',
+      programaSolicitante: '',
+      asignaturaSolicitante: '',
+      añoHomologacion: moment(new Date()),
+      fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
+      periodo: '1',
+      estadoHomologacion: {},
+      descripcion: '',
+    })
+    setOpenModal(false);
+  }
+
   //Metodo para asignar las equivalencias por default a la descripcion de la homologacion. 
   const setDescription = async () => {
     let PlanCodeList = equivalenciasList.map((equivalencia:any) => equivalencia.codigoPlan)
@@ -530,7 +549,7 @@ function Homologaciones(props: any) {
     } else {
       setSeverityAlert('success');
       setShowAlert(true);
-      setMessagesAlert('Homologación creado satisfactoriamente');
+      setMessagesAlert('Homologación creada satisfactoriamente');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -796,7 +815,7 @@ function Homologaciones(props: any) {
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
                         <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                          onClick={() => { cleanAndCloseModal() }} />
                       </div>
                     </Tooltip>
                   </div>

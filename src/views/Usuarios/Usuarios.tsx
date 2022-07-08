@@ -358,7 +358,7 @@ function Usuarios(props: any) {
   //Validacion de campos obligatorios para la creacion y edicion
   const validateFields = () => {
     if (userObject._id) {
-      if (userObject.name && userObject.email && userObject.role.id && userObject.email.match(emailDomainRegexValidation)) {
+      if (userObject.name && userObject.email && userObject.role.id && userObject.email.match(emailDomainRegexValidation) && userObject.identificacion) {
         return true;
       } else {
         return false;
@@ -369,6 +369,7 @@ function Usuarios(props: any) {
         userObject.password &&
         userObject.passwordConfirm &&
         userObject.role.id &&
+        userObject.identification &&
         userObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {

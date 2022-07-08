@@ -238,8 +238,6 @@ function AvancesAsignaturas(props: any) {
       setContenidosList([]);
       setContenidoChecked([]);
       setContenidoChecked([]);
-
-
     }
   }, [planSelected]);
 
@@ -591,8 +589,17 @@ function AvancesAsignaturas(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
+      var idProfile = localStorage.getItem('idProfileLoggedUser');
+      var emailDocente = localStorage.getItem('userEmail')
+      if (idProfile === userProfilesObject.doc.id.toString()){
+        setAvancesList([]);
+        getAvances(0, true, emailDocente);
+        setBlockDocentePermissions(true)
+        setIsFirstLoading(true)
+      }else{
+        getAvances(0, false, null);
+      }
       setOpenModal(false);
-      getAvances();
     }
   }
 
@@ -624,8 +631,17 @@ function AvancesAsignaturas(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
+      var idProfile = localStorage.getItem('idProfileLoggedUser');
+      var emailDocente = localStorage.getItem('userEmail')
+      if (idProfile === userProfilesObject.doc.id.toString()){
+        setAvancesList([]);
+        getAvances(0, true, emailDocente);
+        setBlockDocentePermissions(true)
+        setIsFirstLoading(true)
+      }else{
+        getAvances(0, false, null);
+      }
       setOpenModal(false);
-      getAvances();
     }
   }
 
