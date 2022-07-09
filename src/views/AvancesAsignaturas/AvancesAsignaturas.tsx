@@ -100,7 +100,8 @@ function AvancesAsignaturas(props: any) {
   const [blockCoordinatorPermissions, setBlockCoordinatorPermissions] = useState<boolean>()
   const [blockDocentePermissions, setBlockDocentePermissions] = useState<boolean>()
   const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true)
-
+  const [idProfile, setIdProfile] = useState<any>();
+  const [emailUser, setEmailUser] = useState<any>();
   const [avancesList, setAvancesList] = useState([]);
   const [totalAvances, setTotalAvances] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -139,7 +140,9 @@ function AvancesAsignaturas(props: any) {
     setTotalAvances(0);
     setAvancesList([]);
     var idProfile = localStorage.getItem('idProfileLoggedUser');
+    setIdProfile(idProfile);
     var emailDocente = localStorage.getItem('userEmail')
+    setEmailUser(emailDocente);
     setOpenModalLoading(true);
 
     //Bloquear permisos de coordinador
@@ -491,7 +494,14 @@ function AvancesAsignaturas(props: any) {
   //Cuando se cambia de pagina se ejecuta el metodo getAvances con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
-    getAvances(page);
+    if (idProfile === userProfilesObject.doc.id.toString()){
+      setAvancesList([]);
+      getAvances(page, true, emailUser);
+      setBlockDocentePermissions(true)
+      setIsFirstLoading(true)
+    }else{
+      getAvances(page, false, null);
+    }
   };
 
   //Se establecen los datos de un avance a editar en la modal
@@ -710,7 +720,14 @@ function AvancesAsignaturas(props: any) {
                       <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
                         onClick={() => {
                           setOpenModalLoading(true);
-                          getAvances();
+                          if (idProfile === userProfilesObject.doc.id.toString()){
+                            setAvancesList([]);
+                            getAvances(0, true, emailUser);
+                            setBlockDocentePermissions(true)
+                            setIsFirstLoading(true)
+                          }else{
+                            getAvances(0, false, null);
+                          }
                         }} />
                     </div>
                   </Tooltip>
@@ -784,7 +801,14 @@ function AvancesAsignaturas(props: any) {
                         <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
                           onClick={() => { 
                             setOpenModalLoading(true);
-                            getAvances();
+                            if (idProfile === userProfilesObject.doc.id.toString()){
+                              setAvancesList([]);
+                              getAvances(0, true, emailUser);
+                              setBlockDocentePermissions(true)
+                              setIsFirstLoading(true)
+                            }else{
+                              getAvances(0, false, null);
+                            }
                           }} >
                           {'Aplicar filtros'}
                         </Button>
