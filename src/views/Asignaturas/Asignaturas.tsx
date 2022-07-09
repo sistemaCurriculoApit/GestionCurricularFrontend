@@ -413,7 +413,7 @@ function Asignaturas(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
-      setOpenModal(false);
+      cleanAsignaturaObjectAndSetOpenModal()
       getAsignaturas();
     }
   }
@@ -443,7 +443,7 @@ function Asignaturas(props: any) {
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
-      setOpenModal(false);
+      cleanAsignaturaObjectAndSetOpenModal()
       getAsignaturas();
     }
   }
