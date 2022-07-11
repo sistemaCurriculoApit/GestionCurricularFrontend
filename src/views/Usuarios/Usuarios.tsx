@@ -369,7 +369,7 @@ function Usuarios(props: any) {
         userObject.password &&
         userObject.passwordConfirm &&
         userObject.role.id &&
-        userObject.identification &&
+        userObject.identificacion &&
         userObject.email.match(emailDomainRegexValidation)) {
         return true;
       } else {
