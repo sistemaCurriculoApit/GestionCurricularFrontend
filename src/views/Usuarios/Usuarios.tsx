@@ -164,7 +164,6 @@ function Usuarios(props: any) {
       if (estudiante){
         setUserObject({...userObject, 
           role: roleSelected,
-          identificacion: estudiante.identificacion,
           universidadEstudiante: estudiante.universidad,
           programaEstudiante: estudiante.programa,
           planEstudiante: estudiante.plan,
