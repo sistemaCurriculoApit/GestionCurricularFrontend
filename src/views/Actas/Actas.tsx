@@ -14,8 +14,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
-import CheckIcon from '@material-ui/icons/Check';
 import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import moment from "moment";
 import "moment/locale/es";
 
@@ -72,7 +72,7 @@ function Actas(props: any) {
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
   const [listAssistants, setListAssistants] = useState([]);
-
+  const [isEdit, setIsEdit] = useState<boolean>(false)
   const [actasList, setActasList] = useState([]);
   const [totalActas, setTotalActas] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -118,12 +118,21 @@ function Actas(props: any) {
           data.lugar,
           data.asistente.replaceAll('||', '\n'),
           data.tema,
+          <Tooltip id='filterTooltip' title="Ver detalles de acta" placement='top' classes={{ tooltip: classes.tooltip }}>
+          <div className={classes.buttonHeaderContainer}>
+            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<VisibilityIcon />}
+              onClick={() => {
+                setIsEdit(false)
+                setDataEditOrViewActa(data);
+              }} />
+          </div>
+        </Tooltip>,
           <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
                 onClick={() => {
-                  setDataEditActa(data);
-
+                  setIsEdit(true)
+                  setDataEditOrViewActa(data);
                 }} />
             </div>
           </Tooltip>
@@ -146,7 +155,7 @@ function Actas(props: any) {
 
   };
 
-  const setDataEditActa = (data: any) => {
+  const setDataEditOrViewActa = (data: any) => {
     setOpenModal(true);
     setActaObject({
       _id: data._id,
@@ -439,6 +448,7 @@ function Actas(props: any) {
                       'Lugar',
                       'Asistentes',
                       'Temas',
+                      'Ver detalles',
                       'Acciones'
                     ]}
                     tableData={actasList}
@@ -485,7 +495,13 @@ function Actas(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{actaObject._id ? 'Editar': 'Crear'}  acta</h4>
+                  {
+                    isEdit ? 
+                    <h4 className={classes.cardTitleWhite}>{actaObject._id ? 'Editar': 'Crear'}  acta</h4>
+                    :
+                    <h4 className={classes.cardTitleWhite}>Detalles de acta</h4>
+                  }
+                  
                   <div className={classes.headerActions}>
                     <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -507,6 +523,7 @@ function Actas(props: any) {
                       className={classes.CustomTextField}
                       error={!actaObject.actividad ? true : false}
                       value={actaObject.actividad}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setActaObject({ ...actaObject, actividad: event.target.value })
                       }}
@@ -523,6 +540,7 @@ function Actas(props: any) {
                         format="DD/MM/YYYY"
                         error={!actaObject.fechaActa ? true : false}
                         value={actaObject.fechaActa}
+                        disabled={!isEdit}
                         onChange={(event) => {
                           setActaObject({ ...actaObject, fechaActa: event });
                         }}
@@ -539,6 +557,7 @@ function Actas(props: any) {
                       className={classes.CustomTextField}
                       error={!actaObject.lugar ? true : false}
                       value={actaObject.lugar}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setActaObject({ ...actaObject, lugar: event.target.value })
                       }}
@@ -553,6 +572,7 @@ function Actas(props: any) {
                       options={[]}
                       renderTags={() => (null)}
                       value={listAssistants}
+                      disabled={!isEdit}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -579,6 +599,7 @@ function Actas(props: any) {
                             key={index}
                             label={option}
                             variant="outlined"
+                            disabled={!isEdit}
                             className={classes.chipMargin}
                             onDelete={
                               () => {
@@ -601,6 +622,7 @@ function Actas(props: any) {
                       multiline
                       minRows={4}
                       maxRows={10}
+                      disabled={!isEdit}
                       className={classes.CustomTextField}
                       error={!actaObject.tema ? true : false}
                       value={actaObject.tema}
@@ -620,6 +642,7 @@ function Actas(props: any) {
                       multiline
                       minRows={4}
                       maxRows={10}
+                      disabled={!isEdit}
                       className={classes.CustomTextField}
                       error={!actaObject.conclusion ? true : false}
                       value={actaObject.conclusion}
@@ -632,13 +655,15 @@ function Actas(props: any) {
 
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveActa() }} >
-                  {'Guardar'}
-                </Button>
-              </div>
-
+              {
+                isEdit ? 
+                <div className={classes.containerFooterModal} >
+                  <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSaveActa() }} >
+                    {'Guardar'}
+                  </Button>
+                </div> : null
+              }
             </Card>
           </GridItem>
         </div>
