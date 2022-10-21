@@ -1,5 +1,5 @@
 //importacion de dependencias y servicios
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createStyles } from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
@@ -7,22 +7,22 @@ import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import Card from '@material-ui/core/Card';
 import logoApit from 'assets/img/logoAPIT.png';
+import jwt_decode from 'jwt-decode'
 import {
   successColor,
   blackColor,
   whiteColor,
   hexToRgb
 } from '../../assets/jss/material-dashboard-react';
+import "../../assets/css/google-login-button.css"
 
 import AlertComponent from '../../components/Alert/AlertComponent'
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-
-
 import { validateLogin } from "../../services/loginServices"
 
 //Inicio componente funcional
 function Login(props: any) {
-
+  const document = window.document;
   //Declaración de variables y estados del componente
   const { classes } = props;
   const [openModalLoading, setOpenModalLoading] = useState(false);
@@ -31,22 +31,47 @@ function Login(props: any) {
   const [messageAlert, setMessagesAlert] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const clientId: string = process.env.CLIENT_ID!
+
+  const handleCallbackResponse = async (response: any) => {
+    const user: any = jwt_decode(response.credential)
+    await setEmail(user.email)
+    await setPassword("google identity")
+    setOpenModalLoading(true)
+    setTimeout(() => {
+      handleLogin(false, true)
+    }, 2000);
+
+  }
+
+  useEffect(() => {
+    google.accounts.id.initialize({
+      client_id: "430408237878-50tskg6vp41l7aojrnajacckra4hnurb.apps.googleusercontent.com",
+      callback: handleCallbackResponse
+    })
+    google.accounts.id.renderButton(
+      document.getElementById("sign-in")!,
+      { theme: "outline", size: "large", type: "standard" }
+    )
+  }, [])
 
   //Metodo que controla el inicio de sesion
-  const handleLogin = async (guest?: Boolean) => {
+  const handleLogin = (guest?: Boolean, googleIdentity?: Boolean) => {
     if (guest) {
       //Ingreso con el rol de invitado
       localStorage.setItem('token', '-1');
       localStorage.setItem('idProfileLoggedUser', '5');
       window.location.reload();
     } else {
-      if (email && password) {
+      if ((email && password) || googleIdentity) {
         //Ingreso roles del sistema con credenciales
-        let response: any = await validateLogin({
+        let response: any = validateLogin({
           correo: email,
-          contrasena: password
+          contrasena: password,
+          googleIdentity: googleIdentity
         });
         let { body } = response;
+        debugger
         if (body && body.token) {
           //almacenamiento de token y del perfil logeado
           localStorage.setItem('token', body.token);
@@ -62,7 +87,8 @@ function Login(props: any) {
             setShowAlert(false);
           }, 1000);
         }
-      } else {
+      }
+      else {
         setSeverityAlert('error');
         setMessagesAlert('Correo electrónico y contraseña son obligatorios');
         setShowAlert(true);
@@ -109,6 +135,10 @@ function Login(props: any) {
               <a onClick={() => { setOpenModalLoading(true); handleLogin(true) }} className={classes.a}>
                 Ingresar cómo invitado
               </a>
+              <div id="sign-in__container">
+                <p className="horizontal-row"> ────────────────────── </p>
+                <div id="sign-in"></div>
+              </div>
 
             </div>
           </div>
