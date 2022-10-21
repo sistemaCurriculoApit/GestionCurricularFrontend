@@ -35,8 +35,8 @@ function Login(props: any) {
 
   const handleCallbackResponse = async (response: any) => {
     const user: any = jwt_decode(response.credential)
-    await setEmail(user.email)
-    await setPassword("google identity")
+    setEmail(user.email)
+    setPassword("google identity")
     setOpenModalLoading(true)
     setTimeout(() => {
       handleLogin(false, true)
