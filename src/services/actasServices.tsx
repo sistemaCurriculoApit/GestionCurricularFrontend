@@ -1,4 +1,4 @@
-import { backendBaseUrl, getHeaders } from './constants'
+import { backendBaseUrl, getHeaders } from './constants';
 
 export const getActasPaginated = async (data: any) => {
   return new Promise(resolve => {
@@ -10,13 +10,13 @@ export const getActasPaginated = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const createActa = async (data: any) => {
   return new Promise(resolve => {
@@ -28,13 +28,13 @@ export const createActa = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const updateActa = async (data: any, id: any) => {
   return new Promise(resolve => {
@@ -46,10 +46,10 @@ export const updateActa = async (data: any, id: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};

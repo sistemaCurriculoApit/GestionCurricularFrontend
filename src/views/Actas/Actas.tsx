@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import MomentUtils from "@date-io/moment";
+import MomentUtils from '@date-io/moment';
 // @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
 import Modal from '@material-ui/core/Modal';
-import Chip from "@material-ui/core/Chip";
+import Chip from '@material-ui/core/Chip';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -16,8 +16,8 @@ import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import moment from "moment";
-import "moment/locale/es";
+import moment from 'moment';
+import 'moment/locale/es';
 
 // core components
 import { createStyles } from '@material-ui/core';
@@ -30,18 +30,17 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 
-//jss
-import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
-import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
-import { container, containerFormModal, containerFooterModal, chipMargin, modalForm } from '../../assets/jss/material-dashboard-react'
+// jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
+import { container, containerFormModal, containerFooterModal, chipMargin, modalForm } from '../../assets/jss/material-dashboard-react';
 
-import { AnythingObject } from '../../constants/generalConstants'
-import { getActasPaginated, createActa, updateActa } from "../../services/actasServices"
-
+import { AnythingObject } from '../../constants/generalConstants';
+import { getActasPaginated, createActa, updateActa } from '../../services/actasServices';
 
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
@@ -72,7 +71,7 @@ function Actas(props: any) {
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
   const [listAssistants, setListAssistants] = useState([]);
-  const [isEdit, setIsEdit] = useState<boolean>(false)
+  const [isEdit, setIsEdit] = useState<boolean>(false);
   const [actasList, setActasList] = useState([]);
   const [totalActas, setTotalActas] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -85,20 +84,18 @@ function Actas(props: any) {
     fechaActa: new Date()
   });
 
-  useEffect(() => {
-    setOpenModalLoading(true);
-    getActas();
-    if (openModalCreate) {
-      setOpenModal(true);
-    }
-  }, [])
-
-  useEffect(() => {
-    if (!searchField) {
-      setOpenModalLoading(true);
-      getActas();
-    }
-  }, [searchField])
+  const setDataEditOrViewActa = (data: any) => {
+    setOpenModal(true);
+    setActaObject({
+      _id: data._id,
+      actividad: data.actividad,
+      lugar: data.lugar,
+      tema: data.tema,
+      conclusion: data.conclusion,
+      fechaActa: moment(data.fechaActa),
+    });
+    setListAssistants(data.asistente.split('||'));
+  };
 
   const getActas = async (page?: any) => {
     let response: any = await getActasPaginated({
@@ -118,20 +115,20 @@ function Actas(props: any) {
           data.lugar,
           data.asistente.replaceAll('||', '\n'),
           data.tema,
-          <Tooltip id='filterTooltip' title="Ver detalles de acta" placement='top' classes={{ tooltip: classes.tooltip }}>
-          <div className={classes.buttonHeaderContainer}>
-            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<VisibilityIcon />}
-              onClick={() => {
-                setIsEdit(false)
-                setDataEditOrViewActa(data);
-              }} />
-          </div>
-        </Tooltip>,
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
+          <Tooltip id="filterTooltip" title="Ver detalles de acta" placement="top" classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
                 onClick={() => {
-                  setIsEdit(true)
+                  setIsEdit(false);
+                  setDataEditOrViewActa(data);
+                }} />
+            </div>
+          </Tooltip>,
+          <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
+                onClick={() => {
+                  setIsEdit(true);
                   setDataEditOrViewActa(data);
                 }} />
             </div>
@@ -147,49 +144,27 @@ function Actas(props: any) {
 
     }
     setOpenModalLoading(false);
-  }
+  };
+
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getActas();
+    if (openModalCreate) {
+      setOpenModal(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!searchField) {
+      setOpenModalLoading(true);
+      getActas();
+    }
+  }, [searchField]);
 
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getActas(page);
 
-  };
-
-  const setDataEditOrViewActa = (data: any) => {
-    setOpenModal(true);
-    setActaObject({
-      _id: data._id,
-      actividad: data.actividad,
-      lugar: data.lugar,
-      tema: data.tema,
-      conclusion: data.conclusion,
-      fechaActa: moment(data.fechaActa),
-    });
-    setListAssistants(data.asistente.split('||'));
-  };
-
-  const handleSaveActa = () => {
-    setOpenModalLoading(true);
-    let isValid = validateFields();
-    if (isValid) {
-
-      if (actaObject._id) {
-        //EDITAR USUARIO
-        handleEditActa();
-      } else {
-        //CREAR USUARIO
-        handleCreateActa();
-      }
-
-    } else {
-      setSeverityAlert('warning');
-      setShowAlert(true);
-      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-    }
   };
 
   const handleCreateActa = async () => {
@@ -220,7 +195,7 @@ function Actas(props: any) {
       setOpenModal(false);
       getActas();
     }
-  }
+  };
 
   const handleEditActa = async () => {
     let actaToSave = {
@@ -250,7 +225,7 @@ function Actas(props: any) {
       setOpenModal(false);
       getActas();
     }
-  }
+  };
 
   const validateFields = () => {
     if (actaObject.actividad &&
@@ -261,6 +236,30 @@ function Actas(props: any) {
       return true;
     } else {
       return false;
+    }
+  };
+
+  const handleSaveActa = () => {
+    setOpenModalLoading(true);
+    let isValid = validateFields();
+    if (isValid) {
+
+      if (actaObject._id) {
+        // EDITAR USUARIO
+        handleEditActa();
+      } else {
+        // CREAR USUARIO
+        handleCreateActa();
+      }
+
+    } else {
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
     }
   };
 
@@ -283,17 +282,23 @@ function Actas(props: any) {
                     value={searchField}
                     onChange={(event) => setSearchField(event.target.value)}
                     InputProps={{
-                      endAdornment:
-                        <Button key={'searchButton'} color={'primary'} round variant="outlined" size='sm' justIcon startIcon={<ClearIcon />}
-                          onClick={() => {
-                            setSearchField('')
-                          }} />
+                      endAdornment: (
+                        <Button
+                          key={'searchButton'}
+                          color={'primary'}
+                          round={true}
+                          variant="outlined"
+                          size="sm"
+                          justIcon={true}
+                          startIcon={<ClearIcon />}
+                          onClick={() => setSearchField('')} />
+                      )
                     }}
                   />
 
-                  <Tooltip id='searchTooltip' title="Buscar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="searchTooltip" title="Buscar" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
+                      <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<Search />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getActas();
@@ -301,20 +306,20 @@ function Actas(props: any) {
                       />
                     </div>
                   </Tooltip>
-                  <Tooltip id='filterTooltip' title="Más filtros" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="filterTooltip" title="Más filtros" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" justIcon startIcon={<FilterList />}
-                        onClick={() => { setOpenMoreFilters(!openMoreFilters) }} />
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<FilterList />}
+                        onClick={() => { setOpenMoreFilters(!openMoreFilters); }} />
                     </div>
                   </Tooltip>
                 </div>
               </div>
               {
-                openMoreFilters ?
+                openMoreFilters ? (
                   <div>
                     <Card className={classes.cardFilters}>
                       <div >
-                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                           <GridContainer>
                             <GridItem xs={12} sm={12} md={12}>
                               <h4 className={classes.cardTitleBlack}>Fecha del acta</h4>
@@ -323,16 +328,16 @@ function Actas(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha desde"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateActaFrom}
                                   onChange={(newValue: any) => {
                                     setDateActaFrom(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateActaFrom ? (
@@ -347,16 +352,16 @@ function Actas(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha hasta"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateActaTo}
                                   onChange={(newValue: any) => {
                                     setDateActaTo(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateActaTo ? (
@@ -374,16 +379,16 @@ function Actas(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha desde"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationFrom}
                                   onChange={(newValue: any) => {
                                     setDateCreationFrom(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationFrom ? (
@@ -397,16 +402,16 @@ function Actas(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha hasta"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationTo}
                                   onChange={(newValue: any) => {
                                     setDateCreationTo(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationTo ? (
@@ -420,7 +425,7 @@ function Actas(props: any) {
                         </MuiPickersUtilsProvider>
                       </div>
                       <div className={classes.containerFooterCard} >
-                        <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                        <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                           onClick={() => {
                             setOpenModalLoading(true);
                             getActas();
@@ -431,7 +436,7 @@ function Actas(props: any) {
                       </div>
                     </Card>
                   </div>
-                  : null
+                ) : null
               }
             </CardHeader>
             <CardBody>
@@ -439,20 +444,20 @@ function Actas(props: any) {
               {
                 !actasList.length ?
                   <h2 style={{ textAlign: 'center' }}>No se encontraron actas en la base de datos</h2>
-                  :
-                  <Table
-                    tableHeaderColor="success"
-                    tableHead={[
-                      'Actividad',
-                      'Fecha',
-                      'Lugar',
-                      'Asistentes',
-                      'Temas',
-                      'Ver detalles',
-                      'Acciones'
-                    ]}
-                    tableData={actasList}
-                  />
+                  : (
+                    <Table
+                      tableHeaderColor="success"
+                      tableHead={[
+                        'Actividad',
+                        'Fecha',
+                        'Lugar',
+                        'Asistentes',
+                        'Temas',
+                        'Ver detalles',
+                        'Acciones'
+                      ]}
+                      tableData={actasList}
+                    />)
               }
             </CardBody>
           </Card>
@@ -464,9 +469,9 @@ function Actas(props: any) {
         </GridItem>
       </GridContainer>
       <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nueva acta" placement='left' classes={{ tooltip: classes.tooltip }}>
+        <Tooltip id="addTooltip" title="Crear nueva acta" placement="left" classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} round={true} justIcon={true} startIcon={<AddIcon />}
               onClick={() => {
                 setOpenModal(true);
                 setActaObject(
@@ -496,17 +501,17 @@ function Actas(props: any) {
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
                   {
-                    isEdit ? 
-                    <h4 className={classes.cardTitleWhite}>{actaObject._id ? 'Editar': 'Crear'}  acta</h4>
-                    :
-                    <h4 className={classes.cardTitleWhite}>Detalles de acta</h4>
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{actaObject._id ? 'Editar' : 'Crear'}  acta</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles de acta</h4>
                   }
-                  
+
                   <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModal(false); }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -525,17 +530,17 @@ function Actas(props: any) {
                       value={actaObject.actividad}
                       disabled={!isEdit}
                       onChange={(event) => {
-                        setActaObject({ ...actaObject, actividad: event.target.value })
+                        setActaObject({ ...actaObject, actividad: event.target.value });
                       }}
                     />
                   </GridItem>
 
                   <GridItem xs={12} sm={12} md={6} >
-                    <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                    <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                       <DatePicker
                         label="Fecha"
-                        inputVariant='outlined'
-                        margin='dense'
+                        inputVariant="outlined"
+                        margin="dense"
                         className={classes.CustomTextField}
                         format="DD/MM/YYYY"
                         error={!actaObject.fechaActa ? true : false}
@@ -559,15 +564,15 @@ function Actas(props: any) {
                       value={actaObject.lugar}
                       disabled={!isEdit}
                       onChange={(event) => {
-                        setActaObject({ ...actaObject, lugar: event.target.value })
+                        setActaObject({ ...actaObject, lugar: event.target.value });
                       }}
                     />
                   </GridItem>
 
                   <GridItem xs={12} sm={12} md={12} >
                     <Autocomplete
-                      multiple
-                      freeSolo
+                      multiple={true}
+                      freeSolo={true}
                       id="tags-outlined"
                       options={[]}
                       renderTags={() => (null)}
@@ -619,7 +624,7 @@ function Actas(props: any) {
                       label="Temas"
                       variant="outlined"
                       margin="dense"
-                      multiline
+                      multiline={true}
                       minRows={4}
                       maxRows={10}
                       disabled={!isEdit}
@@ -627,7 +632,7 @@ function Actas(props: any) {
                       error={!actaObject.tema ? true : false}
                       value={actaObject.tema}
                       onChange={(event) => {
-                        setActaObject({ ...actaObject, tema: event.target.value })
+                        setActaObject({ ...actaObject, tema: event.target.value });
                       }}
                       helperText="Cada tema en una línea separada"
                     />
@@ -639,7 +644,7 @@ function Actas(props: any) {
                       label="conclusiones"
                       variant="outlined"
                       margin="dense"
-                      multiline
+                      multiline={true}
                       minRows={4}
                       maxRows={10}
                       disabled={!isEdit}
@@ -647,7 +652,7 @@ function Actas(props: any) {
                       error={!actaObject.conclusion ? true : false}
                       value={actaObject.conclusion}
                       onChange={(event) => {
-                        setActaObject({ ...actaObject, conclusion: event.target.value })
+                        setActaObject({ ...actaObject, conclusion: event.target.value });
                       }}
                       helperText="Cada tema en una línea separada"
                     />
@@ -656,13 +661,18 @@ function Actas(props: any) {
                 </GridContainer>
               </div>
               {
-                isEdit ? 
-                <div className={classes.containerFooterModal} >
-                  <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                    onClick={() => { handleSaveActa() }} >
-                    {'Guardar'}
-                  </Button>
-                </div> : null
+                isEdit ? (
+                  <div className={classes.containerFooterModal} >
+                    <Button
+                      key={'filtersButton'}
+                      color={'primary'}
+                      round={true}
+                      variant="outlined"
+                      endIcon={<SendIcon />}
+                      onClick={() => handleSaveActa()} >
+                      {'Guardar'}
+                    </Button>
+                  </div>) : null
               }
             </Card>
           </GridItem>

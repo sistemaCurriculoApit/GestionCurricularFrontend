@@ -1,5 +1,5 @@
-import { backendBaseUrl, getHeaders } from './constants'
-import { saveAs } from 'file-saver'
+import { backendBaseUrl, getHeaders } from './constants';
+import { saveAs } from 'file-saver';
 
 export const getAsignaturasPaginated = async (data: any) => {
   return new Promise(resolve => {
@@ -11,139 +11,139 @@ export const getAsignaturasPaginated = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
-export const getAllAsignaturas = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
+export const getAllAsignaturas = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/asignatura/allNotPaginated?${query}`,{
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAllAsignaturasWithPlanCode = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
+export const getAllAsignaturasWithPlanCode = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCode?${query}`,{
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCode?${query}`, {
       headers,
       method: 'GET'
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAllAsignaturasWithPlanCodeNT = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
+export const getAllAsignaturasWithPlanCodeNT = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCodeNoToken?${query}`,{
+    fetch(`${backendBaseUrl}api/asignatura/allNotPaginatedWithPlanCodeNoToken?${query}`, {
       headers,
       method: 'GET'
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAllAsignaturasByPlan = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/asignatura/getAllAsignaturasByPlan`,{
+export const getAllAsignaturasByPlan = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/getAllAsignaturasByPlan`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAsignaturaByListIds = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/asignatura/byListIds`,{
+export const getAsignaturaByListIds = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/byListIds`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAsignaturaByListIdsPaginated = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/asignatura/byListIdsPaginated`,{
+export const getAsignaturaByListIdsPaginated = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/byListIdsPaginated`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAsignaturaByListIdsPaginatedNoToken = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/asignatura/byListIdsPaginatedNT`,{
+export const getAsignaturaByListIdsPaginatedNoToken = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/byListIdsPaginatedNT`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
 export const createAsignatura = async (data: any) => {
   return new Promise(resolve => {
@@ -155,13 +155,13 @@ export const createAsignatura = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const updateAsignatura = async (data: any, id: any) => {
   return new Promise(resolve => {
@@ -173,13 +173,13 @@ export const updateAsignatura = async (data: any, id: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const GetFileAsignatura = async (data: any) => {
   return new Promise(resolve => {
@@ -197,25 +197,24 @@ export const GetFileAsignatura = async (data: any) => {
     }))
     .catch(err => resolve({
       ...err
-    }))
-  })
-}
+    }));
+  });
+};
 
-
-export const getAsignaturasByDocente = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/asignatura/getAllAsignaturasByDocente`,{
+export const getAsignaturasByDocente = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/asignatura/getAllAsignaturasByDocente`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};

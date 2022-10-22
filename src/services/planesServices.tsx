@@ -1,4 +1,4 @@
-import { backendBaseUrl, getHeaders } from './constants'
+import { backendBaseUrl, getHeaders } from './constants';
 
 export const getPlanesPaginated = async (data: any) => {
   return new Promise(resolve => {
@@ -10,67 +10,67 @@ export const getPlanesPaginated = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
-export const getAllPlanes = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
+export const getAllPlanes = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
     let query = `search=${data.search}&planIds=${data.planIds}`;
-    fetch(`${backendBaseUrl}api/plan/allNotPaginated?${query}`,{
+    fetch(`${backendBaseUrl}api/plan/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
-    .then(response => response.json())
-    .then(response => {
-      resolve(response)
-    })
-    .catch(error => resolve({ 
-      ...error 
-    }));
+      .then(response => response.json())
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => resolve({
+        ...error
+      }));
   });
-}
+};
 
-export const getPlanesByListIds = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/plan/byListIds`,{
+export const getPlanesByListIds = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/plan/byListIds`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(response => {
-      resolve(response)
-    })
-    .catch(error => resolve({ 
-      ...error 
-    }));
+      .then(response => response.json())
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => resolve({
+        ...error
+      }));
   });
-}
+};
 
-export const getPlanesByListIdsNoToken = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/plan/byListIdsNT`,{
+export const getPlanesByListIdsNoToken = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/plan/byListIdsNT`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
-    .then(response => response.json())
-    .then(response => {
-      resolve(response)
-    })
-    .catch(error => resolve({ 
-      ...error 
-    }));
+      .then(response => response.json())
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => resolve({
+        ...error
+      }));
   });
-}
+};
 
 export const createPlan = async (data: any) => {
   return new Promise(resolve => {
@@ -82,13 +82,13 @@ export const createPlan = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const updatePlan = async (data: any, id: any) => {
   return new Promise(resolve => {
@@ -100,10 +100,10 @@ export const updatePlan = async (data: any, id: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};

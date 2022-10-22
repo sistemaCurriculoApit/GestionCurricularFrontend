@@ -1,6 +1,6 @@
-//importacion de dependencias y servicios
+// importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
-import MomentUtils from "@date-io/moment";
+import MomentUtils from '@date-io/moment';
 // @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
@@ -13,19 +13,14 @@ import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import TabPanel from '@material-ui/lab/TabPanel';
 import Box from '@material-ui/core/Box';
-import Search from '@material-ui/icons/Search';
-import FilterList from '@material-ui/icons/FilterList';
 import CloseIcon from '@material-ui/icons/Close';
-import AddIcon from '@material-ui/icons/Add';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import SendIcon from '@material-ui/icons/Send';
-import ClearIcon from '@material-ui/icons/Clear';
-import moment from "moment";
-import "moment/locale/es";
+import moment from 'moment';
+import 'moment/locale/es';
 
-import XlsxPopulate from "xlsx-populate";
-import { saveAs } from "file-saver";
-
+import XlsxPopulate from 'xlsx-populate';
+import { saveAs } from 'file-saver';
 
 // core components
 import { createStyles } from '@material-ui/core';
@@ -38,25 +33,22 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 
+// jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
+import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react';
 
-//jss
-import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
-import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
-import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
+import { AnythingObject } from '../../constants/generalConstants';
+import { getAllAsignaturas } from '../../services/asignaturasServices';
+import { getAllDocentes } from '../../services/docentesServices';
+import { getAllAvancesByAsignatura, getAllAvancesByDocente, getAllAvancesByPerido } from '../../services/avancesServices';
+import { getAllHomologacionesByIdSolicitante, getAllHomologacionesByPeriodo } from '../../services/homologacionesServices';
 
-import { AnythingObject } from '../../constants/generalConstants'
-import { getAllAsignaturas } from "../../services/asignaturasServices"
-import { getAllDocentes } from "../../services/docentesServices"
-import { getAllAvancesByAsignatura, getAllAvancesByDocente, getAllAvancesByPerido } from "../../services/avancesServices"
-import { getAllHomologacionesByIdSolicitante, getAllHomologacionesByPeriodo } from "../../services/homologacionesServices"
-
-
-
-//Estilos generales usados en el modulo
+// Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -69,12 +61,9 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
-//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
+// Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Reportes(props: any) {
-
-  //Declaración de variables y estados del componente
   const { classes } = props;
-
   const [showAlert, setShowAlert] = useState(false);
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
@@ -121,7 +110,26 @@ function Reportes(props: any) {
 
   const [filterIdSolicitante, setFilterIdSolicitante] = useState('');
 
-  //Al iniciar el componente o seleccionar una pestaña se obtienen los filtros necesarios o simplemente se inicializa la lista de datos
+  const getAsignaturas = async () => {
+    let response: any = await getAllAsignaturas({
+      search: '',
+    });
+    if (response && response.asignaturas) {
+      setAsignaturasList(response.asignaturas);
+    }
+    setOpenModalLoading(false);
+  };
+
+  const getDocentes = async () => {
+    let response: any = await getAllDocentes({
+      search: '',
+    });
+    if (response && response.docentes) {
+      setDocentesList(response.docentes);
+    }
+    setOpenModalLoading(false);
+  };
+
   useEffect(() => {
     setTotalDataList(0);
     switch (tabSelection) {
@@ -151,35 +159,22 @@ function Reportes(props: any) {
       default:
         break;
     }
-  }, [tabSelection])
+  }, [tabSelection]);
 
-
-  //Obtencion de asignaturas para los filtros en las pestañas
-  const getAsignaturas = async () => {
-    let response: any = await getAllAsignaturas({
-      search: '',
+  const getSheetData = (data: any, header: any) => {
+    const fields = Object.keys(data[0]);
+    const sheetData = data.map(function (row: any) {
+      return fields.map(function (fieldName: string) {
+        return row[fieldName] ? row[fieldName] : '';
+      });
     });
-    if (response && response.asignaturas) {
-      setAsignaturasList(response.asignaturas);
-    }
-    setOpenModalLoading(false);
-  }
+    sheetData.unshift(header);
+    return sheetData;
+  };
 
-  //Obtencion de docentes para los filtros en las pestañas
-  const getDocentes = async () => {
-    let response: any = await getAllDocentes({
-      search: '',
-    });
-    if (response && response.docentes) {
-      setDocentesList(response.docentes);
-    }
-    setOpenModalLoading(false);
-  }
-
-  //Metodo de obtencion de los avances por asignatura
   const getAvancesByAsignatura = async (page?: any, isReport?: boolean) => {
     if (filterObject1.añoAvance && filterObject1.periodo && filterObject1.asignatura && filterObject1.asignatura._id) {
-      //Llamado al backend y construcción de los parametros de consulta
+      // Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllAvancesByAsignatura({
         page: page ? page : 0,
         añoAvance: filterObject1.añoAvance.toDate(),
@@ -189,17 +184,17 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.avances && response.avances.length) {
         if (isReport) {
-          //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          var data = response.avances.map((data: any) => {
+          // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+          const data = response.avances.map((res: any) => {
             return {
               asignatura: `${filterObject1.asignatura.codigo} - ${filterObject1.asignatura.nombre}`,
-              añoAvance: moment(data.añoAvance).format('YYYY'),
-              periodo: data.periodo,
-              porcentajeAvance: data.porcentajeAvance,
-              descripcion: data.descripcion,
-              fechaCreacion: moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-              fechaActualizacion: moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
-            }
+              añoAvance: moment(res.añoAvance).format('YYYY'),
+              periodo: res.periodo,
+              porcentajeAvance: res.porcentajeAvance,
+              descripcion: res.descripcion,
+              fechaCreacion: moment(res.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+              fechaActualizacion: moment(res.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
+            };
           });
           let header = [
             'Asignatura',
@@ -211,27 +206,26 @@ function Reportes(props: any) {
             'Fecha ultima actualización'
           ];
 
-
           XlsxPopulate.fromBlankAsync().then(async (workbook: any) => {
             const sheet1 = workbook.sheet(0);
             const sheetData = getSheetData(data, header);
             const totalColumns = sheetData[0].length;
 
-            sheet1.column("A").width(20);
-            sheet1.column("B").width(20);
-            sheet1.column("C").width(20);
-            sheet1.column("D").width(20);
-            sheet1.column("E").width(20);
-            sheet1.column("F").width(25);
-            sheet1.column("G").width(25);
-            sheet1.cell("A1").value(sheetData);
+            sheet1.column('A').width(20);
+            sheet1.column('B').width(20);
+            sheet1.column('C').width(20);
+            sheet1.column('D').width(20);
+            sheet1.column('E').width(20);
+            sheet1.column('F').width(25);
+            sheet1.column('G').width(25);
+            sheet1.cell('A1').value(sheetData);
             const range = sheet1.usedRange();
             const endColumn = String.fromCharCode(64 + totalColumns);
-            sheet1.row(1).style("bold", true);
-            sheet1.range("A1:" + endColumn + "1").style("fill", "BFBFBF");
-            range.style("border");
+            sheet1.row(1).style('bold', true);
+            sheet1.range('A1:' + endColumn + '1').style('fill', 'BFBFBF');
+            range.style('border');
             return workbook.outputAsync().then((res: any) => {
-              saveAs(res, "Avances_por_asignatura.xlsx");
+              saveAs(res, 'Avances_por_asignatura.xlsx');
             });
           });
           setOpenModal(false);
@@ -269,12 +263,12 @@ function Reportes(props: any) {
       }, 1000);
     }
     setOpenModalLoading(false);
-  }
+  };
 
-  //Metodo de obtencion de los avances por docente
+  // Metodo de obtencion de los avances por docente
   const getAvancesByDocente = async (page?: any, isReport?: boolean) => {
     if (filterObject2.añoAvance && filterObject2.periodo && filterObject2.docente && filterObject2.docente._id) {
-      //Llamado al backend y construcción de los parametros de consulta
+      // Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllAvancesByDocente({
         page: page ? page : 0,
         añoAvance: filterObject2.añoAvance.toDate(),
@@ -284,17 +278,17 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.avances && response.avances.length) {
         if (isReport) {
-          //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          var data = response.avances.map((data: any) => {
+          // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+          const data = response.avances.map((res: any) => {
             return {
               docente: `${filterObject2.docente.nombre} - ${filterObject2.docente.documento}`,
-              añoAvance: moment(data.añoAvance).format('YYYY'),
-              periodo: data.periodo,
-              porcentajeAvance: data.porcentajeAvance,
-              descripcion: data.descripcion,
-              fechaCreacion: moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-              fechaActualizacion: moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
-            }
+              añoAvance: moment(res.añoAvance).format('YYYY'),
+              periodo: res.periodo,
+              porcentajeAvance: res.porcentajeAvance,
+              descripcion: res.descripcion,
+              fechaCreacion: moment(res.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+              fechaActualizacion: moment(res.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
+            };
           });
           let header = [
             'Docente',
@@ -306,27 +300,26 @@ function Reportes(props: any) {
             'Fecha ultima actualización'
           ];
 
-
           XlsxPopulate.fromBlankAsync().then(async (workbook: any) => {
             const sheet1 = workbook.sheet(0);
             const sheetData = getSheetData(data, header);
             const totalColumns = sheetData[0].length;
 
-            sheet1.column("A").width(20);
-            sheet1.column("B").width(20);
-            sheet1.column("C").width(20);
-            sheet1.column("D").width(20);
-            sheet1.column("E").width(20);
-            sheet1.column("F").width(25);
-            sheet1.column("G").width(25);
-            sheet1.cell("A1").value(sheetData);
+            sheet1.column('A').width(20);
+            sheet1.column('B').width(20);
+            sheet1.column('C').width(20);
+            sheet1.column('D').width(20);
+            sheet1.column('E').width(20);
+            sheet1.column('F').width(25);
+            sheet1.column('G').width(25);
+            sheet1.cell('A1').value(sheetData);
             const range = sheet1.usedRange();
             const endColumn = String.fromCharCode(64 + totalColumns);
-            sheet1.row(1).style("bold", true);
-            sheet1.range("A1:" + endColumn + "1").style("fill", "BFBFBF");
-            range.style("border");
+            sheet1.row(1).style('bold', true);
+            sheet1.range('A1:' + endColumn + '1').style('fill', 'BFBFBF');
+            range.style('border');
             return workbook.outputAsync().then((res: any) => {
-              saveAs(res, "Avances_por_docente.xlsx");
+              saveAs(res, 'Avances_por_docente.xlsx');
             });
           });
           setOpenModal(false);
@@ -365,12 +358,12 @@ function Reportes(props: any) {
     }
     setOpenModalLoading(false);
 
-  }
+  };
 
-  //Metodo de obtencion de los avances por periodo
+  // Metodo de obtencion de los avances por periodo
   const getAvancesByPeriodo = async (page?: any, isReport?: boolean) => {
     if (filterObject3.añoAvance && filterObject3.periodo) {
-      //Llamado al backend y construcción de los parametros de consulta
+      // Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllAvancesByPerido({
         page: page ? page : 0,
         añoAvance: filterObject3.añoAvance.toDate(),
@@ -379,16 +372,16 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.avances && response.avances.length) {
         if (isReport) {
-          //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          var data = response.avances.map((data: any) => {
+          // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+          const data = response.avances.map((res: any) => {
             return {
-              añoAvance: moment(data.añoAvance).format('YYYY'),
-              periodo: data.periodo,
-              porcentajeAvance: data.porcentajeAvance,
-              descripcion: data.descripcion,
-              fechaCreacion: moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-              fechaActualizacion: moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
-            }
+              añoAvance: moment(res.añoAvance).format('YYYY'),
+              periodo: res.periodo,
+              porcentajeAvance: res.porcentajeAvance,
+              descripcion: res.descripcion,
+              fechaCreacion: moment(res.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+              fechaActualizacion: moment(res.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
+            };
           });
           let header = [
             'Año del avance',
@@ -399,26 +392,25 @@ function Reportes(props: any) {
             'Fecha ultima actualización'
           ];
 
-
           XlsxPopulate.fromBlankAsync().then(async (workbook: any) => {
             const sheet1 = workbook.sheet(0);
             const sheetData = getSheetData(data, header);
             const totalColumns = sheetData[0].length;
 
-            sheet1.column("B").width(20);
-            sheet1.column("A").width(15);
-            sheet1.column("C").width(20);
-            sheet1.column("D").width(20);
-            sheet1.column("E").width(20);
-            sheet1.column("F").width(25);
-            sheet1.cell("A1").value(sheetData);
+            sheet1.column('B').width(20);
+            sheet1.column('A').width(15);
+            sheet1.column('C').width(20);
+            sheet1.column('D').width(20);
+            sheet1.column('E').width(20);
+            sheet1.column('F').width(25);
+            sheet1.cell('A1').value(sheetData);
             const range = sheet1.usedRange();
             const endColumn = String.fromCharCode(64 + totalColumns);
-            sheet1.row(1).style("bold", true);
-            sheet1.range("A1:" + endColumn + "1").style("fill", "BFBFBF");
-            range.style("border");
+            sheet1.row(1).style('bold', true);
+            sheet1.range('A1:' + endColumn + '1').style('fill', 'BFBFBF');
+            range.style('border');
             return workbook.outputAsync().then((res: any) => {
-              saveAs(res, "Avances_por_periodo.xlsx");
+              saveAs(res, 'Avances_por_periodo.xlsx');
             });
           });
           setOpenModal(false);
@@ -457,12 +449,12 @@ function Reportes(props: any) {
     }
     setOpenModalLoading(false);
 
-  }
+  };
 
-  //Metodo de obtencion de las homologacoiones por el id del solicitante
+  // Metodo de obtencion de las homologacoiones por el id del solicitante
   const getHomologacionesByIdSolicitante = async (page?: any, isReport?: boolean) => {
     if (filterIdSolicitante) {
-    //Llamado al backend y construcción de los parametros de consulta
+      // Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllHomologacionesByIdSolicitante({
         page: page ? page : 0,
         identificacionSolicitante: filterIdSolicitante,
@@ -470,18 +462,18 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.homologaciones && response.homologaciones.length) {
         if (isReport) {
-      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          var data = response.homologaciones.map((data: any) => {
+          // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+          const data = response.homologaciones.map((res: any) => {
             return {
-              año: moment(data.añoHomologacion).format('YYYY'),
-              periodo: data.periodo,
-              identificacionSolicitante: data.identificacionSolicitante,
-              nombreSolicitante: data.nombreSolicitante,
-              asignaturaSolicitante: data.asignaturaSolicitante,
-              descripcion: data.descripcion,
-              fechaCreacion: moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-              fechaActualizacion: moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-            }
+              año: moment(res.añoHomologacion).format('YYYY'),
+              periodo: res.periodo,
+              identificacionSolicitante: res.identificacionSolicitante,
+              nombreSolicitante: res.nombreSolicitante,
+              asignaturaSolicitante: res.asignaturaSolicitante,
+              descripcion: res.descripcion,
+              fechaCreacion: moment(res.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+              fechaActualizacion: moment(res.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+            };
           });
           let header = [
             'Año',
@@ -494,28 +486,27 @@ function Reportes(props: any) {
             'Fecha ultima actualización',
           ];
 
-
           XlsxPopulate.fromBlankAsync().then(async (workbook: any) => {
             const sheet1 = workbook.sheet(0);
             const sheetData = getSheetData(data, header);
             const totalColumns = sheetData[0].length;
 
-            sheet1.column("A").width(15);
-            sheet1.column("B").width(30);
-            sheet1.column("C").width(30);
-            sheet1.column("D").width(25);
-            sheet1.column("E").width(20);
-            sheet1.column("F").width(20);
-            sheet1.column("G").width(25);
-            sheet1.column("H").width(25);
-            sheet1.cell("A1").value(sheetData);
+            sheet1.column('A').width(15);
+            sheet1.column('B').width(30);
+            sheet1.column('C').width(30);
+            sheet1.column('D').width(25);
+            sheet1.column('E').width(20);
+            sheet1.column('F').width(20);
+            sheet1.column('G').width(25);
+            sheet1.column('H').width(25);
+            sheet1.cell('A1').value(sheetData);
             const range = sheet1.usedRange();
             const endColumn = String.fromCharCode(64 + totalColumns);
-            sheet1.row(1).style("bold", true);
-            sheet1.range("A1:" + endColumn + "1").style("fill", "BFBFBF");
-            range.style("border");
+            sheet1.row(1).style('bold', true);
+            sheet1.range('A1:' + endColumn + '1').style('fill', 'BFBFBF');
+            range.style('border');
             return workbook.outputAsync().then((res: any) => {
-              saveAs(res, "Homologaciones_por_solicitante.xlsx");
+              saveAs(res, 'Homologaciones_por_solicitante.xlsx');
             });
           });
           setOpenModal(false);
@@ -554,12 +545,12 @@ function Reportes(props: any) {
     }
     setOpenModalLoading(false);
 
-  }
+  };
 
-  //Metodo de obtencion de las homologacoiones por periodo
+  // Metodo de obtencion de las homologacoiones por periodo
   const getHomologacionesByPeriodo = async (page?: any, isReport?: boolean) => {
     if (filterObject5.añoHomologacion && filterObject5.periodo) {
-    //Llamado al backend y construcción de los parametros de consulta
+      // Llamado al backend y construcción de los parametros de consulta
       let response: any = await getAllHomologacionesByPeriodo({
         page: page ? page : 0,
         añoHomologacion: filterObject5.añoHomologacion.toDate(),
@@ -568,18 +559,18 @@ function Reportes(props: any) {
       setPagePagination(page ? page + 1 : 1);
       if (response && response.homologaciones && response.homologaciones.length) {
         if (isReport) {
-      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          var data = response.homologaciones.map((data: any) => {
+          // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+          const data = response.homologaciones.map((res: any) => {
             return {
-              año: moment(data.añoHomologacion).format('YYYY'),
-              periodo: data.periodo,
-              identificacionSolicitante: data.identificacionSolicitante,
-              nombreSolicitante: data.nombreSolicitante,
-              asignaturaSolicitante: data.asignaturaSolicitante,
-              descripcion: data.descripcion,
-              fechaCreacion: moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-              fechaActualizacion: moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-            }
+              año: moment(res.añoHomologacion).format('YYYY'),
+              periodo: res.periodo,
+              identificacionSolicitante: res.identificacionSolicitante,
+              nombreSolicitante: res.nombreSolicitante,
+              asignaturaSolicitante: res.asignaturaSolicitante,
+              descripcion: res.descripcion,
+              fechaCreacion: moment(res.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+              fechaActualizacion: moment(res.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+            };
           });
           let header = [
             'Año',
@@ -592,28 +583,27 @@ function Reportes(props: any) {
             'Fecha ultima actualización',
           ];
 
-
           XlsxPopulate.fromBlankAsync().then(async (workbook: any) => {
             const sheet1 = workbook.sheet(0);
             const sheetData = getSheetData(data, header);
             const totalColumns = sheetData[0].length;
 
-            sheet1.column("A").width(15);
-            sheet1.column("B").width(30);
-            sheet1.column("C").width(30);
-            sheet1.column("D").width(25);
-            sheet1.column("E").width(20);
-            sheet1.column("F").width(20);
-            sheet1.column("G").width(25);
-            sheet1.column("H").width(25);
-            sheet1.cell("A1").value(sheetData);
+            sheet1.column('A').width(15);
+            sheet1.column('B').width(30);
+            sheet1.column('C').width(30);
+            sheet1.column('D').width(25);
+            sheet1.column('E').width(20);
+            sheet1.column('F').width(20);
+            sheet1.column('G').width(25);
+            sheet1.column('H').width(25);
+            sheet1.cell('A1').value(sheetData);
             const range = sheet1.usedRange();
             const endColumn = String.fromCharCode(64 + totalColumns);
-            sheet1.row(1).style("bold", true);
-            sheet1.range("A1:" + endColumn + "1").style("fill", "BFBFBF");
-            range.style("border");
+            sheet1.row(1).style('bold', true);
+            sheet1.range('A1:' + endColumn + '1').style('fill', 'BFBFBF');
+            range.style('border');
             return workbook.outputAsync().then((res: any) => {
-              saveAs(res, "Homologaciones_por_periodo.xlsx");
+              saveAs(res, 'Homologaciones_por_periodo.xlsx');
             });
           });
           setOpenModal(false);
@@ -652,21 +642,21 @@ function Reportes(props: any) {
     }
     setOpenModalLoading(false);
 
-  }
+  };
 
-  //Manejador de la apertura de la modal para establecer la paginacion al generar el reporte 
+  // Manejador de la apertura de la modal para establecer la paginacion al generar el reporte 
   const handleReportOpenModal = async () => {
     setPageReportSelected({});
     let pagesReport = Math.ceil(totalDataList / 100);
     let selectRange = [];
-    for (let i = 1; i == pagesReport; i++) {
+    for (let i = 1; i === pagesReport; i++) {
       selectRange.push({ index: i - 1, label: `${i} - ${i * 100}` });
     }
     setPaginationReport(selectRange);
-    setOpenModal(true)
-  }
+    setOpenModal(true);
+  };
 
-  //Segun la pestaña activa se ejecuta el metodo de obtencion de datos para la tabla que se listara
+  // Segun la pestaña activa se ejecuta el metodo de obtencion de datos para la tabla que se listara
   const handleReportCallFunction = async () => {
     setOpenModalLoading(true);
     switch (tabSelection) {
@@ -689,21 +679,8 @@ function Reportes(props: any) {
       default:
         break;
     }
-  }
+  };
 
-
-  const getSheetData = (data: any, header: any) => {
-    var fields = Object.keys(data[0]);
-    var sheetData = data.map(function (row: any) {
-      return fields.map(function (fieldName) {
-        return row[fieldName] ? row[fieldName] : "";
-      });
-    });
-    sheetData.unshift(header);
-    return sheetData;
-  }
-
-  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -719,36 +696,36 @@ function Reportes(props: any) {
               <TabContext value={tabSelection}>
 
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                  <Tabs value={tabSelection} onChange={(event, value) => { setTabSelection(value) }}
-                    variant='scrollable'
-                    scrollButtons='auto'
+                  <Tabs value={tabSelection} onChange={(event, value) => { setTabSelection(value); }}
+                    variant="scrollable"
+                    scrollButtons="auto"
                   >
-                    <Tab label="Avances por asignatura" value={'1'} wrapped />
-                    <Tab label="Avances de asignatura por docente" value={'2'} wrapped />
-                    <Tab label="Avances por periodo" value={'3'} wrapped />
-                    <Tab label="Homologación por estudiante" value={'4'} wrapped />
-                    <Tab label="Homologación por periodo" value={'5'} wrapped />
+                    <Tab label="Avances por asignatura" value={'1'} wrapped={true} />
+                    <Tab label="Avances de asignatura por docente" value={'2'} wrapped={true} />
+                    <Tab label="Avances por periodo" value={'3'} wrapped={true} />
+                    <Tab label="Homologación por estudiante" value={'4'} wrapped={true} />
+                    <Tab label="Homologación por periodo" value={'5'} wrapped={true} />
                   </Tabs>
                 </Box>
 
                 <TabPanel value={'1'} >
                   <GridContainer>
                     <GridItem xs={12} sm={12} md={4}>
-                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <DatePicker
-                            views={["year"]}
+                            views={['year']}
                             label="Año del avance"
-                            inputVariant='outlined'
-                            margin='dense'
+                            inputVariant="outlined"
+                            margin="dense"
                             className={classes.CustomTextField}
                             format="YYYY"
                             value={filterObject1.añoAvance}
                             onChange={(newValue: any) => {
-                              setFilterObject1({ ...filterObject1, añoAvance: newValue })
+                              setFilterObject1({ ...filterObject1, añoAvance: newValue });
                             }}
-                            clearable
-                            clearLabel='Limpiar'
+                            clearable={true}
+                            clearLabel="Limpiar"
                           />
                           {
                             filterObject1.añoAvance ? (
@@ -763,9 +740,9 @@ function Reportes(props: any) {
                     <GridItem xs={12} sm={12} md={2}>
                       <Autocomplete
                         id="tags-outlined"
-                        options={["1", "2"]}
+                        options={['1', '2']}
                         getOptionLabel={(option) => option}
-                        filterSelectedOptions
+                        filterSelectedOptions={true}
                         onChange={(e, option) => setFilterObject1({ ...filterObject1, periodo: option })}
                         value={filterObject1.periodo}
                         renderInput={(params) => (
@@ -787,7 +764,7 @@ function Reportes(props: any) {
                         id="tags-outlined"
                         options={asignaturasList}
                         getOptionLabel={(option) => `${option.codigo} - ${option.nombre}`}
-                        filterSelectedOptions
+                        filterSelectedOptions={true}
                         onChange={(e, option) => setFilterObject1({ ...filterObject1, asignatura: option || null })}
                         value={filterObject1.asignatura}
                         renderInput={(params) => (
@@ -805,7 +782,7 @@ function Reportes(props: any) {
                     </GridItem>
 
                     <GridItem xs={12} sm={12} md={2} >
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getAvancesByAsignatura();
@@ -853,27 +830,26 @@ function Reportes(props: any) {
                       </>
                   }
 
-
                 </TabPanel>
 
                 <TabPanel value={'2'} >
                   <GridContainer>
                     <GridItem xs={12} sm={12} md={4}>
-                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <DatePicker
-                            views={["year"]}
+                            views={['year']}
                             label="Año del avance"
-                            inputVariant='outlined'
-                            margin='dense'
+                            inputVariant="outlined"
+                            margin="dense"
                             className={classes.CustomTextField}
                             format="YYYY"
                             value={filterObject2.añoAvance}
                             onChange={(newValue: any) => {
-                              setFilterObject2({ ...filterObject2, añoAvance: newValue })
+                              setFilterObject2({ ...filterObject2, añoAvance: newValue });
                             }}
-                            clearable
-                            clearLabel='Limpiar'
+                            clearable={true}
+                            clearLabel="Limpiar"
                           />
                           {
                             filterObject2.añoAvance ? (
@@ -888,9 +864,9 @@ function Reportes(props: any) {
                     <GridItem xs={12} sm={12} md={2}>
                       <Autocomplete
                         id="tags-outlined"
-                        options={["1", "2"]}
+                        options={['1', '2']}
                         getOptionLabel={(option) => option}
-                        filterSelectedOptions
+                        filterSelectedOptions={true}
                         onChange={(e, option) => setFilterObject2({ ...filterObject2, periodo: option })}
                         value={filterObject2.periodo}
                         renderInput={(params) => (
@@ -912,7 +888,7 @@ function Reportes(props: any) {
                         id="tags-outlined"
                         options={docentesList}
                         getOptionLabel={(option) => option._id ? `${option.nombre} - ${option.documento}` : ''}
-                        filterSelectedOptions
+                        filterSelectedOptions={true}
                         onChange={(e, option) => setFilterObject2({ ...filterObject2, docente: option || null })}
                         value={filterObject2.docente}
                         renderInput={(params) => (
@@ -930,7 +906,7 @@ function Reportes(props: any) {
                     </GridItem>
 
                     <GridItem xs={12} sm={12} md={2} >
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getAvancesByDocente();
@@ -978,27 +954,26 @@ function Reportes(props: any) {
                       </>
                   }
 
-
                 </TabPanel>
 
                 <TabPanel value={'3'} >
                   <GridContainer>
                     <GridItem xs={12} sm={12} md={5}>
-                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <DatePicker
-                            views={["year"]}
+                            views={['year']}
                             label="Año del avance"
-                            inputVariant='outlined'
-                            margin='dense'
+                            inputVariant="outlined"
+                            margin="dense"
                             className={classes.CustomTextField}
                             format="YYYY"
                             value={filterObject3.añoAvance}
                             onChange={(newValue: any) => {
-                              setFilterObject3({ ...filterObject3, añoAvance: newValue })
+                              setFilterObject3({ ...filterObject3, añoAvance: newValue });
                             }}
-                            clearable
-                            clearLabel='Limpiar'
+                            clearable={true}
+                            clearLabel="Limpiar"
                           />
                           {
                             filterObject3.añoAvance ? (
@@ -1013,9 +988,9 @@ function Reportes(props: any) {
                     <GridItem xs={12} sm={12} md={5}>
                       <Autocomplete
                         id="tags-outlined"
-                        options={["1", "2"]}
+                        options={['1', '2']}
                         getOptionLabel={(option) => option}
-                        filterSelectedOptions
+                        filterSelectedOptions={true}
                         onChange={(e, option) => setFilterObject3({ ...filterObject3, periodo: option })}
                         value={filterObject3.periodo}
                         renderInput={(params) => (
@@ -1033,7 +1008,7 @@ function Reportes(props: any) {
                     </GridItem>
 
                     <GridItem xs={12} sm={12} md={2} >
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getAvancesByPeriodo();
@@ -1100,9 +1075,8 @@ function Reportes(props: any) {
                       />
                     </GridItem>
 
-
                     <GridItem xs={12} sm={12} md={2} >
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getHomologacionesByIdSolicitante();
@@ -1150,28 +1124,26 @@ function Reportes(props: any) {
                       </>
                   }
 
-
                 </TabPanel>
-
 
                 <TabPanel value={'5'} >
                   <GridContainer>
                     <GridItem xs={12} sm={12} md={5}>
-                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                      <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           <DatePicker
-                            views={["year"]}
+                            views={['year']}
                             label="Año del avance"
-                            inputVariant='outlined'
-                            margin='dense'
+                            inputVariant="outlined"
+                            margin="dense"
                             className={classes.CustomTextField}
                             format="YYYY"
                             value={filterObject5.añoHomologacion}
                             onChange={(newValue: any) => {
-                              setFilterObject5({ ...filterObject5, añoHomologacion: newValue })
+                              setFilterObject5({ ...filterObject5, añoHomologacion: newValue });
                             }}
-                            clearable
-                            clearLabel='Limpiar'
+                            clearable={true}
+                            clearLabel="Limpiar"
                           />
                           {
                             filterObject5.añoHomologacion ? (
@@ -1186,9 +1158,9 @@ function Reportes(props: any) {
                     <GridItem xs={12} sm={12} md={5}>
                       <Autocomplete
                         id="tags-outlined"
-                        options={["1", "2"]}
+                        options={['1', '2']}
                         getOptionLabel={(option) => option}
-                        filterSelectedOptions
+                        filterSelectedOptions={true}
                         onChange={(e, option) => setFilterObject5({ ...filterObject5, periodo: option })}
                         value={filterObject5.periodo}
                         renderInput={(params) => (
@@ -1206,7 +1178,7 @@ function Reportes(props: any) {
                     </GridItem>
 
                     <GridItem xs={12} sm={12} md={2} >
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getHomologacionesByPeriodo();
@@ -1260,14 +1232,13 @@ function Reportes(props: any) {
             </CardBody>
           </Card>
 
-
         </GridItem>
       </GridContainer>
 
       <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Generar Reporte" placement='left' classes={{ tooltip: classes.tooltip }}>
+        <Tooltip id="addTooltip" title="Generar Reporte" placement="left" classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AttachFileIcon />}
+            <Button key={'searchButton'} color={'primary'} round={true} justIcon={true} startIcon={<AttachFileIcon />}
               onClick={() => {
                 if (totalDataList) {
                   handleReportOpenModal();
@@ -1300,10 +1271,10 @@ function Reportes(props: any) {
                 <div className={classes.TitleFilterContainer}>
                   <h4 className={classes.cardTitleWhite}>Descargar reporte</h4>
                   <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModal(false); }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -1320,7 +1291,7 @@ function Reportes(props: any) {
                     id="tags-outlined"
                     options={paginationReport}
                     getOptionLabel={(option) => option && option.label ? option.label : ''}
-                    filterSelectedOptions
+                    filterSelectedOptions={true}
                     onChange={(e, option) => setPageReportSelected(option || {})}
                     value={pageReportSelected}
                     renderInput={(params) => (
@@ -1338,10 +1309,10 @@ function Reportes(props: any) {
               </GridContainer>
 
               <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                   onClick={() => {
                     if (pageReportSelected && pageReportSelected.label) {
-                      handleReportCallFunction()
+                      handleReportCallFunction();
                     } else {
                       setSeverityAlert('info');
                       setShowAlert(true);
