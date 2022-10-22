@@ -51,7 +51,7 @@ import { getAreasByListIds } from '../../services/areasServices';
 import { getAsignaturaByListIds } from '../../services/asignaturasServices';
 import { getDocentesByListIds } from '../../services/docentesServices';
 import { getAllContenidoByAsignatura } from '../../services/contenidosServices';
-import { getAvancesPaginated, createAvance, updateAvance, getAllAvancesByDocenteEmail } from '../../services/avancesServices';
+import { getAdvancements, createAdvancement, updateAdvancement, getAdvancementsByProfessorsEmail } from '../../services/avancesServices';
 
 // Estilos generales usados en el modulo
 const styles = createStyles({
@@ -206,17 +206,19 @@ function AvancesAsignaturas(props: any) {
 
   const getAvances = async (page?: any, byEmailDocente?: boolean, emailDocente?: any) => {
     // Llamado al backend y construcción de los parametros de consulta
+    console.log('gonna call avance')
     let response: any;
     if (byEmailDocente) {
-      response = await getAllAvancesByDocenteEmail({
+      response = await getAdvancementsByProfessorsEmail({
         page: page ? page : 0,
         search: searchField,
-        emailDocente: emailDocente,
+        email: emailDocente,
         dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
         dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
       });
     } else {
-      response = await getAvancesPaginated({
+      response = await getAdvancements({
+        paginated: true,
         page: page ? page : 0,
         search: searchField,
         dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
@@ -224,29 +226,38 @@ function AvancesAsignaturas(props: any) {
       });
     }
     setPagePagination(page ? page + 1 : 1);
-    if (response.avances && response.avances.length) {
+    if (response.advancements && response.advancements.length) {
       setAvancesList([]);
       // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-      let avances = response.avances.map((data: any) => {
-        let arrayData = [
-          moment(data.añoAvance).format('YYYY'),
-          data.periodo,
-          data.porcentajeAvance,
-          data.descripcion,
-          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id="filterTooltip" title={!blockCoordinatorPermission() ? 'Editar' : 'Ver detalles'} placement="top" classes={{ tooltip: classes.tooltip }}>
+      let avances = response.advancements.map((data: any) => [
+        moment(data.añoAvance).format('YYYY'),
+        data.periodo,
+        data.porcentajeAvance,
+        data.descripcion,
+        moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+        moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+        (
+          <Tooltip
+            id="filterTooltip"
+            title={!blockCoordinatorPermission() ? 'Editar' : 'Ver detalles'}
+            placement="top"
+            classes={{ tooltip: classes.tooltip }}
+          >
             <div className={classes.buttonHeaderContainer}>
-              {/* <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />} */}
-              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={!blockCoordinatorPermission() ? <EditIcon /> : <VisibilityIcon />}
-                onClick={() => {
-                  setDataEditAvance(data);
-                }} />
+              <Button
+                key={'filtersButton'}
+                color={'primary'}
+                size="sm"
+                round={true}
+                variant="outlined"
+                justIcon={true}
+                startIcon={!blockCoordinatorPermission() ? <EditIcon /> : <VisibilityIcon />}
+                onClick={() => setDataEditAvance(data)}
+              />
             </div>
           </Tooltip>
-        ];
-        return arrayData;
-      });
+        )
+      ]);
       setTotalAvances(response.totalAvances);
       setAvancesList(avances);
     } else {
@@ -385,7 +396,7 @@ function AvancesAsignaturas(props: any) {
   };
 
   const handleCreateAvance = async () => {
-    let avanceToSave = {
+    const advancement = {
       ...avanceObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -395,11 +406,11 @@ function AvancesAsignaturas(props: any) {
       contenido: contenidoChecked.map((contenido: any) => ({ _id: contenido._id })),
       añoAvance: avanceObject.añoAvance.toDate()
     };
-    let response: any = await createAvance(avanceToSave);
-    if (response && response.error) {
+    const response: any = await createAdvancement(advancement);
+    if (!response) {
       setSeverityAlert('error');
       setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setMessagesAlert('Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -426,7 +437,7 @@ function AvancesAsignaturas(props: any) {
   };
 
   const handleEditAvance = async () => {
-    let avanceToSave = {
+    const advancement = {
       ...avanceObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -436,11 +447,11 @@ function AvancesAsignaturas(props: any) {
       contenido: contenidoChecked.map((contenido: any) => ({ _id: contenido._id })),
       añoAvance: avanceObject.añoAvance.toDate()
     };
-    let response: any = await updateAvance(avanceToSave, avanceObject._id);
-    if (response && response.error) {
+    const response: any = await updateAdvancement(avanceObject._id, advancement);
+    if (!response) {
       setSeverityAlert('warning');
       setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setMessagesAlert('Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -531,11 +542,11 @@ function AvancesAsignaturas(props: any) {
 
   useEffect(() => {
     if (blockDocentePermissions === true && isFirstLoading === true) {
-      var emailDocente = localStorage.getItem('userEmail');
+      const emailDocente = localStorage.getItem('userEmail');
       getAvances(0, true, emailDocente);
       setIsFirstLoading(false);
     }
-  });
+  }, []);
 
   useEffect(() => {
     if (!searchField) {

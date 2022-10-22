@@ -45,8 +45,8 @@ import { container, containerFormModal, containerFooterModal, modalForm } from '
 import { AnythingObject } from '../../constants/generalConstants';
 import { getAllAsignaturas } from '../../services/asignaturasServices';
 import { getAllDocentes } from '../../services/docentesServices';
-import { getAllAvancesByAsignatura, getAllAvancesByDocente, getAllAvancesByPerido } from '../../services/avancesServices';
-import { getAllHomologacionesByIdSolicitante, getAllHomologacionesByPeriodo } from '../../services/homologacionesServices';
+import { getAdvancementsBySubject, getAdvancementsByProfessors, getAdvancementsByPeriods, AdvancementsResponse } from '../../services/avancesServices';
+import { getHomologationsByApplicant, getHomologationsByPeriods, HomologationsResponse } from '../../services/homologacionesServices';
 
 // Estilos generales usados en el modulo
 const styles = createStyles({
@@ -73,17 +73,17 @@ function Reportes(props: any) {
   const [asignaturasList, setAsignaturasList] = useState([]);
   const [docentesList, setDocentesList] = useState([]);
 
-  const [avanceByAsignaturaList, setAvanceByAsignaturaList] = useState([]);
-  const [avanceByDocenteList, setAvanceByDocenteList] = useState([]);
-  const [avanceByPeriodoList, setAvanceByPeriodoList] = useState([]);
-  const [homologacionesByIdSolicitanteList, setHomologacionesByIdSolicitanteList] = useState([]);
-  const [homologacionesByPeriodoList, setHomologacionesByPeriodoList] = useState([]);
+  const [avanceByAsignaturaList, setAvanceByAsignaturaList] = useState<any[]>([]);
+  const [avanceByDocenteList, setAvanceByDocenteList] = useState<any[]>([]);
+  const [avanceByPeriodoList, setAvanceByPeriodoList] = useState<any[]>([]);
+  const [homologacionesByIdSolicitanteList, setHomologacionesByIdSolicitanteList] = useState<any[]>([]);
+  const [homologacionesByPeriodoList, setHomologacionesByPeriodoList] = useState<any[]>([]);
 
   const [paginationReport, setPaginationReport] = useState<AnythingObject[]>([]);
   const [pageReportSelected, setPageReportSelected] = useState<AnythingObject>({});
 
-  const [totalDataList, setTotalDataList] = useState(0);
-  const [pagePagination, setPagePagination] = useState(1);
+  const [totalDataList, setTotalDataList] = useState<number>(0);
+  const [pagePagination, setPagePagination] = useState<number>(1);
 
   const [tabSelection, setTabSelection] = useState('1');
   const [filterObject1, setFilterObject1] = useState<AnythingObject>({
@@ -174,18 +174,16 @@ function Reportes(props: any) {
 
   const getAvancesByAsignatura = async (page?: any, isReport?: boolean) => {
     if (filterObject1.añoAvance && filterObject1.periodo && filterObject1.asignatura && filterObject1.asignatura._id) {
-      // Llamado al backend y construcción de los parametros de consulta
-      let response: any = await getAllAvancesByAsignatura({
+      const response: AdvancementsResponse = await getAdvancementsBySubject(filterObject1.asignatura._id, {
         page: page ? page : 0,
-        añoAvance: filterObject1.añoAvance.toDate(),
-        periodo: filterObject1.periodo,
-        asignaturaId: filterObject1.asignatura._id
+        advancementYear: filterObject1.añoAvance.year(),
+        period: filterObject1.periodo,
       });
       setPagePagination(page ? page + 1 : 1);
-      if (response && response.avances && response.avances.length) {
+      if (response && response.advancements && response.advancements.length) {
         if (isReport) {
           // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          const data = response.avances.map((res: any) => {
+          const data = response.advancements.map((res: any) => {
             return {
               asignatura: `${filterObject1.asignatura.codigo} - ${filterObject1.asignatura.nombre}`,
               añoAvance: moment(res.añoAvance).format('YYYY'),
@@ -230,19 +228,16 @@ function Reportes(props: any) {
           });
           setOpenModal(false);
         } else {
-          let avances = response.avances.map((data: any) => {
-            let arrayData = [
-              moment(data.añoAvance).format('YYYY'),
-              data.periodo,
-              data.porcentajeAvance,
-              data.descripcion,
-              moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-              moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
-            ];
-            return arrayData;
-          });
+          const avances = response.advancements.map((data: any) => [
+            moment(data.añoAvance).format('YYYY'),
+            data.periodo,
+            data.porcentajeAvance,
+            data.descripcion,
+            moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+            moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a')
+          ]);
           setAvanceByAsignaturaList(avances);
-          setTotalDataList(response.totalAvances);
+          setTotalDataList(response.advancementsCount);
         }
       } else {
         setAvanceByAsignaturaList([]);
@@ -268,18 +263,16 @@ function Reportes(props: any) {
   // Metodo de obtencion de los avances por docente
   const getAvancesByDocente = async (page?: any, isReport?: boolean) => {
     if (filterObject2.añoAvance && filterObject2.periodo && filterObject2.docente && filterObject2.docente._id) {
-      // Llamado al backend y construcción de los parametros de consulta
-      let response: any = await getAllAvancesByDocente({
+      const response: AdvancementsResponse = await getAdvancementsByProfessors(filterObject2.docente._id, {
         page: page ? page : 0,
-        añoAvance: filterObject2.añoAvance.toDate(),
-        periodo: filterObject2.periodo,
-        docenteId: filterObject2.docente._id
+        advancementYear: filterObject2.añoAvance.year(),
+        period: filterObject2.periodo
       });
       setPagePagination(page ? page + 1 : 1);
-      if (response && response.avances && response.avances.length) {
+      if (response && response.advancements && response.advancements.length) {
         if (isReport) {
           // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          const data = response.avances.map((res: any) => {
+          const data = response.advancements.map((res: any) => {
             return {
               docente: `${filterObject2.docente.nombre} - ${filterObject2.docente.documento}`,
               añoAvance: moment(res.añoAvance).format('YYYY'),
@@ -324,7 +317,7 @@ function Reportes(props: any) {
           });
           setOpenModal(false);
         } else {
-          let avances = response.avances.map((data: any) => {
+          let avances = response.advancements.map((data: any) => {
             let arrayData = [
               moment(data.añoAvance).format('YYYY'),
               data.periodo,
@@ -336,7 +329,7 @@ function Reportes(props: any) {
             return arrayData;
           });
           setAvanceByDocenteList(avances);
-          setTotalDataList(response.totalAvances);
+          setTotalDataList(response.advancementsCount);
         }
       } else {
         setAvanceByDocenteList([]);
@@ -364,16 +357,15 @@ function Reportes(props: any) {
   const getAvancesByPeriodo = async (page?: any, isReport?: boolean) => {
     if (filterObject3.añoAvance && filterObject3.periodo) {
       // Llamado al backend y construcción de los parametros de consulta
-      let response: any = await getAllAvancesByPerido({
+      const response: any = await getAdvancementsByPeriods(filterObject3.periodo, {
         page: page ? page : 0,
-        añoAvance: filterObject3.añoAvance.toDate(),
-        periodo: filterObject3.periodo
+        advancementYear: filterObject3.añoAvance.year()
       });
       setPagePagination(page ? page + 1 : 1);
-      if (response && response.avances && response.avances.length) {
+      if (response && response.advancements && response.advancements.length) {
         if (isReport) {
           // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          const data = response.avances.map((res: any) => {
+          const data = response.advancements.map((res: any) => {
             return {
               añoAvance: moment(res.añoAvance).format('YYYY'),
               periodo: res.periodo,
@@ -415,7 +407,7 @@ function Reportes(props: any) {
           });
           setOpenModal(false);
         } else {
-          let avances = response.avances.map((data: any) => {
+          let avances = response.advancements.map((data: any) => {
             let arrayData = [
               moment(data.añoAvance).format('YYYY'),
               data.periodo,
@@ -427,7 +419,7 @@ function Reportes(props: any) {
             return arrayData;
           });
           setAvanceByPeriodoList(avances);
-          setTotalDataList(response.totalAvances);
+          setTotalDataList(response.advancementsCount);
         }
       } else {
         setAvanceByPeriodoList([]);
@@ -455,15 +447,14 @@ function Reportes(props: any) {
   const getHomologacionesByIdSolicitante = async (page?: any, isReport?: boolean) => {
     if (filterIdSolicitante) {
       // Llamado al backend y construcción de los parametros de consulta
-      let response: any = await getAllHomologacionesByIdSolicitante({
+      const response: HomologationsResponse = await getHomologationsByApplicant(filterIdSolicitante, {
         page: page ? page : 0,
-        identificacionSolicitante: filterIdSolicitante,
       });
       setPagePagination(page ? page + 1 : 1);
-      if (response && response.homologaciones && response.homologaciones.length) {
+      if (response && response.homologations && response.homologations.length) {
         if (isReport) {
           // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          const data = response.homologaciones.map((res: any) => {
+          const data = response.homologations.map((res: any) => {
             return {
               año: moment(res.añoHomologacion).format('YYYY'),
               periodo: res.periodo,
@@ -511,7 +502,7 @@ function Reportes(props: any) {
           });
           setOpenModal(false);
         } else {
-          let homologaciones = response.homologaciones.map((data: any) => {
+          let homologaciones = response.homologations.map((data: any) => {
             let arrayData = [
               data.identificacionSolicitante,
               data.nombreSolicitante,
@@ -523,7 +514,7 @@ function Reportes(props: any) {
             return arrayData;
           });
           setHomologacionesByIdSolicitanteList(homologaciones);
-          setTotalDataList(response.totalHomologaciones);
+          setTotalDataList(response.homologationsCount);
         }
       } else {
         setHomologacionesByIdSolicitanteList([]);
@@ -550,17 +541,15 @@ function Reportes(props: any) {
   // Metodo de obtencion de las homologacoiones por periodo
   const getHomologacionesByPeriodo = async (page?: any, isReport?: boolean) => {
     if (filterObject5.añoHomologacion && filterObject5.periodo) {
-      // Llamado al backend y construcción de los parametros de consulta
-      let response: any = await getAllHomologacionesByPeriodo({
+      const response: HomologationsResponse = await getHomologationsByPeriods(filterObject5.periodo, {
         page: page ? page : 0,
-        añoHomologacion: filterObject5.añoHomologacion.toDate(),
-        periodo: filterObject5.periodo
+        homologationYear: filterObject5.añoHomologacion.year(),
       });
       setPagePagination(page ? page + 1 : 1);
-      if (response && response.homologaciones && response.homologaciones.length) {
+      if (response && response.homologations && response.homologations.length) {
         if (isReport) {
           // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-          const data = response.homologaciones.map((res: any) => {
+          const data = response.homologations.map((res: any) => {
             return {
               año: moment(res.añoHomologacion).format('YYYY'),
               periodo: res.periodo,
@@ -608,7 +597,7 @@ function Reportes(props: any) {
           });
           setOpenModal(false);
         } else {
-          let homologaciones = response.homologaciones.map((data: any) => {
+          let homologaciones = response.homologations.map((data: any) => {
             let arrayData = [
               data.identificacionSolicitante,
               data.nombreSolicitante,
@@ -620,7 +609,7 @@ function Reportes(props: any) {
             return arrayData;
           });
           setHomologacionesByPeriodoList(homologaciones);
-          setTotalDataList(response.totalHomologaciones);
+          setTotalDataList(response.homologationsCount);
         }
       } else {
         setHomologacionesByPeriodoList([]);

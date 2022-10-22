@@ -1,146 +1,107 @@
-import { backendBaseUrl, getHeaders } from './constants';
+import { backendBaseUrl, getHeaders, buildQuery } from './constants';
 
-export const getAvancesPaginated = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    let query = `page=${data.page}&search=${data.search}&dateCreationFrom=${data.dateCreationFrom}&dateCreationTo=${data.dateCreationTo}`;
-    fetch(`${backendBaseUrl}api/avance/all?${query}`, {
-      headers,
-      method: 'GET'
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+type AdvancementsQuery = {
+  query?: string,
+  paginated?: boolean,
+  page?: number,
+  period?: number,
+  advancementYear?: string,
+  search?: string,
+  dateCreationFrom?: any,
+  dateCreationTo?: any,
+  email?: string
 };
 
-export const getAllAvances = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/avance/allNotPaginated?${query}`, {
-      headers,
-      method: 'GET'
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export interface AdvancementsResponse {
+  advancements: any[];
+  advancementsCount: number;
+}
+
+export const getAdvancements = async (query: AdvancementsQuery): Promise<AdvancementsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}api/advancements?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as AdvancementsResponse;
+  }
 };
 
-export const getAllAvancesByAsignatura = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/allByAsignatura`, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const getAdvancementsBySubject = async (subjectId: string, query: AdvancementsQuery): Promise<AdvancementsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}api/advancements/subjects/${subjectId}?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as AdvancementsResponse;
+  }
 };
 
-export const getAllAvancesByDocenteEmail = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    let query = `search=${data.search}`;
-    let emailDocente = `emailDocente=${data.emailDocente}`;
-    fetch(`${backendBaseUrl}api/avance/allByDocenteEmail?${emailDocente}&${query}`, {
-      headers,
-      method: 'GET',
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const getAdvancementsByProfessorsEmail = async (query: AdvancementsQuery): Promise<AdvancementsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}api/advancements/professors?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as AdvancementsResponse;
+  }
 };
 
-export const getAllAvancesByDocente = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/allByDocente`, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const getAdvancementsByProfessors = async (professorId: string, query: AdvancementsQuery): Promise<AdvancementsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}api/advancements/professors/${professorId}?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as AdvancementsResponse;
+  }
 };
 
-export const getAllAvancesByPerido = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/allByPeriodo`, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const getAdvancementsByPeriods = async (period: string, query: AdvancementsQuery): Promise<AdvancementsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}api/advancements/periods/${period}?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as AdvancementsResponse;
+  }
 };
 
-export const createAvance = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/add`, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const createAdvancement = async (advancement: any): Promise<any> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}api/advancements`;
+    const response = await fetch(url, { headers, method: 'POST', body: JSON.stringify(advancement) });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 };
 
-export const updateAvance = async (data: any, id: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/avance/${id}`, {
-      headers,
-      method: 'PATCH',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const updateAdvancement = async (advancementId: string, advancement: any): Promise<any> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}api/advancements/${advancementId}`;
+    const response = await fetch(url, { headers, method: 'PUT', body: JSON.stringify(advancement) });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 };
