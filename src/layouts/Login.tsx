@@ -1,16 +1,7 @@
-/* eslint-disable */
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
-// creates a beautiful scrollbar
-import PerfectScrollbar from 'perfect-scrollbar';
+import { Switch, Route } from 'react-router-dom';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
-// @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
-// core components
-import Navbar from '../components/Navbars/Navbar';
-import Footer from '../components/Footer/Footer';
-import Sidebar from '../components/Sidebar/Sidebar';
-import FixedPlugin from '../components/FixedPlugin/FixedPlugin';
 
 import routes from '../routes';
 
@@ -33,8 +24,6 @@ const switchRoutes = (
     })}
   </Switch>
 );
-
-const routesFilter = routes.filter(route => (route.layout === '/login'));
 
 interface Props {
   classes: any;
@@ -110,7 +99,7 @@ class DashboardAdmin extends React.Component<Props, State> {
   }
 
   render() {
-    const { classes, ...rest } = this.props;
+    const { classes } = this.props;
     return (
       <div className={classes.wrapper} style={{ backgroundImage: `url(${image})` }}>
         <div className={classes.wrapperFilter} >

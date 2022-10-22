@@ -13,12 +13,8 @@ import {
 
 import Card from '../../components/Card/Card';
 
-
-
 import headerStyle from '../../assets/jss/material-dashboard-react/components/headerStyle';
-import { paginationSize } from '../../constants/generalConstants'
-
-
+import { paginationSize } from '../../constants/generalConstants';
 
 function ModalLoading({ ...props }: any) {
   const { classes, showModal } = props;
@@ -26,7 +22,6 @@ function ModalLoading({ ...props }: any) {
   // useEffect(() => {
   //   setTotalPages(totalData/paginationSize);
   // }, [totalData])
-
 
   return (
     <div className={classes.containerPagination}>

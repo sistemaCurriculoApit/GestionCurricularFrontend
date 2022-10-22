@@ -1,20 +1,13 @@
-//importacion de dependencias y servicios
+// importacion de dependencias y servicios
 import React, { useEffect, useState } from 'react';
-// react plugin for creating charts
 import ChartistGraph from 'react-chartist';
-import { NavLink } from 'react-router-dom';
-// @material-ui/core
 import withStyles from '@material-ui/core/styles/withStyles';
 import Chip from '@material-ui/core/Chip';
 
-// @material-ui/icons
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import DescriptionIcon from '@material-ui/icons/Description';
 import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
 
-
-
-// core components
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
 import Card from '../../components/Card/Card';
@@ -24,20 +17,17 @@ import CardBody from '../../components/Card/CardBody';
 import CardFooter from '../../components/Card/CardFooter';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
 
-import { bugs, website, server } from '../../variables/general';
-
 import {
   dataBaseLineChart,
   dataBaseBarChart,
-  completedTasksChart
 } from '../../variables/charts';
 
 import dashboardStyle from '../../assets/jss/material-dashboard-react/views/dashboardStyle';
 import { userProfilesObject } from '../../constants/generalConstants';
 
-import { getDashboardData, getDashboardHomologacionesChart, getDashboardAvancesChart } from "../../services/dashboardServices"
+import { getDashboardData, getDashboardHomologacionesChart, getDashboardAvancesChart } from '../../services/dashboardServices';
 
-//Constante de los meses del año para ser mostrados en las graficas
+// Constante de los meses del año para ser mostrados en las graficas
 const MonthsArray = [
   'Enero',
   'Febrero',
@@ -51,12 +41,10 @@ const MonthsArray = [
   'Octubre',
   'Noviembre',
   'Diciembre'
-]
+];
 
-//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Dashboard(props: any) {
 
-  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [openModalLoading, setOpenModalLoading] = useState(false);
@@ -68,15 +56,7 @@ function Dashboard(props: any) {
 
   const idProfile = localStorage.getItem('idProfileLoggedUser');
 
-  //Al iniciar el componente se cargan automaticamente todos los datos de las graficas
-  useEffect(() => {
-    setOpenModalLoading(true);
-    getData();
-  }, []);
-
-  //Metodo de obtencion de datos de las graficas
   const getData = async (page?: any) => {
-    //Llamados al backend 
     let response: any = await getDashboardData();
     let homologacionesChartData: any = await getDashboardHomologacionesChart();
     let avancesChartData: any = await getDashboardAvancesChart();
@@ -93,30 +73,35 @@ function Dashboard(props: any) {
       setAvancesChart(avancesChartData.avancesByMonth);
     }
     setOpenModalLoading(false);
-  }
+  };
 
-  //Manejador de redireccion de los accesos directos
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getData();
+  }, []);
+
   const handleRedirectActas = () => {
     if (idProfile) {
-      switch (parseInt(idProfile)) {
+      switch (parseInt(idProfile, 10)) {
         case userProfilesObject.admin.id:
-          props.history.push('/admin/actas', { openModalCreate: true })
+          props.history.push('/admin/actas', { openModalCreate: true });
 
           break;
         case userProfilesObject.coor.id:
-          props.history.push('/coordinador/actas', { openModalCreate: true })
+          props.history.push('/coordinador/actas', { openModalCreate: true });
 
           break;
         case userProfilesObject.doc.id:
-          props.history.push('/docente/actas', { openModalCreate: true })
+          props.history.push('/docente/actas', { openModalCreate: true });
 
+          break;
+        default:
           break;
 
       }
     }
-  }
+  };
 
-  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <GridContainer>
@@ -132,13 +117,13 @@ function Dashboard(props: any) {
               </h3>
             </CardHeader>
             {
-              idProfile && parseInt(idProfile) == userProfilesObject.admin.id ?
+              idProfile && parseInt(idProfile, 10) === userProfilesObject.admin.id ?
                 <CardFooter stats={true}>
                   <div className={classes.stats}>
                     <a className={classes.a}
                       onClick={e => {
                         e.preventDefault();
-                        props.history.push('/admin/administracion/usuarios', { openModalCreate: true })
+                        props.history.push('/admin/administracion/usuarios', { openModalCreate: true });
                       }}
                     >
                       Crear nuevo usuario
@@ -159,13 +144,13 @@ function Dashboard(props: any) {
               <h3 className={classes.cardTitle}>{totalDocentes}</h3>
             </CardHeader>
             {
-              idProfile && parseInt(idProfile) == userProfilesObject.admin.id ?
+              idProfile && parseInt(idProfile, 10) === userProfilesObject.admin.id ?
                 <CardFooter stats={true}>
                   <div className={classes.stats}>
                     <a className={classes.a}
                       onClick={e => {
                         e.preventDefault();
-                        props.history.push('/admin/administracion/docentes', { openModalCreate: true })
+                        props.history.push('/admin/administracion/docentes', { openModalCreate: true });
                       }}
                     >
                       Crear nuevo docente
@@ -186,16 +171,16 @@ function Dashboard(props: any) {
               <h3 className={classes.cardTitle}>{totalActas}</h3>
             </CardHeader>
             {
-              idProfile && (parseInt(idProfile) == userProfilesObject.admin.id ||
-                parseInt(idProfile) == userProfilesObject.coor.id ||
-                parseInt(idProfile) == userProfilesObject.doc.id)
+              idProfile && (parseInt(idProfile, 10) === userProfilesObject.admin.id ||
+                parseInt(idProfile, 10) === userProfilesObject.coor.id ||
+                parseInt(idProfile, 10) === userProfilesObject.doc.id)
                 ?
                 <CardFooter stats={true}>
                   <div className={classes.stats}>
                     <a className={classes.a}
                       onClick={e => {
                         e.preventDefault();
-                        handleRedirectActas()
+                        handleRedirectActas();
                       }}
                     >
                       Crear nueva acta
@@ -234,7 +219,7 @@ function Dashboard(props: any) {
                 <a className={classes.a}
                   onClick={e => {
                     e.preventDefault();
-                    props.history.push('/admin/avancesAsignatura', { openModalCreate: true })
+                    props.history.push('/admin/avancesAsignatura', { openModalCreate: true });
                   }}
                 >
                   Registrar nuevo avance
@@ -270,7 +255,7 @@ function Dashboard(props: any) {
                 <a className={classes.a}
                   onClick={e => {
                     e.preventDefault();
-                    props.history.push('/admin/homologacion', { openModalCreate: true })
+                    props.history.push('/admin/homologacion', { openModalCreate: true });
                   }}
                 >
                   Registrar nueva homologación

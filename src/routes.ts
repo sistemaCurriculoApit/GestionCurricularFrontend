@@ -1,4 +1,3 @@
-// @material-ui/icons
 import Dashboard from '@material-ui/icons/Dashboard';
 import Assignment from '@material-ui/icons/Assignment';
 import LibraryBooks from '@material-ui/icons/LibraryBooks';
@@ -10,12 +9,6 @@ import School from '@material-ui/icons/School';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import AssignmentInd from '@material-ui/icons/AssignmentInd';
 import Web from '@material-ui/icons/Web';
-import Person from '@material-ui/icons/Person';
-import BubbleChart from '@material-ui/icons/BubbleChart';
-import LocationOn from '@material-ui/icons/LocationOn';
-import Notifications from '@material-ui/icons/Notifications';
-import Unarchive from '@material-ui/icons/Unarchive';
-import Language from '@material-ui/icons/Language';
 // core components/views for Admin layout
 import Login from './views/Login/Login';
 import DashboardPage from './views/Dashboard/Dashboard';
@@ -32,14 +25,7 @@ import Homologaciones from './views/Homologaciones/Homologaciones';
 import AvancesAsignaturas from './views/AvancesAsignaturas/AvancesAsignaturas';
 import Micrositios from './views/Micrositios/Micrositios';
 import ManualUsuario from './views/ManualUsuario/ManualUsuario';
-import UserProfile from './views/UserProfile/UserProfile';
-import TableList from './views/TableList/TableList';
-import Typography from './views/Typography/Typography';
-import Icons from './views/Icons/Icons';
-import Maps from './views/Maps/Maps';
-import NotificationsPage from './views/Notifications/Notifications';
 import Actas from './views/Actas/Actas';
-import EquivalenciasPages from './views/Equivalencias/Equivalencias';
 
 const dashboardRoutes = [
   {
@@ -49,7 +35,7 @@ const dashboardRoutes = [
     layout: '/login'
   },
 
-  //ACCESOS DE administrador
+  // ACCESOS DE administrador
   {
     path: '/dashboard',
     name: 'Dashboard',
@@ -62,7 +48,7 @@ const dashboardRoutes = [
     name: 'Currículo',
     icon: Assignment,
     layout: '/admin',
-    subItems:[
+    subItems: [
       {
         path: '/curriculo/programas',
         name: 'Programas',
@@ -98,14 +84,6 @@ const dashboardRoutes = [
         component: ContenidosPage,
         layout: '/admin'
       },
-      //Unused view
-      // {
-      //   path: '/curriculo/equivalencias',
-      //   name: 'Equivalencias',
-      //   icon: School,
-      //   component: EquivalenciasPages,
-      //   layout: '/admin'
-      // },
     ]
   },
   {
@@ -148,7 +126,7 @@ const dashboardRoutes = [
     name: 'Administración',
     icon: SupervisorAccount,
     layout: '/admin',
-    subItems:[
+    subItems: [
       {
         path: '/administracion/usuarios',
         name: 'Usuarios',
@@ -173,8 +151,7 @@ const dashboardRoutes = [
     layout: '/admin'
   },
 
-
-  //ACCESOS DE  COORDINADOR
+  // ACCESOS DE  COORDINADOR
   {
     path: '/homologacion',
     name: 'Homologación de asignaturas',
@@ -218,7 +195,7 @@ const dashboardRoutes = [
     layout: '/coordinador'
   },
 
-  //ACCESOS DE  DOCENTE
+  // ACCESOS DE  DOCENTE
   {
     path: '/avancesAsignatura',
     name: 'Avances de asignaturas',
@@ -254,8 +231,8 @@ const dashboardRoutes = [
     component: ManualUsuario,
     layout: '/docente'
   },
-  
-  //ACCESOS ESTUDIANTE
+
+  // ACCESOS ESTUDIANTE
   {
     path: '/homologacion',
     name: 'Homologación de asignaturas',
@@ -278,8 +255,7 @@ const dashboardRoutes = [
     layout: '/estudiante'
   },
 
-
-  //ACCESOS DE INVITADO
+  // ACCESOS DE INVITADO
   {
     path: '/micrositio',
     name: 'Micrositio',

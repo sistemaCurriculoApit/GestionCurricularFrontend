@@ -43,7 +43,7 @@ const headerStyle = (theme: Theme) => createStyles({
     ...defaultFont,
     lineHeight: '30px',
     fontSize: '18px',
-    fontWeight:500,
+    fontWeight: 500,
     borderRadius: '3px',
     textTransform: 'none',
     color: '#000',

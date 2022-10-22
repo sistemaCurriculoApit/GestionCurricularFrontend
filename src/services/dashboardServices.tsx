@@ -1,4 +1,4 @@
-import { backendBaseUrl, getHeaders } from './constants'
+import { backendBaseUrl, getHeaders } from './constants';
 
 export const getDashboardData = async (data?: any) => {
   return new Promise(resolve => {
@@ -9,13 +9,13 @@ export const getDashboardData = async (data?: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const getDashboardHomologacionesChart = async (data?: any) => {
   return new Promise(resolve => {
@@ -26,13 +26,13 @@ export const getDashboardHomologacionesChart = async (data?: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const getDashboardAvancesChart = async (data?: any) => {
   return new Promise(resolve => {
@@ -43,11 +43,10 @@ export const getDashboardAvancesChart = async (data?: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
-
+};

@@ -29,7 +29,7 @@ const footerStyle = createStyles({
     margin: '0',
     fontSize: '14px',
     float: 'right', // float: "right!important"
-    fontWeight:600
+    fontWeight: 600
   },
   footer: {
     bottom: '0',
@@ -42,7 +42,7 @@ const footerStyle = createStyles({
     color: successColor[0], // color: primaryColor
     textDecoration: 'none',
     backgroundColor: 'transparent',
-    '&:hover':{
+    '&:hover': {
       color: successColor[1],
     }
   },

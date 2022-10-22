@@ -1,7 +1,5 @@
-//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
-import MomentUtils from "@date-io/moment";
-// @material-ui/core components
+import MomentUtils from '@date-io/moment';
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
 import Modal from '@material-ui/core/Modal';
@@ -15,10 +13,9 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
-import moment from "moment";
-import "moment/locale/es";
+import moment from 'moment';
+import 'moment/locale/es';
 
-// core components
 import { createStyles } from '@material-ui/core';
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
@@ -29,21 +26,19 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 
-//jss
-import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
-import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
-import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
+// jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
+import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react';
 
-import { AnythingObject } from '../../constants/generalConstants'
-import { getAreasPaginated, createArea, updateArea } from "../../services/areasServices"
-import { getAllAsignaturas } from "../../services/asignaturasServices"
+import { AnythingObject } from '../../constants/generalConstants';
+import { getAreasPaginated, createArea, updateArea } from '../../services/areasServices';
+import { getAllAsignaturas } from '../../services/asignaturasServices';
 
-
-//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -56,10 +51,7 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
-//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Areas(props: any) {
-  
-  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -84,23 +76,47 @@ function Areas(props: any) {
     asignatura: [],
   });
 
-  //Al iniciar el componente se obtienen las areas
-  useEffect(() => {
-    setOpenModalLoading(true);
-    getAreas();
-  }, [])
+  const validateFields = () => (areaObject.codigo && areaObject.nombre);
 
-  //Actualizacion de la lista de areas si el componente de busqueda es modificado
-  useEffect(() => {
-    if (!searchField) {
-      setOpenModalLoading(true);
-      getAreas();
+  const getAsignaturas = async (isEdit?: boolean, areaToEdit?: any) => {
+    let response: any = await getAllAsignaturas({
+      search: '',
+    });
+    let asignaturasSelected = [];
+    if (response && response.asignaturas) {
+      setAsignaturasList(response.asignaturas);
+      if (isEdit && areaToEdit.asignatura && areaToEdit.asignatura.length) {
+        for (let i = 0; i < areaToEdit.asignatura.length; i++) {
+          let findAsignatura = response.asignaturas.find((asignatura: any) => asignatura._id === areaToEdit.asignatura[i]._id);
+          if (findAsignatura) {
+            asignaturasSelected.push(findAsignatura);
+          }
+        }
+      }
     }
-  }, [searchField])
+    setAreaObject({ ...areaToEdit, asignatura: asignaturasSelected });
+    setOpenModalLoading(false);
+  };
 
-  //Metodo de obtencion de areas
+  const handleOpenModal = (isEdit?: boolean, areaToEdit?: any) => {
+    try {
+      setOpenModal(true);
+      setOpenModalLoading(true);
+      getAsignaturas(isEdit, areaToEdit);
+    } catch (error) {
+      setOpenModalLoading(false);
+    }
+  };
+
+  const setDataEditArea = (data: any) => {
+    try {
+      handleOpenModal(true, data);
+    } catch (error) {
+      setOpenModalLoading(false);
+    }
+  };
+
   const getAreas = async (page?: any) => {
-    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getAreasPaginated({
       page: page ? page : 0,
       search: searchField,
@@ -109,7 +125,7 @@ function Areas(props: any) {
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.areas && response.areas.length) {
-      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+      // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let areas = response.areas.map((data: any) => {
         let arrayData = [
           data.codigo,
@@ -117,14 +133,16 @@ function Areas(props: any) {
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
-                onClick={() => {
-                  setDataEditArea(data);
-                }} />
-            </div>
-          </Tooltip>
+          (
+            <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
+              <div className={classes.buttonHeaderContainer}>
+                <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
+                  onClick={() => {
+                    setDataEditArea(data);
+                  }} />
+              </div>
+            </Tooltip>
+          )
         ];
         return arrayData;
       });
@@ -136,80 +154,25 @@ function Areas(props: any) {
 
     }
     setOpenModalLoading(false);
-  }
+  };
 
-  //Obtencion de las asignaturas para la modal, cuando se crea o se edita
-  const getAsignaturas = async (isEdit?: boolean, areaToEdit?: any) => {
-    let response: any = await getAllAsignaturas({
-      search: '',
-    });
-    let asignaturasSelected = [];
-    if (response && response.asignaturas) {
-      setAsignaturasList(response.asignaturas);
-      if (isEdit && areaToEdit.asignatura && areaToEdit.asignatura.length) {
-        for (let i = 0; i < areaToEdit.asignatura.length; i++) {
-          let findAsignatura = response.asignaturas.find((asignatura: any) => asignatura._id === areaToEdit.asignatura[i]._id)
-          if (findAsignatura) {
-            asignaturasSelected.push(findAsignatura);
-          }
-        }
-      }
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getAreas();
+  }, []);
+
+  useEffect(() => {
+    if (!searchField) {
+      setOpenModalLoading(true);
+      getAreas();
     }
-    setAreaObject({ ...areaToEdit, asignatura: asignaturasSelected });
-    setOpenModalLoading(false);
-  }
+  }, [searchField]);
 
-  //Cuando se cambia de pagina se ejecuta el metodo getAreas con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getAreas(page);
   };
 
-  //Se establecen los datos de una area a editar en la modal
-  const setDataEditArea = (data: any) => {
-    try {
-      handleOpenModal(true, data);
-    } catch (error) {
-      setOpenModalLoading(false);
-    }
-  };
-
-  //Metodo que controla la apertura de la modal con el fin de obtener las asignaturas
-  const handleOpenModal = (isEdit?: boolean, areaToEdit?: any) => {
-    try {
-      setOpenModal(true);
-      setOpenModalLoading(true);
-      getAsignaturas(isEdit, areaToEdit);
-    } catch (error) {
-      setOpenModalLoading(false);
-    }
-  }
-
-  //Manejador de la accion guardar de la modal, se encarga de crear o editar
-  const handleSaveAarea = () => {
-    setOpenModalLoading(true);
-    let isValid = validateFields();
-    if (isValid) {
-      if (areaObject._id) {
-        //EDITAR
-        handleEditArea();
-      } else {
-        //CREAR
-        handleCreateArea();
-      }
-
-    } else {
-      setSeverityAlert('warning');
-      setShowAlert(true);
-      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-    }
-  };
-
-  //Metodo para crear una area
   const handleCreateArea = async () => {
     let areaToSave = {
       ...areaObject,
@@ -234,9 +197,8 @@ function Areas(props: any) {
       setOpenModal(false);
       getAreas();
     }
-  }
+  };
 
-  //Metodo para editar una area
   const handleEditArea = async () => {
     let areaToSave = {
       ...areaObject,
@@ -261,21 +223,31 @@ function Areas(props: any) {
       setOpenModal(false);
       getAreas();
     }
-  }
+  };
 
-  //Validacion de campos obligatorios para la creacion y edicion
-  const validateFields = () => {
-    if (areaObject.codigo &&
-      areaObject.nombre
-    ) {
-      return true;
+  const handleSaveAarea = () => {
+    setOpenModalLoading(true);
+    let isValid = validateFields();
+    if (isValid) {
+      if (areaObject._id) {
+        // EDITAR
+        handleEditArea();
+      } else {
+        // CREAR
+        handleCreateArea();
+      }
+
     } else {
-      return false;
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
     }
   };
 
-
-  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div >
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -296,16 +268,16 @@ function Areas(props: any) {
                     onChange={(event) => setSearchField(event.target.value)}
                     InputProps={{
                       endAdornment:
-                        <Button key={'searchButton'} color={'primary'} round variant="outlined" size='sm' justIcon startIcon={<ClearIcon />}
+                        <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" size="sm" justIcon={true} startIcon={<ClearIcon />}
                           onClick={() => {
-                            setSearchField('')
+                            setSearchField('');
                           }} />
                     }}
                   />
 
-                  <Tooltip id='searchTooltip' title="Buscar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="searchTooltip" title="Buscar" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
+                      <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<Search />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getAreas();
@@ -313,10 +285,10 @@ function Areas(props: any) {
                       />
                     </div>
                   </Tooltip>
-                  <Tooltip id='filterTooltip' title="Más filtros" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="filterTooltip" title="Más filtros" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" justIcon startIcon={<FilterList />}
-                        onClick={() => { setOpenMoreFilters(!openMoreFilters) }} />
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<FilterList />}
+                        onClick={() => { setOpenMoreFilters(!openMoreFilters); }} />
                     </div>
                   </Tooltip>
                 </div>
@@ -326,7 +298,7 @@ function Areas(props: any) {
                   <div>
                     <Card className={classes.cardFilters}>
                       <div >
-                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                           <GridContainer>
                             <GridItem xs={12} sm={12} md={12}>
                               <h4 className={classes.cardTitleBlack}>Fecha de creación</h4>
@@ -334,8 +306,8 @@ function Areas(props: any) {
                             <GridItem xs={12} sm={12} md={6}>
                               <DatePicker
                                 label="Fecha desde"
-                                inputVariant='outlined'
-                                margin='dense'
+                                inputVariant="outlined"
+                                margin="dense"
                                 className={classes.CustomTextField}
                                 format="DD/MM/YYYY"
                                 value={dateCreationFrom}
@@ -348,8 +320,8 @@ function Areas(props: any) {
                             <GridItem xs={12} sm={12} md={6}>
                               <DatePicker
                                 label="Fecha hasta"
-                                inputVariant='outlined'
-                                margin='dense'
+                                inputVariant="outlined"
+                                margin="dense"
                                 className={classes.CustomTextField}
                                 format="DD/MM/YYYY"
                                 value={dateCreationTo}
@@ -362,7 +334,7 @@ function Areas(props: any) {
                         </MuiPickersUtilsProvider>
                       </div>
                       <div className={classes.containerFooterCard} >
-                        <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                        <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                           onClick={() => {
                             setOpenModalLoading(true);
                             getAreas();
@@ -405,9 +377,9 @@ function Areas(props: any) {
         </GridItem>
       </GridContainer>
       <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nueva área" placement='left' classes={{ tooltip: classes.tooltip }}>
+        <Tooltip id="addTooltip" title="Crear nueva área" placement="left" classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} round={true} justIcon={true} startIcon={<AddIcon />}
               onClick={() => {
                 handleOpenModal(false,
                   {
@@ -417,7 +389,7 @@ function Areas(props: any) {
                     descripcion: '',
                     asignatura: [],
                   }
-                )
+                );
               }} />
           </div>
         </Tooltip>
@@ -437,12 +409,12 @@ function Areas(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{areaObject._id ? 'Editar': 'Crear'} área</h4>
+                  <h4 className={classes.cardTitleWhite}>{areaObject._id ? 'Editar' : 'Crear'} área</h4>
                   <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModal(false); }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -460,7 +432,7 @@ function Areas(props: any) {
                       error={!areaObject.codigo ? true : false}
                       value={areaObject.codigo}
                       onChange={(event) => {
-                        setAreaObject({ ...areaObject, codigo: event.target.value })
+                        setAreaObject({ ...areaObject, codigo: event.target.value });
                       }}
                     />
                   </GridItem>
@@ -475,7 +447,7 @@ function Areas(props: any) {
                       error={!areaObject.nombre ? true : false}
                       value={areaObject.nombre}
                       onChange={(event) => {
-                        setAreaObject({ ...areaObject, nombre: event.target.value })
+                        setAreaObject({ ...areaObject, nombre: event.target.value });
                       }}
                     />
                   </GridItem>
@@ -488,10 +460,10 @@ function Areas(props: any) {
                       className={classes.CustomTextField}
                       minRows={4}
                       maxRows={10}
-                      multiline
+                      multiline={true}
                       value={areaObject.descripcion}
                       onChange={(event) => {
-                        setAreaObject({ ...areaObject, descripcion: event.target.value })
+                        setAreaObject({ ...areaObject, descripcion: event.target.value });
                       }}
                     // value={email}
                     // onChange={(event) => setEmail(event.target.value)}
@@ -499,14 +471,14 @@ function Areas(props: any) {
                   </GridItem>
                   <GridItem xs={12} sm={12} md={12} >
                     <Autocomplete
-                      multiple
+                      multiple={true}
                       id="tags-outlined"
                       options={asignaturasList}
                       getOptionLabel={(option) => `${option.codigo} - ${option.nombre}`}
-                      filterSelectedOptions
+                      filterSelectedOptions={true}
                       value={areaObject.asignatura}
                       onChange={(event, value) => {
-                        setAreaObject({ ...areaObject, asignatura: value })
+                        setAreaObject({ ...areaObject, asignatura: value });
                       }}
                       renderInput={(params) => (
                         <TextField
@@ -524,8 +496,8 @@ function Areas(props: any) {
                 </GridContainer>
               </div>
               <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveAarea() }} >
+                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                  onClick={() => { handleSaveAarea(); }} >
                   {'Guardar'}
                 </Button>
 

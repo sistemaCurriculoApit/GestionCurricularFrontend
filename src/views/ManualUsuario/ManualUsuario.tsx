@@ -9,8 +9,7 @@ import CardHeader from '../../components/Card/CardHeader';
 import CardBody from '../../components/Card/CardBody';
 import { createStyles } from '@material-ui/core';
 import { frontendBaseUrl } from '../../services/constants';
-import { userProfilesObject } from '../../constants/generalConstants'
-
+import { userProfilesObject } from '../../constants/generalConstants';
 
 const styles = createStyles({
   cardCategoryWhite: {
@@ -48,24 +47,21 @@ const styles = createStyles({
 function ManualUsuario(props: any) {
   const { classes } = props;
 
-  
-  
   const getManualUsuarioName = () => {
     var idProfile = localStorage.getItem('idProfileLoggedUser');
     switch (idProfile) {
       case userProfilesObject.admin.id.toString():
-        return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.admin.title}.pdf`
+        return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.admin.title}.pdf`;
       case userProfilesObject.coor.id.toString():
-        return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.coor.title}.pdf`
+        return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.coor.title}.pdf`;
         case userProfilesObject.doc.id.toString():
-          return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.doc.title}.pdf`
+          return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.doc.title}.pdf`;
           case userProfilesObject.est.id.toString():
-            return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.est.title}.pdf`
+            return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.est.title}.pdf`;
           default:
-            return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_Invitado.pdf`
+            return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_Invitado.pdf`;
     }
-  }
-
+  };
 
   return (
     <GridContainer>
