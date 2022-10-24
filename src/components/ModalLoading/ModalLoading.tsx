@@ -1,27 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import classNames from 'classnames';
-// import PropTypes from 'prop-types';
-// @material-ui/core components
+import React from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { createStyles } from '@material-ui/core';
 import Modal from '@material-ui/core/Modal';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import {
-  primaryColor,
-  hexToRgb
-} from '../../assets/jss/material-dashboard-react';
 
 import Card from '../../components/Card/Card';
 
-import headerStyle from '../../assets/jss/material-dashboard-react/components/headerStyle';
-import { paginationSize } from '../../constants/generalConstants';
-
 function ModalLoading({ ...props }: any) {
   const { classes, showModal } = props;
-
-  // useEffect(() => {
-  //   setTotalPages(totalData/paginationSize);
-  // }, [totalData])
 
   return (
     <div className={classes.containerPagination}>

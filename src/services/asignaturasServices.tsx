@@ -19,7 +19,7 @@ export const getAsignaturasPaginated = async (data: any) => {
   });
 };
 
-export const getAllAsignaturas = async(data: any) => {
+export const getAllAsignaturas = async(data: any): Promise<any> => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `search=${data.search}`;

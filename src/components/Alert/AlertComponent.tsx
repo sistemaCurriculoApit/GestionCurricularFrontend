@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
 import Alert from '@material-ui/lab/Alert';
 import { createStyles } from '@material-ui/core';
@@ -7,7 +6,6 @@ import { createStyles } from '@material-ui/core';
 function AlertComponent({ ...props }: any) {
   const {
     classes,
-    color,
     severity = 'success',
     message = '',
     visible = false,
@@ -28,17 +26,17 @@ function AlertComponent({ ...props }: any) {
   return (
     <div className={classes.containerAlert}>
       {
-        showAlert ?
+        showAlert ? (
           <Alert severity={severity}>
             {message}
           </Alert>
-
-          : null
+        ) : null
 
       }
     </div>
   );
 }
+
 const styles = createStyles({
   containerAlert: {
     position: 'fixed',

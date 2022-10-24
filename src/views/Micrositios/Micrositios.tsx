@@ -1,16 +1,10 @@
-// importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
-import withStyles from '@material-ui/core/styles/withStyles';
-import TextField from '@material-ui/core/TextField';
-import Modal from '@material-ui/core/Modal';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Tooltip from '@material-ui/core/Tooltip';
-import CloseIcon from '@material-ui/icons/Close';
-import GetApp from '@material-ui/icons/GetApp';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import { withStyles } from '@material-ui/core/styles';
+import { TextField, createStyles, Modal, Tooltip } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
+import { Close as CloseIcon, GetApp, Visibility as VisibilityIcon } from '@material-ui/icons';
 
-// core components
-import { createStyles } from '@material-ui/core';
+import AlertComponent from '../../components/Alert/AlertComponent';
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
 import Table from '../../components/Table/Table';
@@ -20,14 +14,12 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent';
 
-// jss
 import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
 import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 
 import { AnythingObject, tiposAsignatura } from '../../constants/generalConstants';
 import { getAllProgramasNoToken } from '../../services/programasServices';
