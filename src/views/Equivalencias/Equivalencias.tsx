@@ -1,6 +1,4 @@
-//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
-// @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
 import Modal from '@material-ui/core/Modal';
@@ -12,7 +10,6 @@ import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 
-// core components
 import { createStyles } from '@material-ui/core';
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
@@ -23,25 +20,23 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 
-//jss
-import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
-import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
+// jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 import {
   container,
   containerFormModal,
   containerFooterModal,
   modalForm
-} from '../../assets/jss/material-dashboard-react'
+} from '../../assets/jss/material-dashboard-react';
 
-import { AnythingObject } from '../../constants/generalConstants'
-import { getEquivalenciasPaginated, createEquivalencia, updateEquivalencia } from "../../services/equivalenciasServices"
+import { AnythingObject } from '../../constants/generalConstants';
+import { getEquivalenciasPaginated, createEquivalencia, updateEquivalencia } from '../../services/equivalenciasServices';
 
-
-//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -54,10 +49,8 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
-//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Equivalencias(props: any) {
-  
-  //Declaración de variables y estados del componente
+
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -78,40 +71,39 @@ function Equivalencias(props: any) {
     sourceCourseName: '',
   });
 
+  const validateFields = () => (equivalenciaObject.sourceCourseCode &&
+    equivalenciaObject.sourceCourseName &&
+    equivalenciaObject.sourcePlan
+  );
 
-  //Al iniciar el componente se obtienen las equivalencias
-  useEffect(() => {
-    setOpenModalLoading(true);
-    getEquivalencias();
-  }, [])
+  const setDataEditEquivalencia = (data: any) => {
+    setOpenModal(true);
+    setEquivalenciaObject({
+      _id: data._id,
+      sourceCourseCode: data.sourceCourseCode,
+      sourceCourseName: data.sourceCourseName,
+      sourcePlanName: data.sourcePlanName,
+      sourcePlan: data.sourcePlan
+    });
+  };
 
-  //Actualizacion de la lista de equivalencias si el componente de busqueda es modificado
-  useEffect(() => {
-    if (!searchField) {
-      setOpenModalLoading(true);
-      getEquivalencias();
-    }
-  }, [searchField])
-
-  //Metodo de obtencion de equivalencias
   const getEquivalencias = async (page?: any) => {
-    //Llamado al backend y construcción de los parametros de consulta
     let response: any = await getEquivalenciasPaginated({
       page: page ? page : 0,
       search: searchField,
     });
     setPagePagination(page ? page + 1 : 1);
     if (response.equivalencias && response.equivalencias.length) {
-      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+      // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
       let equivalencias = response.equivalencias.map((data: any) => {
         let arrayData = [
           data.sourceCourseCode,
           data.sourceCourseName,
           data.sourcePlan,
           data.sourcePlanName,
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
+          <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
                 onClick={() => {
                   setDataEditEquivalencia(data);
                 }} />
@@ -128,64 +120,25 @@ function Equivalencias(props: any) {
 
     }
     setOpenModalLoading(false);
-  }
+  };
 
-  //Cuando se cambia de pagina se ejecuta el metodo getEquivalencias con la pagina solicitada
   const onChangePage = (page: number) => {
     setOpenModalLoading(true);
     getEquivalencias(page);
   };
 
-
-  //Se establecen los datos de una equivalencia a editar en la modal
-  const setDataEditEquivalencia = (data: any) => {
-    setOpenModal(true);
-    setEquivalenciaObject({
-      _id: data._id,
-      sourceCourseCode: data.sourceCourseCode,
-      sourceCourseName: data.sourceCourseName,
-      sourcePlanName: data.sourcePlanName,
-      sourcePlan: data.sourcePlan
-    });
-  };
-
-  //Manejador de la accion guardar de la modal, se encarga de crear o editar
-  const handleSaveEquivalencia = () => {
-    setOpenModalLoading(true);
-    let isValid = validateFields();
-    if (isValid) {
-      if (equivalenciaObject._id) {
-        //EDITAR
-        handleEditEquivalencia();
-      } else {
-        //CREAR
-        handleCreateEquivalencia();
-      }
-
-    } else {
-      setSeverityAlert('warning');
-      setShowAlert(true);
-      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-    }
-  };
-
-  //Metodo para crear un Contenido
   const handleCreateEquivalencia = async () => {
     let equivalenciaToSave = {
-    sourceCourseCode: equivalenciaObject.sourceCourseCode,
-    sourceCourseName: equivalenciaObject.sourceCourseName,
-    sourcePlan: equivalenciaObject.sourcePlan,
-    sourcePlanName: equivalenciaObject.sourcePlanName
+      sourceCourseCode: equivalenciaObject.sourceCourseCode,
+      sourceCourseName: equivalenciaObject.sourceCourseName,
+      sourcePlan: equivalenciaObject.sourcePlan,
+      sourcePlanName: equivalenciaObject.sourcePlanName
     };
     let response: any = await createEquivalencia(equivalenciaToSave);
     if (response && response.error) {
       setSeverityAlert('error');
       setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -200,9 +153,8 @@ function Equivalencias(props: any) {
       setOpenModal(false);
       getEquivalencias();
     }
-  }
+  };
 
-  //Metodo para editar un Contenido
   const handleEditEquivalencia = async () => {
     let equivalenciaToSave = {
       sourceCourseCode: equivalenciaObject.sourceCourseCode,
@@ -214,7 +166,7 @@ function Equivalencias(props: any) {
     if (response && response.error) {
       setSeverityAlert('warning');
       setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -229,21 +181,43 @@ function Equivalencias(props: any) {
       setOpenModal(false);
       getEquivalencias();
     }
-  }
+  };
 
-  //Validacion de campos obligatorios para la creacion y edicion
-  const validateFields = () => {
-    if (equivalenciaObject.sourceCourseCode &&
-        equivalenciaObject.sourceCourseName &&
-        equivalenciaObject.sourcePlan
-    ) {
-      return true;
+  const handleSaveEquivalencia = () => {
+    setOpenModalLoading(true);
+    let isValid = validateFields();
+    if (isValid) {
+      if (equivalenciaObject._id) {
+        // EDITAR
+        handleEditEquivalencia();
+      } else {
+        // CREAR
+        handleCreateEquivalencia();
+      }
+
     } else {
-      return false;
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
     }
   };
 
-  //Retorno con todos la construcción de la interfaz del modulo
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getEquivalencias();
+  }, []);
+
+  useEffect(() => {
+    if (!searchField) {
+      setOpenModalLoading(true);
+      getEquivalencias();
+    }
+  }, [searchField]);
+
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -264,16 +238,16 @@ function Equivalencias(props: any) {
                     onChange={(event) => setSearchField(event.target.value)}
                     InputProps={{
                       endAdornment:
-                        <Button key={'searchButton'} color={'primary'} round variant="outlined" size='sm' justIcon startIcon={<ClearIcon />}
+                        <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" size="sm" justIcon={true} startIcon={<ClearIcon />}
                           onClick={() => {
-                            setSearchField('')
+                            setSearchField('');
                           }} />
                     }}
                   />
 
-                  <Tooltip id='searchTooltip' title="Buscar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="searchTooltip" title="Buscar" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
+                      <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<Search />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getEquivalencias();
@@ -312,9 +286,9 @@ function Equivalencias(props: any) {
         </GridItem>
       </GridContainer>
       <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nueva equivalencia" placement='left' classes={{ tooltip: classes.tooltip }}>
+        <Tooltip id="addTooltip" title="Crear nueva equivalencia" placement="left" classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} round={true} justIcon={true} startIcon={<AddIcon />}
               onClick={() => {
                 setOpenModal(true);
                 setEquivalenciaObject(
@@ -345,12 +319,12 @@ function Equivalencias(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{equivalenciaObject._id ? 'Editar': 'Crear'} equivalencia</h4>
+                  <h4 className={classes.cardTitleWhite}>{equivalenciaObject._id ? 'Editar' : 'Crear'} equivalencia</h4>
                   <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModal(false); }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -358,66 +332,66 @@ function Equivalencias(props: any) {
               </CardHeader >
               <div className={classes.containerFormModal} >
                 <GridContainer>
-                    <GridItem xs={12} sm={12} md={6} >
-                        <TextField
-                        id="outlined-email"
-                        label="Código de asignatura"
-                        variant="outlined"
-                        margin="dense"
-                        className={classes.CustomTextField}
-                        error={!equivalenciaObject.sourceCourseCode ? true : false}
-                        value={equivalenciaObject.sourceCourseCode}
-                        onChange={(event) => {
-                            setEquivalenciaObject({ ...equivalenciaObject, sourceCourseCode: event.target.value })
-                        }}
-                        />
-                    </GridItem>
-                    <GridItem xs={12} sm={12} md={6} >
-                        <TextField
-                        id="outlined-email"
-                        label="Nombre de asignatura"
-                        variant="outlined"
-                        margin="dense"
-                        className={classes.CustomTextField}
-                        error={!equivalenciaObject.sourceCourseName ? true : false}
-                        value={equivalenciaObject.sourceCourseName}
-                        onChange={(event) => {
-                            setEquivalenciaObject({ ...equivalenciaObject, sourceCourseName: event.target.value })
-                        }}
-                        />
-                    </GridItem>
-                    <GridItem xs={12} sm={12} md={6} >
-                        <TextField
-                        id="outlined-email"
-                        label="Código del plan origen"
-                        variant="outlined"
-                        margin="dense"
-                        className={classes.CustomTextField}
-                        error={!equivalenciaObject.sourcePlan ? true : false}
-                        value={equivalenciaObject.sourcePlan}
-                        onChange={(event) => {
-                            setEquivalenciaObject({ ...equivalenciaObject, sourcePlan: event.target.value })
-                        }}
-                        />
-                    </GridItem>
-                    <GridItem xs={12} sm={12} md={6} >
-                        <TextField
-                        id="outlined-email"
-                        label="Nombre del plan origen"
-                        variant="outlined"
-                        margin="dense"
-                        className={classes.CustomTextField}
-                        value={equivalenciaObject.sourcePlanName}
-                        onChange={(event) => {
-                            setEquivalenciaObject({ ...equivalenciaObject, sourcePlanName: event.target.value })
-                        }}
-                        />
-                    </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Código de asignatura"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!equivalenciaObject.sourceCourseCode ? true : false}
+                      value={equivalenciaObject.sourceCourseCode}
+                      onChange={(event) => {
+                        setEquivalenciaObject({ ...equivalenciaObject, sourceCourseCode: event.target.value });
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Nombre de asignatura"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!equivalenciaObject.sourceCourseName ? true : false}
+                      value={equivalenciaObject.sourceCourseName}
+                      onChange={(event) => {
+                        setEquivalenciaObject({ ...equivalenciaObject, sourceCourseName: event.target.value });
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Código del plan origen"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      error={!equivalenciaObject.sourcePlan ? true : false}
+                      value={equivalenciaObject.sourcePlan}
+                      onChange={(event) => {
+                        setEquivalenciaObject({ ...equivalenciaObject, sourcePlan: event.target.value });
+                      }}
+                    />
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
+                    <TextField
+                      id="outlined-email"
+                      label="Nombre del plan origen"
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.CustomTextField}
+                      value={equivalenciaObject.sourcePlanName}
+                      onChange={(event) => {
+                        setEquivalenciaObject({ ...equivalenciaObject, sourcePlanName: event.target.value });
+                      }}
+                    />
+                  </GridItem>
                 </GridContainer>
               </div>
               <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveEquivalencia() }} >
+                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                  onClick={() => { handleSaveEquivalencia(); }} >
                   {'Guardar'}
                 </Button>
 

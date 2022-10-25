@@ -20,13 +20,13 @@ function Header({ ...props }: any) {
   function makeBrand() {
     var name;
     props.routes.map((prop: any, key: any) => {
-      if(prop.subItems){
-        prop.subItems.forEach((subItem:any) => {
+      if (prop.subItems) {
+        prop.subItems.forEach((subItem: any) => {
           if (subItem.layout + subItem.path === props.location.pathname) {
             name = `${prop.name} / ${subItem.name}`;
           }
         });
-      }else{
+      } else {
         if (prop.layout + prop.path === props.location.pathname) {
           name = prop.name;
         }

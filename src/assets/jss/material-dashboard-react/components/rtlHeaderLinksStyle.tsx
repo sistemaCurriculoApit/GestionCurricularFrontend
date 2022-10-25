@@ -15,7 +15,7 @@ const headerLinksStyle = (theme: Theme) => createStyles({
     },
     [theme.breakpoints.down('sm')]: {
       margin: '10px 15px !important',
-      float: 'none', //float: "none !important",
+      float: 'none', // float: "none !important",
       paddingTop: '1px',
       paddingBottom: '1px',
       padding: '0!important',

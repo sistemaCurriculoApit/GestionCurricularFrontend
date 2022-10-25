@@ -51,7 +51,7 @@ const tableStyle = (theme: Theme) => createStyles({
     padding: '5px 8px',
     verticalAlign: 'middle',
   },
-  CellContent:{
+  CellContent: {
     whiteSpace: 'pre-line',
     textOverflow: 'ellipsis',
     display: 'block',

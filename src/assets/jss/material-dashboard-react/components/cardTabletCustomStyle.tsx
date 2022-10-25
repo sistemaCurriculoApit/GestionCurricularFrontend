@@ -1,12 +1,3 @@
-import {
-  warningCardHeader,
-  successCardHeader,
-  dangerCardHeader,
-  infoCardHeader,
-  primaryCardHeader,
-  roseCardHeader,
-  whiteColor
-} from '../../material-dashboard-react';
 import { createStyles } from '@material-ui/core';
 
 const cardTabletCustomStyle = createStyles({
@@ -66,9 +57,9 @@ const cardTabletCustomStyle = createStyles({
     marginLeft: 'auto',
     width: 'auto'
   },
-  containerFooterCard:{
-    marginTop:'5px',
-    display:'flex',
+  containerFooterCard: {
+    marginTop: '5px',
+    display: 'flex',
     justifyContent: 'flex-end',
   },
   TitleFilterContainer: {

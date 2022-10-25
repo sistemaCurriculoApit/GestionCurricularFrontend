@@ -16,7 +16,7 @@ import {
 } from '../../assets/jss/material-dashboard-react';
 import "../../assets/css/google-login-button.css"
 
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
 import { validateLogin } from "../../services/loginServices"
 
@@ -58,7 +58,6 @@ function Login(props: any) {
   //Metodo que controla el inicio de sesion
   const handleLogin = (guest?: Boolean, googleIdentity?: Boolean) => {
     if (guest) {
-      //Ingreso con el rol de invitado
       localStorage.setItem('token', '-1');
       localStorage.setItem('idProfileLoggedUser', '5');
       window.location.reload();
@@ -73,7 +72,6 @@ function Login(props: any) {
         let { body } = response;
         debugger
         if (body && body.token) {
-          //almacenamiento de token y del perfil logeado
           localStorage.setItem('token', body.token);
           localStorage.setItem('idProfileLoggedUser', body.user.rolId);
           localStorage.setItem('userEmail', body.user.correo);
@@ -99,9 +97,8 @@ function Login(props: any) {
 
     }
     setOpenModalLoading(false);
-  }
+  };
 
-  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div className="App" >
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -128,11 +125,11 @@ function Login(props: any) {
                 onChange={(event) => setPassword(event.target.value)}
               />
 
-              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => { setOpenModalLoading(true); handleLogin() }}>
+              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => { setOpenModalLoading(true); handleLogin(); }}>
                 Iniciar sesión
               </Button>
 
-              <a onClick={() => { setOpenModalLoading(true); handleLogin(true) }} className={classes.a}>
+              <a onClick={() => { setOpenModalLoading(true); handleLogin(true); }} className={classes.a}>
                 Ingresar cómo invitado
               </a>
               <div id="sign-in__container">
@@ -150,7 +147,6 @@ function Login(props: any) {
   );
 }
 
-//Estilos del modulo
 const styles = createStyles({
   cardLogin: {
     padding: '10px',
@@ -211,4 +207,3 @@ const styles = createStyles({
 });
 
 export default withStyles(styles)(Login);
-
