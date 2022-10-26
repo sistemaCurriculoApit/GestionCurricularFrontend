@@ -1,22 +1,14 @@
-/* eslint-disable */
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
-// creates a beautiful scrollbar
+import { Switch, Route } from 'react-router-dom';
 import PerfectScrollbar from 'perfect-scrollbar';
-import 'perfect-scrollbar/css/perfect-scrollbar.css';
-// @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
-// core components
 import Navbar from '../components/Navbars/Navbar';
-import Footer from '../components/Footer/Footer';
 import Sidebar from '../components/Sidebar/Sidebar';
-
 import routes from '../routes';
-
 import dashboardStyle from '../assets/jss/material-dashboard-react/layouts/dashboardStyle';
-
 import image from 'assets/img/sidebar-5.jpg';
 import logo from 'assets/img/logoPoli.png';
+import 'perfect-scrollbar/css/perfect-scrollbar.css';
 
 const switchRoutes = (
   <Switch>

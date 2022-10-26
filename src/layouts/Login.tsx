@@ -106,7 +106,6 @@ class DashboardAdmin extends React.Component<Props, State> {
           <div className={classes.content}>
             <div className={classes.container}>{switchRoutes}</div>
           </div>
-          {/* {this.getRoute() ? <Footer /> : null} */}
         </div>
       </div>
     );

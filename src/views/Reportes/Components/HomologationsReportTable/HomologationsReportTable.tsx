@@ -1,6 +1,7 @@
 import React from 'react';
 import Table from '../../../../components/Table/Table';
 import TablePagination from '../../../../components/Pagination/TablePagination';
+import { ReportTable } from '../ReportTable/ReportTable';
 
 type HomologationsReportTableProps = {
   classes: any,
@@ -15,37 +16,24 @@ export const HomologationsReportTable: React.FC<HomologationsReportTableProps> =
   homologations,
   onChangePage,
   page,
-  totalPages,
+  totalPages
 }) => {
-  if (!homologations.length) {
-    return <h2 style={{ textAlign: 'center' }}>No se encontraron homologaciones en la base de datos</h2>;
-  }
-
   return (
-    <>
-      <Table
-        tableHeaderColor="success"
-        tableHead={[
-          'Identificacion del solicitante',
-          'Nombre del solicitante',
-          'Asignatura del solicitante',
-          'Descripcion',
-          'Fecha de creación',
-          'Fecha ultima actualización',
-        ]}
-        tableData={homologations}
-      />
-      <div style={{ width: '100%' }}>
-        <br />
-      </div>
-      <div className={classes.centerContent}>
-        <br />
-        <TablePagination
-          page={page}
-          onChangePage={onChangePage}
-          totalData={totalPages}
-        />
-      </div>
-    </>
+    <ReportTable
+      classes={classes}
+      data={homologations}
+      onChangePage={onChangePage}
+      page={page}
+      totalPages={totalPages}
+      message='No se encontraron homologaciones en la base de datos'
+      headers={[
+        'Identificacion del solicitante',
+        'Nombre del solicitante',
+        'Asignatura del solicitante',
+        'Descripcion',
+        'Fecha de creación',
+        'Fecha ultima actualización',
+      ]}
+    />
   );
-}
+};

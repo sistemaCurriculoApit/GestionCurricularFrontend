@@ -29,7 +29,6 @@ import { getAllContenidoByAsignaturaNoToken } from '../../services/contenidosSer
 import { getAsignaturaByListIdsPaginatedNoToken, GetFileAsignatura, getAllAsignaturasWithPlanCodeNT } from '../../services/asignaturasServices';
 import { getAllDocentesNT } from '../../services/docentesServices';
 
-// Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -42,10 +41,7 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
-function Micrositios(props: any) {
-
-  const { classes } = props;
-
+const Micrositios = ({ classes }: any) => {
   const [showAlert, setShowAlert] = useState(false);
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
@@ -58,9 +54,9 @@ function Micrositios(props: any) {
   const [planSelected, setPlanSelected] = useState<AnythingObject>({});
   const [areasList, setAreasList] = useState([]);
   const [areaSelected, setAreaSelected] = useState<AnythingObject>({});
-  const [contenidosList, setContenidosList] = useState([]);
-  const [docenteList, setDocenteList] = useState([]);
-  const [equivalenciaList, setEquivalenciaList] = useState([]);
+  const [, setContenidosList] = useState([]);
+  const [, setDocenteList] = useState([]);
+  const [, setEquivalenciaList] = useState([]);
   const [tipoAsignaturaSelected, setTipoAsignaturaSelected] = useState<AnythingObject>({});
 
   const [asignaturasList, setAsignaturasList] = useState([]);
@@ -163,14 +159,14 @@ function Micrositios(props: any) {
   };
 
   const getAreas = async (setByDefault?: boolean, plan?: any) => {
-    var areaIds;
+    let areaIds;
     if (!setByDefault) {
       areaIds = planSelected.area.map((option: any) => option._id);
     } else {
       areaIds = plan.area.map((option: any) => option._id);
     }
 
-    let response: any = await getAreasByListIdsNoToken({
+    const response: any = await getAreasByListIdsNoToken({
       search: '',
       areaIds
     });
@@ -187,21 +183,21 @@ function Micrositios(props: any) {
   };
 
   const getPlanes = async (setByDefault?: boolean, programa?: any) => {
-    var planIds: any;
+    let planIds: any;
     if (!setByDefault) {
       planIds = programaSelected.plan.map((option: any) => option._id);
     } else {
       planIds = programa.plan.map((option: any) => option._id);
     }
 
-    let response: any = await getPlanesByListIdsNoToken({
+    const response: any = await getPlanesByListIdsNoToken({
       search: '',
       planIds
     });
     if (response && response.planes) {
       setPlanesList(response.planes);
       if (setByDefault) {
-        var find8210Plan = response.planes.find((plan: any) => plan.codigo === '8210');
+        const find8210Plan = response.planes.find((plan: any) => plan.codigo === '8210');
         if (find8210Plan) {
           setPlanSelected(find8210Plan);
           getAreas(setByDefault, find8210Plan);
@@ -212,13 +208,14 @@ function Micrositios(props: any) {
   };
 
   const getProgramas = async (setByDefault?: boolean) => {
-    let response: any = await getAllProgramasNoToken({
+    const response: any = await getAllProgramasNoToken({
       search: '',
     });
+
     if (response && response.programas) {
       setProgramasList(response.programas);
       if (setByDefault) {
-        var findIngeniriaProgram = response.programas.find((programa: any) => programa.codigo === '1');
+        const findIngeniriaProgram = response.programas.find((programa: any) => programa.codigo === '1');
         if (findIngeniriaProgram) {
           setProgramaSelected(findIngeniriaProgram);
           getPlanes(setByDefault, findIngeniriaProgram);
@@ -427,14 +424,12 @@ function Micrositios(props: any) {
                     id="tags-outlined"
                     options={programasList}
                     getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
+                    disableClearable={true}
                     filterSelectedOptions={true}
-                    onChange={(e, option) => {
+                    onChange={(_, option) => {
                       setProgramaSelected(option || {});
-                      // Inicializacion de objetos
                       setPlanSelected({});
                       setAreaSelected({});
-
-                      // inicializacion de listas
                       setPlanesList([]);
                       setAreasList([]);
                       setAsignaturasList([]);
@@ -460,13 +455,11 @@ function Micrositios(props: any) {
                     id="tags-outlined"
                     options={planesList}
                     getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
+                    disableClearable={true}
                     filterSelectedOptions={true}
-                    onChange={(e, option) => {
+                    onChange={(_, option) => {
                       setPlanSelected(option || {});
-                      // Inicializacion de objetos
                       setAreaSelected({});
-
-                      // inicializacion de listas
                       setAreasList([]);
                       setAsignaturasList([]);
                       setTotalAsignaturas(0);
@@ -492,8 +485,9 @@ function Micrositios(props: any) {
                     id="tags-outlined"
                     options={areasList}
                     getOptionLabel={(option) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
+                    disableClearable={true}
                     filterSelectedOptions={true}
-                    onChange={(e, option) => {
+                    onChange={(_, option) => {
                       setAreaSelected(option || {});
                     }}
                     value={areaSelected}
@@ -520,22 +514,23 @@ function Micrositios(props: any) {
               {
                 !asignaturasList.length ?
                   <h2 style={{ textAlign: 'center' }}>No se encontraron asignaturas en la base de datos</h2>
-                  :
-                  <Table
-                    tableHeaderColor="success"
-                    tableHead={[
-                      'Código',
-                      'Nombre',
-                      'Créditos',
-                      'Horas semanales',
-                      'Semestre',
-                      'Prerrequisitos',
-                      'Correquisitos',
-                      'Acciones',
-                      'Descargas'
-                    ]}
-                    tableData={asignaturasList}
-                  />
+                  : (
+                    <Table
+                      tableHeaderColor="success"
+                      tableHead={[
+                        'Código',
+                        'Nombre',
+                        'Créditos',
+                        'Horas semanales',
+                        'Semestre',
+                        'Prerrequisitos',
+                        'Correquisitos',
+                        'Acciones',
+                        'Descargas'
+                      ]}
+                      tableData={asignaturasList}
+                    />
+                  )
               }
 
             </CardBody>
@@ -984,6 +979,6 @@ function Micrositios(props: any) {
 
     </div>
   );
-}
+};
 
 export default withStyles(styles)(Micrositios);

@@ -1,6 +1,5 @@
 import React from 'react';
-import Table from '../../../../components/Table/Table';
-import TablePagination from '../../../../components/Pagination/TablePagination';
+import { ReportTable } from '../ReportTable/ReportTable';
 
 type AdvacementReportTableProps = {
   classes: any,
@@ -15,36 +14,24 @@ export const AdvacementReportTable: React.FC<AdvacementReportTableProps> = ({
   advancements,
   onChangePage,
   page,
+  totalPages
 }) => {
-  if (!advancements.length) {
-    return <h2 style={{ textAlign: 'center' }}>No se encontraron avances en la base de datos</h2>;
-  }
-
   return (
-    <>
-      <Table
-        tableHeaderColor="success"
-        tableHead={[
-          'Año del avance',
-          'Periodo',
-          'Porcentaje de avance',
-          'Descripción',
-          'Fecha de creación',
-          'Fecha ultima actualización'
-        ]}
-        tableData={advancements}
-      />
-      <div style={{ width: '100%' }}>
-        <br />
-      </div>
-      <div className={classes.centerContent}>
-        <br />
-        <TablePagination
-          page={page}
-          onChangePage={onChangePage}
-          totalData={advancements.length}
-        />
-      </div>
-    </>
+    <ReportTable
+      classes={classes}
+      data={advancements}
+      onChangePage={onChangePage}
+      page={page}
+      totalPages={totalPages}
+      message="No se encontraron avances en la base de datos"
+      headers={[
+        'Año del avance',
+        'Periodo',
+        'Porcentaje de avance',
+        'Descripción',
+        'Fecha de creación',
+        'Fecha ultima actualización'
+      ]}
+    />
   );
-}
+};
