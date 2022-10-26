@@ -135,7 +135,7 @@ const Sidebar = ({ ...props }) => {
     localStorage.removeItem('idProfileLoggedUser');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('userName');
-    window.location.assign('/login');
+    document.location.assign('/login');
   };
 
   var brand = (

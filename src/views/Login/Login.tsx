@@ -31,52 +31,53 @@ function Login(props: any) {
   const [messageAlert, setMessagesAlert] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const clientId: string = process.env.CLIENT_ID!
+  const [googleIdentity, setGoogleIdentity] = useState(false)
 
   const handleCallbackResponse = async (response: any) => {
     const user: any = jwt_decode(response.credential)
     setEmail(user.email)
     setPassword("google identity")
+    setGoogleIdentity(true)
     setOpenModalLoading(true)
-    setTimeout(() => {
-      handleLogin(false, true)
-    }, 2000);
-
   }
 
   useEffect(() => {
-    google.accounts.id.initialize({
-      client_id: "430408237878-50tskg6vp41l7aojrnajacckra4hnurb.apps.googleusercontent.com",
-      callback: handleCallbackResponse
-    })
-    google.accounts.id.renderButton(
-      document.getElementById("sign-in")!,
-      { theme: "outline", size: "large", type: "standard" }
-    )
-  }, [])
+    setTimeout(()=> {
+        google.accounts.id.initialize({
+          client_id: "430408237878-50tskg6vp41l7aojrnajacckra4hnurb.apps.googleusercontent.com",
+          callback: handleCallbackResponse
+        })
+        google.accounts.id.renderButton(
+          document.getElementById("sign-in")!,
+          { theme: "outline", size: "large", type: "standard" }
+        )
+    }, 500)
+  })
+
+  useEffect(() => {
+    if (googleIdentity) handleLogin()
+  }, [googleIdentity])
 
   //Metodo que controla el inicio de sesion
-  const handleLogin = (guest?: Boolean, googleIdentity?: Boolean) => {
+  const handleLogin = async (guest?: Boolean) => {
     if (guest) {
       localStorage.setItem('token', '-1');
       localStorage.setItem('idProfileLoggedUser', '5');
-      window.location.reload();
     } else {
       if ((email && password) || googleIdentity) {
         //Ingreso roles del sistema con credenciales
-        let response: any = validateLogin({
+        let response: any = await validateLogin({
           correo: email,
           contrasena: password,
           googleIdentity: googleIdentity
         });
         let { body } = response;
-        debugger
         if (body && body.token) {
           localStorage.setItem('token', body.token);
           localStorage.setItem('idProfileLoggedUser', body.user.rolId);
           localStorage.setItem('userEmail', body.user.correo);
           localStorage.setItem('userName', body.user.nombreUsuario);
-          window.location.reload();
+          document.location.reload();
         } else {
           setSeverityAlert('error');
           setMessagesAlert(body && body.descripcion ? body.descripcion : 'Ha ocurrido al intentar iniciar sesion');
