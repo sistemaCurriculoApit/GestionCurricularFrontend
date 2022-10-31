@@ -1,109 +1,81 @@
-import { backendBaseUrl, getHeaders } from './constants';
+import { backendBaseUrl, getHeaders, buildQuery } from './constants';
 
-export const getHomologacionesPaginated = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    let query = `page=${data.page}&search=${data.search}&dateCreationFrom=${data.dateCreationFrom}&dateCreationTo=${data.dateCreationTo}`;
-    fetch(`${backendBaseUrl}api/homologacion/all?${query}`, {
-      headers,
-      method: 'GET'
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+type HomologationsQuery = {
+  query?: string,
+  paginated?: boolean,
+  page?: number,
+  period?: number,
+  homologationYear?: string,
+  search?: string,
+  dateCreationFrom?: any,
+  dateCreationTo?: any,
+  email?: string
 };
 
-export const getAllHomologaciones = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/homologacion/allNotPaginated?${query}`, {
-      headers,
-      method: 'GET'
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export interface HomologationsResponse {
+  homologations: any[];
+  homologationsCount: number;
+}
+
+export const getHomologations = async (query: HomologationsQuery): Promise<HomologationsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/homologations?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as HomologationsResponse;
+  }
 };
 
-export const getAllHomologacionesByIdSolicitante = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/homologacion/allByIdSolicitante`, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const getHomologationsByApplicant = async (applicantId: string, query: HomologationsQuery): Promise<HomologationsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/homologations/applicants/${applicantId}?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as HomologationsResponse;
+  }
 };
 
-export const getAllHomologacionesByPeriodo = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/homologacion/allByPeriodo`, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const getHomologationsByPeriods = async (period: string, query: HomologationsQuery): Promise<HomologationsResponse> => {
+  try {
+    const queryString = buildQuery(query);
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/homologations/periods/${period}?${queryString}`;
+    const response = await fetch(url, { headers, method: 'GET' });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return {} as HomologationsResponse;
+  }
 };
 
-export const createHomologacion = async (data: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/homologacion/add`, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const createHomologation = async (homologation: any): Promise<any> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/homologations`;
+    const response = await fetch(url, { headers, method: 'POST', body: JSON.stringify(homologation) });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 };
 
-export const updateHomologacion = async (data: any, id: any) => {
-  return new Promise(resolve => {
-    let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/homologacion/${id}`, {
-      headers,
-      method: 'PATCH',
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(response => {
-        resolve(response);
-      })
-      .catch(error => resolve({
-        ...error
-      }));
-  });
+export const updateHomologations = async (homologationId: string, homologation: any): Promise<any> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/homologations/${homologationId}`;
+    const response = await fetch(url, { headers, method: 'PUT', body: JSON.stringify(homologation) });
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 };

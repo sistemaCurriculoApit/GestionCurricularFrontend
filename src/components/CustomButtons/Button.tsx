@@ -1,33 +1,27 @@
 import React from 'react';
-// nodejs library that concatenates classes
 import classNames from 'classnames';
-// nodejs library to set properties for components
-// import PropTypes from "prop-types";
 
-// material-ui components
 import withStyles from '@material-ui/core/styles/withStyles';
 import Button from '@material-ui/core/Button';
 
 import buttonStyle from '../../assets/jss/material-dashboard-react/components/buttonStyle';
-import { createStyles } from '@material-ui/core';
 
-function RegularButton({ ...props }: any) {
-  const {
-    classes,
-    color,
-    round,
-    children,
-    disabled,
-    simple,
-    size,
-    block,
-    link,
-    justIcon,
-    fab,
-    className,
-    muiClasses,
-    ...rest
-  } = props;
+function RegularButton({
+  classes,
+  color,
+  round,
+  children,
+  disabled,
+  simple,
+  size,
+  block,
+  link,
+  justIcon,
+  fab,
+  className,
+  muiClasses,
+  ...rest
+}: any) {
   const btnClasses = classNames({
     [classes.button]: true,
     [classes[size]]: size,
@@ -47,29 +41,5 @@ function RegularButton({ ...props }: any) {
     </Button>
   );
 }
-
-// RegularButton.propTypes = {
-//   classes: PropTypes.object.isRequired,
-//   color: PropTypes.oneOf([
-//     "primary",
-//     "info",
-//     "success",
-//     "warning",
-//     "danger",
-//     "rose",
-//     "white",
-//     "transparent"
-//   ]),
-//   size: PropTypes.oneOf(["sm", "lg"]),
-//   simple: PropTypes.bool,
-//   round: PropTypes.bool,
-//   disabled: PropTypes.bool,
-//   block: PropTypes.bool,
-//   link: PropTypes.bool,
-//   justIcon: PropTypes.bool,
-//   className: PropTypes.string,
-//   // use this to pass the classes props from Material-UI
-//   muiClasses: PropTypes.object
-// };
 
 export default withStyles(buttonStyle)(RegularButton);

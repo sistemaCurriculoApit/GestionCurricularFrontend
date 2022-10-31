@@ -1,46 +1,39 @@
-/* eslint-disable */
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
-// creates a beautiful scrollbar
+import { Switch, Route } from 'react-router-dom';
 import PerfectScrollbar from 'perfect-scrollbar';
-import 'perfect-scrollbar/css/perfect-scrollbar.css';
-// @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
-// core components
 import Navbar from '../components/Navbars/Navbar';
-import Footer from '../components/Footer/Footer';
 import Sidebar from '../components/Sidebar/Sidebar';
-
 import routes from '../routes';
-
 import dashboardStyle from '../assets/jss/material-dashboard-react/layouts/dashboardStyle';
-
 import image from 'assets/img/sidebar-5.jpg';
 import logo from 'assets/img/logoPoli.png';
+import 'perfect-scrollbar/css/perfect-scrollbar.css';
 
 const switchRoutes = (
   <Switch>
     {routes.map((prop: any) => {
-      if (prop.layout === '/admin') {
-        if (prop.subItems) {
-          let subItemsRoute = prop.subItems.map((subItemProps: any) => {
-            return (<Route
-              path={subItemProps.layout + subItemProps.path}
-              component={subItemProps.component}
-              key={subItemProps.path}
-            />);
-          });
-          return subItemsRoute;
-        } else {
-          return (
-            <Route
-              path={prop.layout + prop.path}
-              component={prop.component}
-              key={prop.path}
-            />
-          );
-        }
+      if (prop.layout !== '/admin') {
+        return null;
       }
+
+      if (prop.subItems) {
+        return prop.subItems.map((subItemProps: any) => (
+          <Route
+            path={subItemProps.layout + subItemProps.path}
+            component={subItemProps.component}
+            key={subItemProps.path}
+          />
+        ));
+      }
+
+      return (
+        <Route
+          path={prop.layout + prop.path}
+          component={prop.component}
+          key={prop.path}
+        />
+      );
     })}
   </Switch>
 );

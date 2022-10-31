@@ -3,7 +3,7 @@ import { backendBaseUrl, getHeaders } from './constants';
 export const getDashboardData = async (data?: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/dashboard/dataCount`, {
+    fetch(`${backendBaseUrl}/api/dashboard/dataCount`, {
       headers,
       method: 'GET'
     })
@@ -20,7 +20,7 @@ export const getDashboardData = async (data?: any) => {
 export const getDashboardHomologacionesChart = async (data?: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/dashboard/chartHomologaciones`, {
+    fetch(`${backendBaseUrl}/api/dashboard/chartHomologaciones`, {
       headers,
       method: 'GET'
     })
@@ -37,7 +37,7 @@ export const getDashboardHomologacionesChart = async (data?: any) => {
 export const getDashboardAvancesChart = async (data?: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/dashboard/chartAvances`, {
+    fetch(`${backendBaseUrl}/api/dashboard/chartAvances`, {
       headers,
       method: 'GET'
     })

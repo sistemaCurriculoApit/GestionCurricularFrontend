@@ -4,7 +4,7 @@ export const getAreasPaginated = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `page=${data.page}&search=${data.search}&dateCreationFrom=${data.dateCreationFrom}&dateCreationTo=${data.dateCreationTo}`;
-    fetch(`${backendBaseUrl}api/area/all?${query}`, {
+    fetch(`${backendBaseUrl}/api/area/all?${query}`, {
       headers,
       method: 'GET'
     })
@@ -22,7 +22,7 @@ export const getAllAreas = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/area/allNotPaginated?${query}`, {
+    fetch(`${backendBaseUrl}/api/area/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
@@ -39,7 +39,7 @@ export const getAllAreas = async(data: any) => {
 export const getAreasByListIds = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/area/byListIds`, {
+    fetch(`${backendBaseUrl}/api/area/byListIds`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -57,7 +57,7 @@ export const getAreasByListIds = async(data: any) => {
 export const getAreasByListIdsNoToken = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/area/byListIdsNT`, {
+    fetch(`${backendBaseUrl}/api/area/byListIdsNT`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -75,7 +75,7 @@ export const getAreasByListIdsNoToken = async(data: any) => {
 export const createArea = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/area/add`, {
+    fetch(`${backendBaseUrl}/api/area/add`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -93,7 +93,7 @@ export const createArea = async (data: any) => {
 export const updateArea = async (data: any, id: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/area/${id}`, {
+    fetch(`${backendBaseUrl}/api/area/${id}`, {
       headers,
       method: 'PATCH',
       body: JSON.stringify(data)

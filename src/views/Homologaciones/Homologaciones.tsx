@@ -46,8 +46,8 @@ import { getPlanesByListIds } from '../../services/planesServices';
 import { getAllAsignaturasByPlan } from '../../services/asignaturasServices';
 import { getAllContenidoByAsignatura } from '../../services/contenidosServices';
 import { getAllEquivalenciaByAsignatura } from '../../services/equivalenciasServices';
-import { getHomologacionesPaginated, createHomologacion, updateHomologacion } from '../../services/homologacionesServices';
-import { getEstudianteByEmail, getAllEstudiantes } from '../../services/estudiantesServices';
+import { getHomologations, createHomologation, updateHomologations, HomologationsResponse } from '../../services/homologacionesServices';
+import { getAllEstudiantes } from '../../services/estudiantesServices';
 import { userProfilesObject } from '../../constants/generalConstants';
 
 // Estilos generales usados en el modulo
@@ -259,7 +259,8 @@ function Homologaciones(props: any) {
   };
 
   const getHomologaciones = async (page?: any) => {
-    let response: any = await getHomologacionesPaginated({
+    const response: any = await getHomologations({
+      paginated: true,
       page: page ? page : 0,
       search: searchField,
       dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
@@ -267,41 +268,49 @@ function Homologaciones(props: any) {
     });
     let estudiantes: any = await getEstudiantes();
     setPagePagination(page ? page + 1 : 1);
-    if (response.homologaciones && response.homologaciones.length) {
-      response.homologaciones.forEach((homologacion: any) => {
-        homologacion.estudiante = estudiantes.find((estudiante: any) => estudiante.homologacion.find(((homologacionEst: any) => homologacionEst._id === homologacion._id)));
+    if (response.homologations && response.homologations.length) {
+      response.homologations.forEach((homologation: any) => {
+        homologation.estudiante = estudiantes.find((estudiante: any) => estudiante.homologacion.find(((homologacionEst: any) => homologacionEst._id === homologation._id)));
       });
       let idProfile: any = localStorage.getItem('idProfileLoggedUser');
       let emailUser: any = localStorage.getItem('userEmail');
       let homologacionesNew: any = [];
       if (idProfile === userProfilesObject.est.id.toString()) {
-        homologacionesNew = response.homologaciones.filter((homologacion: any) => homologacion.estudiante && homologacion.estudiante.correo === emailUser);
+        homologacionesNew = response.homologations.filter((homologacion: any) => homologacion.estudiante && homologacion.estudiante.correo === emailUser);
       } else {
-        homologacionesNew = response.homologaciones;
+        homologacionesNew = response.homologations;
       }
 
       // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
 
-      let homologaciones = homologacionesNew.map((data: any) => {
-        let arrayData = [
-          data.estudiante ? data.estudiante.identificacion : '',
-          data.estudiante ? data.estudiante.nombre : '',
-          data.asignaturaSolicitante,
-          data.descripcion,
-          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id="filterTooltip" title={!blockStudentPermission() ? 'Editar' : 'Ver'} placement="top" classes={{ tooltip: classes.tooltip }}>
+      const homologaciones = homologacionesNew.map((data: any) => [
+        data.estudiante ? data.estudiante.identificacion : '',
+        data.estudiante ? data.estudiante.nombre : '',
+        data.asignaturaSolicitante,
+        data.descripcion,
+        moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+        moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+        (
+          <Tooltip
+            id="filterTooltip"
+            title={!blockStudentPermission() ? 'Editar' : 'Ver'}
+            placement="top"
+            classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={!blockStudentPermission() ? <EditIcon /> : <VisibilityIcon />}
-                onClick={() => {
-                  setDataEditHomologacion(data);
-                }} />
+              <Button
+                key={'filtersButton'}
+                color={'primary'}
+                size="sm"
+                round={true}
+                variant="outlined"
+                justIcon={true}
+                startIcon={!blockStudentPermission() ? <EditIcon /> : <VisibilityIcon />}
+                onClick={() => setDataEditHomologacion(data)} />
             </div>
           </Tooltip>
-        ];
-        return arrayData;
-      });
-      setTotalHomologaciones(response.totalHomologaciones);
+        )
+      ]);
+      setTotalHomologaciones(response.homologationsCount);
       setHomologacionesList(homologaciones);
     } else {
       setTotalHomologaciones(0);
@@ -401,7 +410,7 @@ function Homologaciones(props: any) {
   );
 
   const handleCreateHomologacion = async () => {
-    let homologacionToSave = {
+    const homologation = {
       ...homologacionObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -412,11 +421,11 @@ function Homologaciones(props: any) {
       identificacionSolicitante: estudianteSelected.identificacion,
       estudianteId: estudianteSelected._id
     };
-    let response: any = await createHomologacion(homologacionToSave);
-    if (response && response.error) {
+    const response: any = await createHomologation(homologation);
+    if (!response) {
       setSeverityAlert('error');
       setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setMessagesAlert('Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
@@ -434,8 +443,8 @@ function Homologaciones(props: any) {
   };
 
   const handleEditHomologacion = async () => {
-    let fechaDecisionNew = homologacionObject.fechaDecision ? homologacionObject.fechaDecision.toDate() : moment(new Date());
-    let homologacionToSave = {
+    const fechaDecisionNew = homologacionObject.fechaDecision ? homologacionObject.fechaDecision.toDate() : moment(new Date());
+    const homologation = {
       ...homologacionObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -446,11 +455,11 @@ function Homologaciones(props: any) {
       identificacionSolicitante: estudianteSelected.identificacion,
       estudianteId: estudianteSelected._id
     };
-    let response: any = await updateHomologacion(homologacionToSave, homologacionObject._id);
-    if (response && response.error) {
+    const response: HomologationsResponse = await updateHomologations(homologacionObject._id, homologation);
+    if (!response) {
       setSeverityAlert('warning');
       setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setMessagesAlert('Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);

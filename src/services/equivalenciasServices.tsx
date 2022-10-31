@@ -4,7 +4,7 @@ export const getEquivalenciasPaginated = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `page=${data.page}&search=${data.search}`;
-    fetch(`${backendBaseUrl}api/equivalencia/all?${query}`, {
+    fetch(`${backendBaseUrl}/api/equivalencia/all?${query}`, {
       headers,
       method: 'GET'
     })
@@ -22,7 +22,7 @@ export const getAllEquivalencias = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/equivalencia/allNotPaginated?${query}`, {
+    fetch(`${backendBaseUrl}/api/equivalencia/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
@@ -39,7 +39,7 @@ export const getAllEquivalencias = async (data: any) => {
 export const getAllEquivalenciaByAsignatura = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/asignatura/getEquivalenciaByAsignatura`, {
+    fetch(`${backendBaseUrl}/api/asignatura/getEquivalenciaByAsignatura`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -57,7 +57,7 @@ export const getAllEquivalenciaByAsignatura = async (data: any) => {
 export const getAllEquivalenciaByAsignaturaNoToken = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/asignatura/getEquivalenciaByAsignaturaNT`, {
+    fetch(`${backendBaseUrl}/api/asignatura/getEquivalenciaByAsignaturaNT`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -75,7 +75,7 @@ export const getAllEquivalenciaByAsignaturaNoToken = async (data: any) => {
 export const createEquivalencia = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/equivalencia/add`, {
+    fetch(`${backendBaseUrl}/api/equivalencia/add`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -93,7 +93,7 @@ export const createEquivalencia = async (data: any) => {
 export const updateEquivalencia = async (data: any, id: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/equivalencia/${id}`, {
+    fetch(`${backendBaseUrl}/api/equivalencia/${id}`, {
       headers,
       method: 'PATCH',
       body: JSON.stringify(data)

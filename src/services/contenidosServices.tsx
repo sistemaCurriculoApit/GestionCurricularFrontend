@@ -4,7 +4,7 @@ export const getContenidosPaginated = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `page=${data.page}&search=${data.search}&dateCreationFrom=${data.dateCreationFrom}&dateCreationTo=${data.dateCreationTo}`;
-    fetch(`${backendBaseUrl}api/contenido/all?${query}`, {
+    fetch(`${backendBaseUrl}/api/contenido/all?${query}`, {
       headers,
       method: 'GET'
     })
@@ -22,7 +22,7 @@ export const getAllContenidos = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/contenido/allNotPaginated?${query}`, {
+    fetch(`${backendBaseUrl}/api/contenido/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
@@ -39,7 +39,7 @@ export const getAllContenidos = async(data: any) => {
 export const getAllContenidoByAsignatura = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/contenido/getAllContenidoByAsignatura`, {
+    fetch(`${backendBaseUrl}/api/contenido/getAllContenidoByAsignatura`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -54,10 +54,10 @@ export const getAllContenidoByAsignatura = async(data: any) => {
   });
 };
 
-export const getAllContenidoByAsignaturaNoToken = async(data: any) => {
+export const getAllContenidoByAsignaturaNoToken = async(data: any):  Promise<any> => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/contenido/getAllContenidoByAsignaturaNT`, {
+    fetch(`${backendBaseUrl}/api/contenido/getAllContenidoByAsignaturaNT`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -75,7 +75,7 @@ export const getAllContenidoByAsignaturaNoToken = async(data: any) => {
 export const createContenido = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/contenido/add`, {
+    fetch(`${backendBaseUrl}/api/contenido/add`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -93,7 +93,7 @@ export const createContenido = async (data: any) => {
 export const updateContenido = async (data: any, id: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/contenido/${id}`, {
+    fetch(`${backendBaseUrl}/api/contenido/${id}`, {
       headers,
       method: 'PATCH',
       body: JSON.stringify(data)

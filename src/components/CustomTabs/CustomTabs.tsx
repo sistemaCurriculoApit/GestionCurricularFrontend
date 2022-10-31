@@ -1,13 +1,9 @@
 import React from 'react';
-// nodejs library that concatenates classes
 import classNames from 'classnames';
-// nodejs library to set properties for components
 
-// material-ui components
 import withStyles from '@material-ui/core/styles/withStyles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-// core components
 import Card from '../../components/Card/Card';
 import CardBody from '../../components/Card/CardBody';
 import CardHeader from '../../components/Card/CardHeader';
@@ -79,13 +75,6 @@ class CustomTabs extends React.Component<Props, State> {
               }
               return (
                 <Tab
-                  // classes={{
-                  //   root: classes.tabRootButton,
-                  //   labelContainer: classes.tabLabelContainer,
-                  //   label: classes.tabLabel,
-                  //   selected: classes.tabSelected,
-                  //   wrapper: classes.tabWrapper
-                  // }}
                   key={key}
                   label={prop.tabName}
                   {...icon}
