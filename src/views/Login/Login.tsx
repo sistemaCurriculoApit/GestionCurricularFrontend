@@ -63,6 +63,7 @@ function Login(props: any) {
     if (guest) {
       localStorage.setItem('token', '-1');
       localStorage.setItem('idProfileLoggedUser', '5');
+      document.location.reload()
     } else {
       if ((email && password) || googleIdentity) {
         //Ingreso roles del sistema con credenciales
