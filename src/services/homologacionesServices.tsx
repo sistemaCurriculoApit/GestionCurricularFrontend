@@ -21,7 +21,7 @@ export const getHomologations = async (query: HomologationsQuery): Promise<Homol
   try {
     const queryString = buildQuery(query);
     const headers = getHeaders();
-    const url = `${backendBaseUrl}api/homologations?${queryString}`;
+    const url = `${backendBaseUrl}/api/homologations?${queryString}`;
     const response = await fetch(url, { headers, method: 'GET' });
     return await response.json();
   } catch (e) {
@@ -34,7 +34,7 @@ export const getHomologationsByApplicant = async (applicantId: string, query: Ho
   try {
     const queryString = buildQuery(query);
     const headers = getHeaders();
-    const url = `${backendBaseUrl}api/homologations/applicants/${applicantId}?${queryString}`;
+    const url = `${backendBaseUrl}/api/homologations/applicants/${applicantId}?${queryString}`;
     const response = await fetch(url, { headers, method: 'GET' });
     return await response.json();
   } catch (e) {
@@ -47,7 +47,7 @@ export const getHomologationsByPeriods = async (period: string, query: Homologat
   try {
     const queryString = buildQuery(query);
     const headers = getHeaders();
-    const url = `${backendBaseUrl}api/homologations/periods/${period}?${queryString}`;
+    const url = `${backendBaseUrl}/api/homologations/periods/${period}?${queryString}`;
     const response = await fetch(url, { headers, method: 'GET' });
     return await response.json();
   } catch (e) {
@@ -59,7 +59,7 @@ export const getHomologationsByPeriods = async (period: string, query: Homologat
 export const createHomologation = async (homologation: any): Promise<any> => {
   try {
     const headers = getHeaders();
-    const url = `${backendBaseUrl}api/homologations`;
+    const url = `${backendBaseUrl}/api/homologations`;
     const response = await fetch(url, { headers, method: 'POST', body: JSON.stringify(homologation) });
     return await response.json();
   } catch (e) {
@@ -71,7 +71,7 @@ export const createHomologation = async (homologation: any): Promise<any> => {
 export const updateHomologations = async (homologationId: string, homologation: any): Promise<any> => {
   try {
     const headers = getHeaders();
-    const url = `${backendBaseUrl}api/homologations/${homologationId}`;
+    const url = `${backendBaseUrl}/api/homologations/${homologationId}`;
     const response = await fetch(url, { headers, method: 'PUT', body: JSON.stringify(homologation) });
     return await response.json();
   } catch (e) {

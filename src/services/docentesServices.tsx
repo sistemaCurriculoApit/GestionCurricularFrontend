@@ -4,7 +4,7 @@ export const getDocentePaginated = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `page=${data.page}&search=${data.search}&dateCreationFrom=${data.dateCreationFrom}&dateCreationTo=${data.dateCreationTo}`;
-    fetch(`${backendBaseUrl}api/docente/all?${query}`, {
+    fetch(`${backendBaseUrl}/api/docente/all?${query}`, {
       headers,
       method: 'GET'
     })
@@ -22,7 +22,7 @@ export const getAllDocentes = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/docente/allNotPaginated?${query}`, {
+    fetch(`${backendBaseUrl}/api/docente/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
@@ -36,11 +36,11 @@ export const getAllDocentes = async(data: any) => {
   });
 };
 
-export const getAllDocentesNT = async(data: any) => {
+export const getAllDocentesNT = async(data: any): Promise<any> => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/docente/allNotPaginatedNT?${query}`, {
+    fetch(`${backendBaseUrl}/api/docente/allNotPaginatedNT?${query}`, {
       headers,
       method: 'GET'
     })
@@ -57,7 +57,7 @@ export const getAllDocentesNT = async(data: any) => {
 export const getDocentesByListIds = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/docente/byListIds`, {
+    fetch(`${backendBaseUrl}/api/docente/byListIds`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -75,7 +75,7 @@ export const getDocentesByListIds = async(data: any) => {
 export const createDocente = async(data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/docente/add`, {
+    fetch(`${backendBaseUrl}/api/docente/add`, {
       headers,
       method: 'POST', 
       body: JSON.stringify(data)
@@ -93,7 +93,7 @@ export const createDocente = async(data: any) => {
 export const updateDocente = async(data: any, id: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/docente/${id}`, {
+    fetch(`${backendBaseUrl}/api/docente/${id}`, {
       headers,
       method: 'PATCH', 
       body: JSON.stringify(data)

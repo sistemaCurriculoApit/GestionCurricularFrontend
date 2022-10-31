@@ -13,26 +13,27 @@ import 'perfect-scrollbar/css/perfect-scrollbar.css';
 const switchRoutes = (
   <Switch>
     {routes.map((prop: any) => {
-      if (prop.layout === '/admin') {
-        if (prop.subItems) {
-          let subItemsRoute = prop.subItems.map((subItemProps: any) => {
-            return (<Route
-              path={subItemProps.layout + subItemProps.path}
-              component={subItemProps.component}
-              key={subItemProps.path}
-            />);
-          });
-          return subItemsRoute;
-        } else {
-          return (
-            <Route
-              path={prop.layout + prop.path}
-              component={prop.component}
-              key={prop.path}
-            />
-          );
-        }
+      if (prop.layout !== '/admin') {
+        return null;
       }
+
+      if (prop.subItems) {
+        return prop.subItems.map((subItemProps: any) => (
+          <Route
+            path={subItemProps.layout + subItemProps.path}
+            component={subItemProps.component}
+            key={subItemProps.path}
+          />
+        ));
+      }
+
+      return (
+        <Route
+          path={prop.layout + prop.path}
+          component={prop.component}
+          key={prop.path}
+        />
+      );
     })}
   </Switch>
 );

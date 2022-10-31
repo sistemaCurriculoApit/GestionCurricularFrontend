@@ -1,6 +1,6 @@
 const production = process.env.name === 'prod';
-export const backendBaseUrl = production ? 'https://curriculo-apit-backend.herokuapp.com/' : 'http://localhost:3000/';
-export const frontendBaseUrl = production ? 'https://curriculo-apit-frontend.herokuapp.com/' : 'http://localhost:3002/';
+export const backendBaseUrl = production ? 'https://curriculo-apit-backend.herokuapp.com' : 'http://localhost:3000';
+export const frontendBaseUrl = production ? 'https://curriculo-apit-frontend.herokuapp.com' : 'http://localhost:3002';
 
 export const getHeaders = () => {
   const headers = new Headers({ 'Content-Type': 'application/json' });

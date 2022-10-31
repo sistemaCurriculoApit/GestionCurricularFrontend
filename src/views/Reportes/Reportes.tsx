@@ -23,11 +23,13 @@ import { containerFloatButton } from '../../assets/jss/material-dashboard-react/
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react';
 
-import { AdvancementsBySubjectTab } from './Components/Tabs/AdvancementsBySubject/AdvacementsBySubject';
-import { AdvacementsByProfessorTab } from './Components/Tabs/AdvancementsByProfessor/AdvancementsByProfessor';
-import { AdvancementsByPeriodTab } from './Components/Tabs/AdvancementsByPeriod/AdvancementsByPeriod';
-import { HomologationsByApplicantTab } from './Components/Tabs/HomologationsByApplicant/HomologationsByApplication';
-import { HomologationsByPeriodTab } from './Components/Tabs/HomologationsByPeriod/HomologationsByPeriod';
+import {
+  AdvancementsBySubjectTab,
+  AdvacementsByProfessorTab,
+  AdvancementsByPeriodTab,
+  HomologationsByApplicantTab,
+  HomologationsByPeriodTab
+} from './Components/Tabs';
 import { useExportModal } from './Components/Modal/Modal';
 import { ReportButton } from './Components/ReportButton/ReportButton';
 

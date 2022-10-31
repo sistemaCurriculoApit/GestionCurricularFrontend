@@ -4,7 +4,7 @@ export const getActasPaginated = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
     let query = `page=${data.page}&search=${data.search}&dateCreationFrom=${data.dateCreationFrom}&dateCreationTo=${data.dateCreationTo}&dateActaFrom=${data.dateActaFrom}&dateActaTo=${data.dateActaTo}`;
-    fetch(`${backendBaseUrl}api/acta/all?${query}`, {
+    fetch(`${backendBaseUrl}/api/acta/all?${query}`, {
       headers,
       method: 'GET'
     })
@@ -21,7 +21,7 @@ export const getActasPaginated = async (data: any) => {
 export const createActa = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/acta/add`, {
+    fetch(`${backendBaseUrl}/api/acta/add`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -39,7 +39,7 @@ export const createActa = async (data: any) => {
 export const updateActa = async (data: any, id: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/acta/${id}`, {
+    fetch(`${backendBaseUrl}/api/acta/${id}`, {
       headers,
       method: 'PATCH',
       body: JSON.stringify(data)

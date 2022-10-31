@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-// @material-ui/core components
+import React from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
-// core components
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
 import Card from '../../components/Card/Card';
@@ -48,19 +46,10 @@ function ManualUsuario(props: any) {
   const { classes } = props;
 
   const getManualUsuarioName = () => {
-    var idProfile = localStorage.getItem('idProfileLoggedUser');
-    switch (idProfile) {
-      case userProfilesObject.admin.id.toString():
-        return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.admin.title}.pdf`;
-      case userProfilesObject.coor.id.toString():
-        return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.coor.title}.pdf`;
-        case userProfilesObject.doc.id.toString():
-          return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.doc.title}.pdf`;
-          case userProfilesObject.est.id.toString():
-            return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_${userProfilesObject.est.title}.pdf`;
-          default:
-            return `${frontendBaseUrl}Manual_de_Usuario_Gestion_Curricular_Invitado.pdf`;
-    }
+    const idProfile = localStorage.getItem('idProfileLoggedUser');
+    const profile = Object.values(userProfilesObject).find(({ id }: any) => id.toString() === idProfile);
+    const manualName = profile ? profile.title : 'Invitado';
+    return `${frontendBaseUrl}/Manual_de_Usuario_Gestion_Curricular_${manualName}.pdf`;
   };
 
   return (

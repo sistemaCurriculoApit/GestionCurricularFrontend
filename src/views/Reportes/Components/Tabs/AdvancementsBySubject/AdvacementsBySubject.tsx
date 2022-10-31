@@ -12,6 +12,7 @@ import { TableDivider } from '../../TableDivider/TableDivider';
 import { useYearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
 import { TabProps } from '../types';
 import { parseAdvancement } from '../../../Util/Util';
+import { Subject } from '../../../../../models';
 
 type AdvancementsBySubjectTabProps = TabProps;
 const FILE_SUFIX = 'por_asignatura';
@@ -26,7 +27,7 @@ export const AdvancementsBySubjectTab: React.FC<AdvancementsBySubjectTabProps> =
   const [selectedSubject, setSelectedSubject] = useState<any>(null);
   const [advancements, setAdvancements] = useState<any[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
   const { year: advancementYear, period, YearPeriodPicker } = useYearPeriodPicker({
     classes,
     sizesYear: { xs: 12, sm: 12, md: 4 },
@@ -35,7 +36,7 @@ export const AdvancementsBySubjectTab: React.FC<AdvancementsBySubjectTabProps> =
 
   useEffect(() => {
     setLoading(true);
-    const getSubjects = async (): Promise<any[]> => {
+    const getSubjects = async (): Promise<Subject[]> => {
       try {
         const response: any = await getAllAsignaturas({ search: '' });
         return response.asignaturas || [];
@@ -44,7 +45,7 @@ export const AdvancementsBySubjectTab: React.FC<AdvancementsBySubjectTabProps> =
       }
     };
 
-    getSubjects().then((data: any[]) => { setSubjects(data); setLoading(false); });
+    getSubjects().then((_subjects: Subject[]) => { setSubjects(_subjects); setLoading(false); });
   }, []);
 
   const handleAdvancementsBySubject = useCallback(async (queryPage?: number, isReport?: boolean) => {

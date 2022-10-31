@@ -205,8 +205,6 @@ function AvancesAsignaturas(props: any) {
   };
 
   const getAvances = async (page?: any, byEmailDocente?: boolean, emailDocente?: any) => {
-    // Llamado al backend y construcción de los parametros de consulta
-    console.log('gonna call avance')
     let response: any;
     if (byEmailDocente) {
       response = await getAdvancementsByProfessorsEmail({

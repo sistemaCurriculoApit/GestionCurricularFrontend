@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import { TextField, createStyles, Modal, Tooltip } from '@material-ui/core';
+import { TextField, createStyles } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { Close as CloseIcon, GetApp, Visibility as VisibilityIcon } from '@material-ui/icons';
 
 import AlertComponent from '../../components/Alert/AlertComponent';
 import GridItem from '../../components/Grid/GridItem';
@@ -11,7 +10,6 @@ import Table from '../../components/Table/Table';
 import Card from '../../components/Card/Card';
 import CardHeader from '../../components/Card/CardHeader';
 import CardBody from '../../components/Card/CardBody';
-import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
 
@@ -21,13 +19,16 @@ import { container, containerFormModal, containerFooterModal, modalForm } from '
 import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 
-import { AnythingObject, tiposAsignatura } from '../../constants/generalConstants';
+import { tiposAsignatura } from '../../constants/generalConstants';
 import { getAllProgramasNoToken } from '../../services/programasServices';
 import { getPlanesByListIdsNoToken } from '../../services/planesServices';
 import { getAreasByListIdsNoToken } from '../../services/areasServices';
 import { getAllContenidoByAsignaturaNoToken } from '../../services/contenidosServices';
 import { getAsignaturaByListIdsPaginatedNoToken, GetFileAsignatura, getAllAsignaturasWithPlanCodeNT } from '../../services/asignaturasServices';
 import { getAllDocentesNT } from '../../services/docentesServices';
+import { useSubjectModal } from './Components/Modal/Modal';
+import { transformSubjects } from './Util/SubjectTransformation';
+import { Subject } from '../../models';
 
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
@@ -41,368 +42,264 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
+const ID_ENGINEERING_PROGRAM = '1';
+const ID_ENGINEERING_PLAN = '8210';
+const ID_ENGINEERING_AREA = '3';
+const subjectInitialValue: Subject = {
+  _id: '',
+  nombre: '',
+  codigo: '',
+  semestre: '',
+  cantidadCredito: 1,
+  asignaturaTipo: {},
+  intensidadHorariaPractica: 0,
+  intensidadHorariaTeorica: 0,
+  intensidadHorariaIndependiente: 0,
+  intensidadHoraria: 0,
+  prerrequisitos: '',
+  correquisitos: '',
+  presentacionAsignatura: '',
+  justificacionAsignatura: '',
+  objetivoGeneral: '',
+  objetivosEspecificos: '',
+  competencias: '',
+  mediosEducativos: '',
+  evaluacion: '',
+  bibliografia: '',
+  cibergrafia: '',
+  contenido: [],
+  docente: [],
+  equivalencia: []
+};
+
 const Micrositios = ({ classes }: any) => {
-  const [showAlert, setShowAlert] = useState(false);
-  const [severityAlert, setSeverityAlert] = useState('');
-  const [messageAlert, setMessagesAlert] = useState('');
-  const [openModalLoading, setOpenModalLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [severityAlert, setSeverityAlert] = useState<string>('');
+  const [messageAlert, setMessagesAlert] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [programasList, setProgramasList] = useState([]);
-  const [programaSelected, setProgramaSelected] = useState<AnythingObject>({});
-  const [planesList, setPlanesList] = useState([]);
-  const [planSelected, setPlanSelected] = useState<AnythingObject>({});
-  const [areasList, setAreasList] = useState([]);
-  const [areaSelected, setAreaSelected] = useState<AnythingObject>({});
-  const [, setContenidosList] = useState([]);
-  const [, setDocenteList] = useState([]);
-  const [, setEquivalenciaList] = useState([]);
-  const [tipoAsignaturaSelected, setTipoAsignaturaSelected] = useState<AnythingObject>({});
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState<any>(null);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [areas, setAreas] = useState<any[]>([]);
+  const [selectedArea, setSelectedArea] = useState<any>(null);
+  const [selectedSubjectType, setSelectedSubjectType] = useState<any>({});
 
-  const [asignaturasList, setAsignaturasList] = useState([]);
-  const [totalAsignaturas, setTotalAsignaturas] = useState(0);
-  const [pagePagination] = useState(1);
-  const [asignaturaObject, setAsignaturaObject] = useState<AnythingObject>({
-    _id: '',
-    nombre: '',
-    codigo: '',
-    semestre: '',
-    cantidadCredito: 1,
-    asignaturaTipo: {},
-    intensidadHorariaPractica: 0,
-    intensidadHorariaTeorica: 0,
-    intensidadHorariaIndependiente: 0,
-    intensidadHoraria: 0,
-    prerrequisitos: '',
-    correquisitos: '',
-    presentacionAsignatura: '',
-    justificacionAsignatura: '',
-    objetivoGeneral: '',
-    objetivosEspecificos: '',
-    competencias: '',
-    mediosEducativos: '',
-    evaluacion: '',
-    bibliografia: '',
-    cibergrafia: '',
-    contenido: [],
-    docente: [],
-    equivalencia: []
-  });
+  const [professors, setProfessors] = useState<any>(null);
+  const [equivalences, setEquivalences] = useState<any>(null);
+  const [contents, setContents] = useState<any>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjectsCount, setSubjectsCount] = useState(0);
+  const [page, setPage] = useState(0);
+  const [subject, setSubject] = useState<Subject>(subjectInitialValue);
+  const [isFirstTime, setIsFirstTime] = useState<boolean>(true);
+  const { Modal: SubjectModal, setIsModalOpen } = useSubjectModal();
 
-  const downloadCourseFormat = async (asignaturaToDownload?: any, fromObject?: boolean) => {
-    setOpenModalLoading(true);
-    let asignaturaToGetFile: any;
-    if (fromObject) {
-      asignaturaToGetFile = {
-        ...asignaturaObject,
-        asignaturaTipo: '',
-        docente: asignaturaObject.docente ? asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })) : null,
-        contenido: asignaturaObject.contenido ? asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })) : null,
-        equivalencia: asignaturaObject.equivalencia ? asignaturaObject.equivalencia.map((equivalencia: any) => ({ _id: equivalencia.asignatura._id })) : null
-      };
-    } else {
-      asignaturaToGetFile = {
-        ...asignaturaToDownload,
-        asignaturaTipo: '',
-        docente: asignaturaToDownload.docente ? asignaturaToDownload.docente.map((docente: any) => ({ _id: docente._id })) : null,
-        contenido: asignaturaToDownload.contenido ? asignaturaToDownload.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })) : null,
-        equivalencia: asignaturaToDownload.equivalencia ? asignaturaToDownload.equivalencia.map((equivalencia: any) => ({ _id: equivalencia.asignatura._id })) : null
-      };
-    }
-    let response: any = await GetFileAsignatura(asignaturaToGetFile);
-    if (!response) {
-      setSeverityAlert('error');
-      setShowAlert(true);
-      setMessagesAlert('Ocurrio un error generando el archivo PDF.');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-    } else {
-      setSeverityAlert('success');
-      setShowAlert(true);
-      setMessagesAlert('archivo PDF generado satisfactoriamente.');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-    }
-    setOpenModalLoading(false);
+  const setMessage = ([level, message]: string[]) => {
+    setSeverityAlert(level);
+    setShowAlert(true);
+    setMessagesAlert(message);
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 1000);
   };
 
-  const cleanAsignaturaObjectAndSetOpenModal = () => {
-    setAsignaturaObject({
-      _id: '',
-      nombre: '',
-      codigo: '',
-      semestre: '',
-      cantidadCredito: 1,
-      asignaturaTipo: {},
-      intensidadHorariaPractica: 0,
-      intensidadHorariaTeorica: 0,
-      intensidadHorariaIndependiente: 0,
-      intensidadHoraria: 0,
-      prerrequisitos: '',
-      correquisitos: '',
-      presentacionAsignatura: '',
-      justificacionAsignatura: '',
-      objetivoGeneral: '',
-      objetivosEspecificos: '',
-      competencias: '',
-      mediosEducativos: '',
-      evaluacion: '',
-      bibliografia: '',
-      cibergrafia: '',
-      contenido: [],
-      docente: [],
-      equivalencia: []
+  const cleanSubject = () => {
+    setSubject(subjectInitialValue);
+    setIsModalOpen(false);
+  };
+
+  const getCompleteSubject = (_subject: Subject) => {
+    const docente = _subject.docente.map((professor: any) => professors[professor._id] || professor);
+    const contenido = _subject.contenido.map((content: any) => contents[content._id] || content);
+    const equivalencia = _subject.equivalencia.map((equivalency: any) => equivalences[equivalency._id] || equivalences);
+
+    return ({
+      ..._subject,
+      docente,
+      contenido,
+      equivalencia
     });
-    setOpenModal(false);
   };
 
-  const getAreas = async (setByDefault?: boolean, plan?: any) => {
-    let areaIds;
-    if (!setByDefault) {
-      areaIds = planSelected.area.map((option: any) => option._id);
-    } else {
-      areaIds = plan.area.map((option: any) => option._id);
-    }
+  const downloadCourseFormat = async (_subject?: any, fromObject?: boolean) => {
+    setIsLoading(true);
+    const baseSubject = fromObject ? subject : _subject;
+    const asignaturaToGetFile = {
+      ...baseSubject,
+      asignaturaTipo: '',
+      docente: baseSubject.docente ? baseSubject.docente.map(({ _id }: any) => ({ _id })) : null,
+      contenido: baseSubject.contenido ? baseSubject.contenido.map(({ _id, nombre, descripcion }: any) => ({ _id, nombre, descripcion })) : null,
+      equivalencia: baseSubject.equivalencia ? baseSubject.equivalencia.map(({ asignatura }: any) => ({ _id: asignatura._id })) : null
+    };
 
-    const response: any = await getAreasByListIdsNoToken({
-      search: '',
-      areaIds
-    });
-    if (response && response.areas) {
-      setAreasList(response.areas);
-      if (setByDefault) {
-        var findIngArea = response.areas.find((area: any) => area.codigo === '3');
-        if (findIngArea) {
-          setAreaSelected(findIngArea);
-        }
-      }
-    }
-    setOpenModalLoading(false);
+    const response: any = await GetFileAsignatura(asignaturaToGetFile);
+    const messageType = response ? 'success' : 'error';
+    const message = response ? 'Archivo PDF generado satisfactoriamente.' : 'Ocurrio un error generando el archivo PDF.';
+
+    setMessage([messageType, message]);
+    setIsLoading(false);
   };
 
-  const getPlanes = async (setByDefault?: boolean, programa?: any) => {
-    let planIds: any;
-    if (!setByDefault) {
-      planIds = programaSelected.plan.map((option: any) => option._id);
-    } else {
-      planIds = programa.plan.map((option: any) => option._id);
+  const getAreas = async () => {
+    const areaIds = selectedPlan.area.map((_plan: any) => _plan._id);
+
+    const response: any = await getAreasByListIdsNoToken({ search: '', areaIds });
+
+    if (!response || !response.areas) {
+      setAreas([]);
+      setIsLoading(false);
+      return;
     }
 
-    const response: any = await getPlanesByListIdsNoToken({
-      search: '',
-      planIds
-    });
-    if (response && response.planes) {
-      setPlanesList(response.planes);
-      if (setByDefault) {
-        const find8210Plan = response.planes.find((plan: any) => plan.codigo === '8210');
-        if (find8210Plan) {
-          setPlanSelected(find8210Plan);
-          getAreas(setByDefault, find8210Plan);
-        }
-      }
-    }
-    setOpenModalLoading(false);
+    const { areas: _areas } = response;
+    setAreas(_areas);
+
+    const defaultArea = !isFirstTime ? _areas[0] : _areas.find((area: any) => area.codigo === ID_ENGINEERING_AREA);
+    setSelectedArea(defaultArea);
+    setIsLoading(false);
+    return;
   };
 
-  const getProgramas = async (setByDefault?: boolean) => {
-    const response: any = await getAllProgramasNoToken({
-      search: '',
-    });
+  const getPlans = async () => {
+    setIsLoading(true);
+    const planIds = selectedProgram.plan.map((plan: any) => plan._id);
 
-    if (response && response.programas) {
-      setProgramasList(response.programas);
-      if (setByDefault) {
-        const findIngeniriaProgram = response.programas.find((programa: any) => programa.codigo === '1');
-        if (findIngeniriaProgram) {
-          setProgramaSelected(findIngeniriaProgram);
-          getPlanes(setByDefault, findIngeniriaProgram);
-        }
-      }
+    const response: any = await getPlanesByListIdsNoToken({ search: '', planIds });
+
+    if (!response || !response.planes) {
+      setPlans([]);
+      setIsLoading(false);
+      return;
     }
-    setOpenModalLoading(false);
+
+    const { planes } = response;
+
+    setPlans(planes);
+
+    const defaultPlan = !isFirstTime ? planes[0] : planes.find((plan: any) => plan.codigo === ID_ENGINEERING_PLAN);
+    setSelectedPlan(defaultPlan);
+    setIsLoading(false);
+    return;
   };
 
-  const getEquivalencias = async (asignaturaSelected?: any) => {
-    let response: any = await getAllAsignaturasWithPlanCodeNT({
-      search: '',
-    });
-    let equivalenciasSelected = [];
-    if (response && (response.asignaturas)) {
-      var newAsignaturasList = response.asignaturas.filter((item: any) => item.asignatura._id !== asignaturaSelected._id);
-      setEquivalenciaList(newAsignaturasList);
-      if (asignaturaSelected.equivalencia.length) {
-        for (let i = 0; i < asignaturaSelected.equivalencia.length; i++) {
-          let findEquivalencia = response.asignaturas.find((asignatura: any) => asignatura.asignatura._id === asignaturaSelected.equivalencia[i]._id);
-          if (findEquivalencia) {
-            equivalenciasSelected.push(findEquivalencia);
-          }
-        }
-      }
-    }
-    setAsignaturaObject({ ...asignaturaSelected, equivalencia: equivalenciasSelected });
-    const result = { ...asignaturaSelected, equivalencia: equivalenciasSelected };
-    setOpenModalLoading(false);
-    return result;
+  const getDataToDownloadFormat = (_subject?: any) => {
+    cleanSubject();
+    setSelectedSubjectType(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === _subject.asignaturaTipo) || {});
+
+    const subjectData = getCompleteSubject(_subject);
+    downloadCourseFormat(subjectData, false);
   };
 
-  const getContenidos = async (asignaturaSelected?: any) => {
-    let response: any = await getAllContenidoByAsignaturaNoToken({
-      search: '',
-    });
-    let contenidosSelected = [];
-    if (response && response.contenidos) {
-      setContenidosList(response.contenidos);
-      if (asignaturaSelected.contenido && asignaturaSelected.contenido.length) {
-        for (let i = 0; i < asignaturaSelected.contenido.length; i++) {
-          let findContenido = response.contenidos.find((contenido: any) => contenido._id === asignaturaSelected.contenido[i]._id);
-          if (findContenido) {
-            contenidosSelected.push(findContenido);
-          }
-        }
-      }
-    }
-    const result = await getEquivalencias({ ...asignaturaSelected, contenido: contenidosSelected });
-    return result;
-  };
+  const getSubjects = async (_page?: any) => {
+    setIsLoading(true);
 
-  const getDocentes = async (asignaturaSelected?: any) => {
-    let response: any = await getAllDocentesNT({
-      search: '',
-    });
-    let docentesSelected = [];
-    if (response && response.docentes) {
-      setDocenteList(response.docentes);
-      if (asignaturaSelected.docente && asignaturaSelected.docente.length) {
-        for (let i = 0; i < asignaturaSelected.docente.length; i++) {
-          let findDocente = response.docentes.find((docente: any) => docente._id === asignaturaSelected.docente[i]._id);
-          if (findDocente) {
-            docentesSelected.push(findDocente);
-          }
-        }
-      }
+    if (isFirstTime) {
+      setIsFirstTime(false);
     }
-    const result = await getContenidos({ ...asignaturaSelected, docente: docentesSelected });
-    return result;
-  };
 
-  const getDataToDownloadFormat = async (asignaturaToDownload?: any) => {
-    try {
-      cleanAsignaturaObjectAndSetOpenModal();
-      setOpenModalLoading(true);
-      setTipoAsignaturaSelected(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === asignaturaToDownload.asignaturaTipo) || {});
-      let asignaturaData = await getDocentes(asignaturaToDownload);
-      downloadCourseFormat(asignaturaData, false);
-    } catch (error) {
-      setOpenModalLoading(false);
-    }
-  };
-
-  const getAsignaturas = async (page?: any) => {
-    var asignaturaIds = areaSelected.asignatura.map((option: any) => option._id);
-    let response: any = await getAsignaturaByListIdsPaginatedNoToken({
-      page: page ? page : 0,
+    const asignaturaIds = selectedArea.asignatura.map((_subject: Subject) => _subject._id);
+    const response: any = await getAsignaturaByListIdsPaginatedNoToken({
+      page: _page,
       asignaturaIds
     });
-    if (response && response.asignaturas && response.asignaturas.length) {
-      // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-      let asignaturas = response.asignaturas.map((data: any) => {
-        let arrayData = [
-          data.codigo,
-          data.nombre,
-          data.cantidadCredito,
-          data.intensidadHoraria,
-          data.semestre,
-          data.prerrequisitos,
-          data.correquisitos,
-          <Tooltip id="filterTooltip" title="Ver detalles de asignatura" placement="top" classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
-                onClick={() => {
-                  setOpenModal(true);
-                  setOpenModalLoading(true);
-                  setTipoAsignaturaSelected(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === data.asignaturaTipo) || {});
-                  getDocentes(data);
-                }} />
-            </div>
-          </Tooltip>,
-          <Tooltip id="filterTooltip" title="Descargar formato asignatura" placement="top" classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<GetApp />}
-                onClick={() => {
-                  getDataToDownloadFormat(data);
-                }} />
-            </div>
-          </Tooltip>
-        ];
-        return arrayData;
-      });
-      setTotalAsignaturas(response.totalAsignaturas);
-      setAsignaturasList(asignaturas);
-      setOpenModalLoading(false);
-    } else {
-      setAsignaturasList([]);
-      setTotalAsignaturas(0);
-      setSeverityAlert('info');
-      setShowAlert(true);
-      setMessagesAlert('No se encontraron registros en la base de datos, por favor prueba con otros filtros');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
+
+    if (!response || !response.asignaturas || !response.asignaturas.length) {
+      setSubjects([]);
+      setSubjectsCount(0);
+      setMessage(['info', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
+      return;
     }
+
+    const _subjects = transformSubjects({
+      subjects: response.asignaturas,
+      classes: classes,
+      subjectTypes: tiposAsignatura,
+      onStateClick: (_subject, subjectTypes) => {
+        setIsModalOpen(true);
+        setIsLoading(true);
+        setSelectedSubjectType(subjectTypes.find((_subjectType: any) => _subjectType.id === _subject.asignaturaTipo) || {});
+        setSubject(getCompleteSubject(_subject));
+        setIsLoading(false);
+      },
+      onDownloadClick: (data) => {
+        getDataToDownloadFormat(data);
+      }
+    });
+
+    setSubjectsCount(response.totalAsignaturas);
+    setSubjects(_subjects);
+    setIsLoading(false);
   };
 
-  const onChangePage = (page: number) => {
-    setOpenModalLoading(true);
-    getAsignaturas(page);
+  const onChangePage = (_page: number) => {
+    setIsLoading(true);
+    setPage(_page);
+    getSubjects(_page);
   };
 
   useEffect(() => {
-    setOpenModalLoading(true);
-    getProgramas(true);
+    const init = async () => {
+      setIsLoading(true);
+      try {
+        const [
+          { docentes },
+          { contenidos },
+          { asignaturas },
+          { programas }
+        ] = await Promise.all([
+          getAllDocentesNT({ search: '' }),
+          getAllContenidoByAsignaturaNoToken({ search: '' }),
+          getAllAsignaturasWithPlanCodeNT({ search: '' }),
+          getAllProgramasNoToken({ search: '' })
+        ]);
+
+        setPrograms(programas);
+
+        const defaultProgram = !isFirstTime ? programas[0] : programas.find((program: any) => program.codigo === ID_ENGINEERING_PROGRAM);
+        const contentsHashMap = contenidos.reduce((acc: any, el: any) => ({ ...acc, [el._id]: el }), {});
+        const professorsHashMap = docentes.reduce((acc: any, el: any) => ({ ...acc, [el._id]: el }), {});
+        const subjectsHashMap = asignaturas.reduce((acc: any, el: any) => ({ ...acc, [el.asignatura._id]: el }), {});
+
+        setSelectedProgram(defaultProgram);
+        setProfessors(professorsHashMap);
+        setContents(contentsHashMap);
+        setEquivalences(subjectsHashMap);
+        setIsLoading(false);
+      } catch {
+        setMessage(['error', 'Intente de nuevo']);
+        setIsLoading(false);
+      }
+    };
+
+    init();
   }, []);
 
   useEffect(() => {
-    if (programaSelected._id) {
-      setOpenModalLoading(true);
-      getPlanes();
-    } else {
-      // Inicializacion de objetos
-      setPlanSelected({});
-      setAreaSelected({});
+    setSelectedPlan(null);
+    setSelectedArea(null);
+    setPlans([]);
+    setAreas([]);
+    setSubjects([]);
+    setSubjectsCount(0);
 
-      // inicializacion de listas
-      setPlanesList([]);
-      setAreasList([]);
-      setAsignaturasList([]);
-      setTotalAsignaturas(0);
-
+    if (selectedProgram && selectedProgram._id) {
+      getPlans();
     }
-  }, [programaSelected]);
+  }, [selectedProgram]);
 
   useEffect(() => {
-    if (planSelected._id) {
-      setOpenModalLoading(true);
+    if (selectedPlan && selectedPlan._id) {
       getAreas();
-    } else {
-      // Inicializacion de objetos
-      setAreaSelected({});
-
-      // inicializacion de listas
-      setAreasList([]);
-      setAsignaturasList([]);
-      setTotalAsignaturas(0);
     }
-  }, [planSelected]);
+  }, [selectedPlan]);
 
   useEffect(() => {
-    if (areaSelected._id) {
-      setOpenModalLoading(true);
-      getAsignaturas();
+    if (selectedArea && selectedArea._id) {
+      getSubjects();
     }
-  }, [areaSelected]);
+  }, [selectedArea]);
 
   return (
     <div>
@@ -422,21 +319,21 @@ const Micrositios = ({ classes }: any) => {
                 <GridItem xs={12} sm={12} md={4} >
                   <Autocomplete
                     id="tags-outlined"
-                    options={programasList}
+                    options={programs}
                     getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                     disableClearable={true}
                     filterSelectedOptions={true}
                     onChange={(_, option) => {
-                      setProgramaSelected(option || {});
-                      setPlanSelected({});
-                      setAreaSelected({});
-                      setPlanesList([]);
-                      setAreasList([]);
-                      setAsignaturasList([]);
-                      setTotalAsignaturas(0);
+                      setSelectedProgram(option || {});
+                      setSelectedPlan({});
+                      setSelectedArea({});
+                      setPlans([]);
+                      setAreas([]);
+                      setSubjects([]);
+                      setSubjectsCount(0);
 
                     }}
-                    value={programaSelected}
+                    value={selectedProgram}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -444,7 +341,7 @@ const Micrositios = ({ classes }: any) => {
                         label="Programa"
                         variant="outlined"
                         margin="dense"
-                        error={programaSelected && !programaSelected._id ? true : false}
+                        error={selectedProgram && !selectedProgram._id ? true : false}
                         className={classes.CustomTextField}
                       />
                     )}
@@ -453,19 +350,19 @@ const Micrositios = ({ classes }: any) => {
                 <GridItem xs={12} sm={12} md={4} >
                   <Autocomplete
                     id="tags-outlined"
-                    options={planesList}
+                    options={plans}
                     getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                     disableClearable={true}
                     filterSelectedOptions={true}
                     onChange={(_, option) => {
-                      setPlanSelected(option || {});
-                      setAreaSelected({});
-                      setAreasList([]);
-                      setAsignaturasList([]);
-                      setTotalAsignaturas(0);
+                      setSelectedPlan(option || {});
+                      setSelectedArea({});
+                      setAreas([]);
+                      setSubjects([]);
+                      setSubjectsCount(0);
 
                     }}
-                    value={planSelected}
+                    value={selectedPlan}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -473,7 +370,7 @@ const Micrositios = ({ classes }: any) => {
                         label="Plan"
                         variant="outlined"
                         margin="dense"
-                        error={planSelected && !planSelected._id ? true : false}
+                        error={selectedPlan && !selectedPlan._id ? true : false}
                         className={classes.CustomTextField}
                       />
                     )}
@@ -483,14 +380,14 @@ const Micrositios = ({ classes }: any) => {
                 <GridItem xs={12} sm={12} md={4} >
                   <Autocomplete
                     id="tags-outlined"
-                    options={areasList}
+                    options={areas}
                     getOptionLabel={(option) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                     disableClearable={true}
                     filterSelectedOptions={true}
                     onChange={(_, option) => {
-                      setAreaSelected(option || {});
+                      setSelectedArea(option || {});
                     }}
-                    value={areaSelected}
+                    value={selectedArea}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -498,7 +395,7 @@ const Micrositios = ({ classes }: any) => {
                         label="Área"
                         variant="outlined"
                         margin="dense"
-                        error={areaSelected && !areaSelected._id ? true : false}
+                        error={selectedArea && !selectedArea._id ? true : false}
                         className={classes.CustomTextField}
                       />
                     )}
@@ -512,7 +409,7 @@ const Micrositios = ({ classes }: any) => {
               </GridContainer>
 
               {
-                !asignaturasList.length ?
+                !subjects.length ?
                   <h2 style={{ textAlign: 'center' }}>No se encontraron asignaturas en la base de datos</h2>
                   : (
                     <Table
@@ -528,7 +425,7 @@ const Micrositios = ({ classes }: any) => {
                         'Acciones',
                         'Descargas'
                       ]}
-                      tableData={asignaturasList}
+                      tableData={subjects}
                     />
                   )
               }
@@ -537,445 +434,22 @@ const Micrositios = ({ classes }: any) => {
           </Card>
 
           <Card className={classes.centerContent}>
-            <TablePagination page={pagePagination} onChangePage={onChangePage} totalData={totalAsignaturas} />
+            <TablePagination page={page + 1} onChangePage={onChangePage} totalData={subjectsCount} />
           </Card>
 
         </GridItem>
       </GridContainer>
 
-      {/* Modal listado de contenidos por asignatura */}
-      <Modal
-        open={openModal}
-        className={classes.modalForm}
-      >
-        <div className={classes.centerContent}>
-          <GridItem xs={12} sm={8} md={8} >
-            <Card className={classes.container}>
-              <CardHeader color="success">
-                <div className={classes.TitleFilterContainer}>
-                  <div className={classes.headerActions}>
-                    <Tooltip id="filterTooltip" title="Descargar formato de asignatura" placement="top" classes={{ tooltip: classes.tooltip }}>
-                      <div>
-                        <Button key={'filtersButton'} color={'secondary'} size="md" round={true} variant="outlined" justIcon={true} startIcon={<GetApp />}
-                          onClick={() => { downloadCourseFormat(null, true); }} />
-                      </div>
-                    </Tooltip>
-                  </div>
-                  <h4 className={classes.cardTitleWhite}>Detalle de asignatura</h4>
-                  <div className={classes.headerActions}>
-                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
-                      <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
-                          onClick={() => { cleanAsignaturaObjectAndSetOpenModal(); }} />
-                      </div>
-                    </Tooltip>
-                  </div>
-                </div>
-              </CardHeader >
-              <div className={classes.containerFormModal} >
-                <GridContainer>
-                  <GridItem xs={12} sm={12} md={12} >
-                    {
-                      !asignaturaObject._id ?
-                        <h2 style={{ textAlign: 'center' }}>No se encontraron detalles de la asignatura</h2>
-                        :
-                        <GridContainer>
-                          <GridItem xs={12} sm={12} md={12}>
-                            <h4 className={classes.cardTitleBlack}>Información de asignatura</h4>
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Código"
-                              variant="outlined"
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.codigo}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Nombre"
-                              variant="outlined"
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.nombre}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Créditos"
-                              variant="outlined"
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              type={'number'}
-                              value={asignaturaObject.cantidadCredito}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <Autocomplete
-                              id="tags-outlined"
-                              options={tiposAsignatura}
-                              getOptionLabel={(option) => option.title}
-                              filterSelectedOptions={true}
-                              disabled={true}
-                              onChange={(e, option) => {
-                                if (option.id === 0) {
-                                  setAsignaturaObject({
-                                    ...asignaturaObject,
-                                    intensidadHorariaTeorica: asignaturaObject.intensidadHorariaTeorica,
-                                    intensidadHorariaPractica: 0
-                                  });
-                                }
-                                if (option.id === 1) {
-                                  setAsignaturaObject({
-                                    ...asignaturaObject,
-                                    intensidadHorariaTeorica: 0,
-                                    intensidadHorariaPractica: asignaturaObject.intensidadHorariaPractica
-                                  });
-                                }
-                                if (option.id === 2) {
-                                  setAsignaturaObject({
-                                    ...asignaturaObject,
-                                    intensidadHorariaTeorica: asignaturaObject.intensidadHorariaTeorica,
-                                    intensidadHorariaPractica: asignaturaObject.intensidadHorariaPractica
-                                  });
-                                }
-                                setTipoAsignaturaSelected(option || {});
-                              }}
-                              value={tipoAsignaturaSelected}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  id="outlined-estado-solicitud"
-                                  label="Tipo de asignatura"
-                                  variant="outlined"
-                                  margin="dense"
-                                  className={classes.CustomTextField}
-                                />
-                              )}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Horas Trabajo Presencial Teorico"
-                              variant="outlined"
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              type={'number'}
-                              value={asignaturaObject.intensidadHorariaTeorica}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Horas Trabajo Presencial Practico"
-                              variant="outlined"
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              type={'number'}
-                              value={asignaturaObject.intensidadHorariaPractica}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Horas Trabajo Independiente"
-                              variant="outlined"
-                              margin="dense"
-                              className={classes.CustomTextField}
-                              type={'number'}
-                              disabled={true}
-                              value={asignaturaObject.intensidadHorariaIndependiente}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Total Horas Semanales"
-                              variant="outlined"
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              type={'number'}
-                              value={asignaturaObject.intensidadHoraria}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Semestre"
-                              variant="outlined"
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.semestre}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Prerrequisitos"
-                              variant="outlined"
-                              minRows={3}
-                              maxRows={9}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.prerrequisitos}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Correquisitos"
-                              variant="outlined"
-                              minRows={3}
-                              maxRows={9}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.correquisitos}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Presentacion de la asignatura"
-                              variant="outlined"
-                              minRows={3}
-                              maxRows={9}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.presentacionAsignatura}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Justificacion"
-                              variant="outlined"
-                              minRows={3}
-                              maxRows={9}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.justificacionAsignatura}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Objetivo General"
-                              variant="outlined"
-                              minRows={3}
-                              maxRows={9}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.objetivoGeneral}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Objetivos Especificos"
-                              variant="outlined"
-                              minRows={3}
-                              maxRows={9}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.objetivosEspecificos}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Competencias a Desarrollar"
-                              variant="outlined"
-                              minRows={5}
-                              maxRows={10}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.competencias}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Medios Educativos"
-                              variant="outlined"
-                              minRows={5}
-                              maxRows={10}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.mediosEducativos}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={4} >
-                            <TextField
-                              id="outlined-email"
-                              label="Evaluacion"
-                              variant="outlined"
-                              minRows={5}
-                              maxRows={10}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.evaluacion}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Bibliografia"
-                              variant="outlined"
-                              minRows={4}
-                              maxRows={10}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.bibliografia}
-                            />
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={6} >
-                            <TextField
-                              id="outlined-email"
-                              label="Cibergrafia"
-                              variant="outlined"
-                              minRows={4}
-                              maxRows={10}
-                              multiline={true}
-                              margin="dense"
-                              disabled={true}
-                              className={classes.CustomTextField}
-                              value={asignaturaObject.cibergrafia}
-                            />
-                          </GridItem>
+      <SubjectModal
+        classes={classes}
+        subject={subject}
+        subjectTypes={tiposAsignatura}
+        subjectTypesSelected={selectedSubjectType}
+        downloadCourseFormat={downloadCourseFormat}
+        cleanSubject={cleanSubject}
+      />
 
-                          <GridItem xs={12} sm={12} md={12} >
-                            <br />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12} >
-                            <hr />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12}>
-                            <h4 className={classes.cardTitleBlack}>Contenidos de asignatura</h4>
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12}>
-                            <Table
-                              tableHeaderColor="success"
-                              tableHead={[
-                                'Código',
-                                'Nombre',
-                                'Descripción',
-                              ]}
-                              tableData={asignaturaObject.contenido.map((contenido: any) => {
-                                let arrayContenidos = [
-                                  contenido.codigo, contenido.nombre, contenido.descripcion
-                                ];
-                                return arrayContenidos;
-                              })}
-                            />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12} >
-                            <br />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12} >
-                            <hr />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12}>
-                            <h4 className={classes.cardTitleBlack}>Asignaturas equivalentes</h4>
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={12}>
-                            <Table
-                              tableHeaderColor="success"
-                              tableHead={[
-                                'Código de plan',
-                                'Código',
-                                'Nombre',
-                                'Creditos',
-                                'Intensidad Horaria'
-                              ]}
-                              tableData={asignaturaObject.equivalencia.map((equivalencia: any) => {
-                                let arrayEquivalencia = [
-                                  equivalencia.codigoPlan, equivalencia.asignatura.codigo, equivalencia.asignatura.nombre, equivalencia.asignatura.cantidadCredito, equivalencia.asignatura.intensidadHoraria
-                                ];
-                                return arrayEquivalencia;
-                              })}
-                            />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12} >
-                            <br />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12} >
-                            <hr />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12}>
-                            <h4 className={classes.cardTitleBlack}>Información Docentes</h4>
-                          </GridItem>
-                          <GridItem xs={12} sm={12} md={12}>
-                            <Table
-                              tableHeaderColor="success"
-                              tableHead={[
-                                'Nombre',
-                                'Correo'
-                              ]}
-                              tableData={asignaturaObject.docente.map((docente: any) => {
-                                let arrayDocente = [
-                                  docente.nombre, docente.correo
-                                ];
-                                return arrayDocente;
-                              })}
-                            />
-                          </GridItem>
-
-                          <GridItem xs={12} sm={12} md={12} >
-                            <br />
-                          </GridItem>
-
-                        </GridContainer>
-                    }
-                  </GridItem>
-                </GridContainer>
-              </div>
-            </Card>
-          </GridItem>
-        </div>
-      </Modal>
-
-      <ModalLoading showModal={openModalLoading} />
+      <ModalLoading showModal={isLoading} />
 
     </div>
   );

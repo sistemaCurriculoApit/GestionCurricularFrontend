@@ -3,7 +3,7 @@ import { backendBaseUrl, getHeaders } from './constants';
 export const getEstudianteByEmail = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/estudiante/getByEmail`, {
+    fetch(`${backendBaseUrl}/api/estudiante/getByEmail`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
@@ -21,7 +21,7 @@ export const getEstudianteByEmail = async (data: any) => {
 export const getAllEstudiantes = async () => {
   return new Promise(resolve => {
     let headers: any = getHeaders();
-    fetch(`${backendBaseUrl}api/estudiante/all`, {
+    fetch(`${backendBaseUrl}/api/estudiante/all`, {
       headers,
       method: 'GET',
     })
