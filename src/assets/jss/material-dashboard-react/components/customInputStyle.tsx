@@ -100,7 +100,7 @@ export const CustomSearchTextField = createStyles({
 export const CustomTextField = createStyles({
   input: {
     margin: '5px 5px',
-    width:'100%',
+    width: '100%',
     '& label.Mui-focused': {
       color: '#000',
     },

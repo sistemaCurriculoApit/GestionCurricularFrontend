@@ -16,6 +16,7 @@
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@material-ui/pickers": "^3.3.10",
     "@types/classnames": "^2.3.1",
+    "@types/google.accounts": "^0.0.2",
     "@types/node": "^17.0.0",
     "@types/react": "^16.14.21",
     "@types/react-dom": "^16.9.14",
@@ -29,8 +30,11 @@
     "html-to-pdf-js": "^0.9.3",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.1",
+    "install": "^0.13.0",
     "jspdf": "^2.5.1",
+    "jwt-decode": "^3.1.2",
     "moment": "^2.29.1",
+    "npm": "^8.19.2",
     "perfect-scrollbar": "1.4.0",
     "prettier": "1.16.4",
     "react": "^16.14.0",
@@ -41,7 +45,6 @@
     "react-scripts": "2.1.5",
     "react-swipeable-views": "0.13.1",
     "save": "^2.5.0",
-    "tslint": "^5.20.1",
     "tslint-react": "^4.1.0",
     "typescript": "^3.9.10",
     "xlsx": "^0.18.5",
@@ -53,21 +56,15 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
-    "lint:check": "eslint . --ext=js,jsx;  exit 0",
-    "lint:fix": "eslint . --ext=js,jsx --fix;  exit 0",
+    "lint:check": "tslint **/*.ts **/*.tsx",
+    "lint:fix": "tslint **/*.ts **/*.tsx --fix",
     "build-package-css": "cp src/assets/css/material-dashboard-react.css dist/material-dashboard-react.css",
-    "build-package": "npm run build-package-css && babel src --out-dir dist"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/creativetimofficial/material-dashboard-react.git"
+    "build-package": "npm run build-package-css && babel src --out-dir dist",
+    "prepare": "husky install"
   },
   "keywords": [],
-  "author": "Creative Tim <hello@creative-tim.com> (https://www.creative-tim.com/)",
+  "author": "Politecnico Colombiano Jaime Isaza Cadavid",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/creativetimofficial/material-dashboard-react/issues"
-  },
   "homepage": "https://curriculo-apit-frontend.herokuapp.com/",
   "optionalDependencies": {
     "@types/googlemaps": "3.30.16",
@@ -84,6 +81,8 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@types/file-saver": "^2.0.5"
+    "@types/file-saver": "^2.0.5",
+    "husky": "^8.0.1",
+    "tslint": "^6.1.3"
   }
 }

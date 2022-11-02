@@ -1,5 +1,5 @@
 //importacion de dependencias y servicios
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createStyles } from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
@@ -7,22 +7,22 @@ import Button from '@material-ui/core/Button';
 import Link from '@material-ui/core/Link';
 import Card from '@material-ui/core/Card';
 import logoApit from 'assets/img/logoAPIT.png';
+import jwt_decode from 'jwt-decode'
 import {
   successColor,
   blackColor,
   whiteColor,
   hexToRgb
 } from '../../assets/jss/material-dashboard-react';
+import "../../assets/css/google-login-button.css"
 
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-
-
 import { validateLogin } from "../../services/loginServices"
 
 //Inicio componente funcional
 function Login(props: any) {
-
+  const document = window.document;
   //Declaración de variables y estados del componente
   const { classes } = props;
   const [openModalLoading, setOpenModalLoading] = useState(false);
@@ -31,29 +31,54 @@ function Login(props: any) {
   const [messageAlert, setMessagesAlert] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [googleIdentity, setGoogleIdentity] = useState(false)
+
+  const handleCallbackResponse = async (response: any) => {
+    const user: any = jwt_decode(response.credential)
+    setEmail(user.email)
+    setPassword("google identity")
+    setGoogleIdentity(true)
+    setOpenModalLoading(true)
+  }
+
+  useEffect(() => {
+    setTimeout(()=> {
+        google.accounts.id.initialize({
+          client_id: "430408237878-50tskg6vp41l7aojrnajacckra4hnurb.apps.googleusercontent.com",
+          callback: handleCallbackResponse
+        })
+        google.accounts.id.renderButton(
+          document.getElementById("sign-in")!,
+          { theme: "outline", size: "large", type: "standard" }
+        )
+    }, 500)
+  })
+
+  useEffect(() => {
+    if (googleIdentity) handleLogin()
+  }, [googleIdentity])
 
   //Metodo que controla el inicio de sesion
   const handleLogin = async (guest?: Boolean) => {
     if (guest) {
-      //Ingreso con el rol de invitado
       localStorage.setItem('token', '-1');
       localStorage.setItem('idProfileLoggedUser', '5');
-      window.location.reload();
+      document.location.reload()
     } else {
-      if (email && password) {
+      if ((email && password) || googleIdentity) {
         //Ingreso roles del sistema con credenciales
         let response: any = await validateLogin({
           correo: email,
-          contrasena: password
+          contrasena: password,
+          googleIdentity: googleIdentity
         });
         let { body } = response;
         if (body && body.token) {
-          //almacenamiento de token y del perfil logeado
           localStorage.setItem('token', body.token);
           localStorage.setItem('idProfileLoggedUser', body.user.rolId);
           localStorage.setItem('userEmail', body.user.correo);
           localStorage.setItem('userName', body.user.nombreUsuario);
-          window.location.reload();
+          document.location.reload();
         } else {
           setSeverityAlert('error');
           setMessagesAlert(body && body.descripcion ? body.descripcion : 'Ha ocurrido al intentar iniciar sesion');
@@ -62,7 +87,8 @@ function Login(props: any) {
             setShowAlert(false);
           }, 1000);
         }
-      } else {
+      }
+      else {
         setSeverityAlert('error');
         setMessagesAlert('Correo electrónico y contraseña son obligatorios');
         setShowAlert(true);
@@ -73,9 +99,8 @@ function Login(props: any) {
 
     }
     setOpenModalLoading(false);
-  }
+  };
 
-  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div className="App" >
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -102,13 +127,17 @@ function Login(props: any) {
                 onChange={(event) => setPassword(event.target.value)}
               />
 
-              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => { setOpenModalLoading(true); handleLogin() }}>
+              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => { setOpenModalLoading(true); handleLogin(); }}>
                 Iniciar sesión
               </Button>
 
-              <a onClick={() => { setOpenModalLoading(true); handleLogin(true) }} className={classes.a}>
+              <a onClick={() => { setOpenModalLoading(true); handleLogin(true); }} className={classes.a}>
                 Ingresar cómo invitado
               </a>
+              <div id="sign-in__container">
+                <p className="horizontal-row"> ────────────────────── </p>
+                <div id="sign-in"></div>
+              </div>
 
             </div>
           </div>
@@ -120,7 +149,6 @@ function Login(props: any) {
   );
 }
 
-//Estilos del modulo
 const styles = createStyles({
   cardLogin: {
     padding: '10px',
@@ -181,4 +209,3 @@ const styles = createStyles({
 });
 
 export default withStyles(styles)(Login);
-

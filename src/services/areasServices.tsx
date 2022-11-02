@@ -1,4 +1,4 @@
-import { backendBaseUrl, getHeaders } from './constants'
+import { backendBaseUrl, getHeaders } from './constants';
 
 export const getAreasPaginated = async (data: any) => {
   return new Promise(resolve => {
@@ -10,67 +10,67 @@ export const getAreasPaginated = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
-export const getAllAreas = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
+export const getAllAreas = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/area/allNotPaginated?${query}`,{
+    fetch(`${backendBaseUrl}api/area/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAreasByListIds = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/area/byListIds`,{
+export const getAreasByListIds = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/area/byListIds`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
-export const getAreasByListIdsNoToken = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
-    fetch(`${backendBaseUrl}api/area/byListIdsNT`,{
+export const getAreasByListIdsNoToken = async(data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}api/area/byListIdsNT`, {
       headers,
       method: 'POST',
       body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(response => {
-      resolve(response)
+      resolve(response);
     })
     .catch(error => resolve({ 
       ...error 
     }));
   });
-}
+};
 
 export const createArea = async (data: any) => {
   return new Promise(resolve => {
@@ -82,13 +82,13 @@ export const createArea = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const updateArea = async (data: any, id: any) => {
   return new Promise(resolve => {
@@ -100,10 +100,10 @@ export const updateArea = async (data: any, id: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};

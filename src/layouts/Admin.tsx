@@ -10,7 +10,6 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import Navbar from '../components/Navbars/Navbar';
 import Footer from '../components/Footer/Footer';
 import Sidebar from '../components/Sidebar/Sidebar';
-import FixedPlugin from '../components/FixedPlugin/FixedPlugin';
 
 import routes from '../routes';
 
@@ -21,15 +20,15 @@ import logo from 'assets/img/logoPoli.png';
 
 const switchRoutes = (
   <Switch>
-    {routes.map((prop:any) => {
+    {routes.map((prop: any) => {
       if (prop.layout === '/admin') {
         if (prop.subItems) {
-          let subItemsRoute = prop.subItems.map((subItemProps:any) => {
+          let subItemsRoute = prop.subItems.map((subItemProps: any) => {
             return (<Route
               path={subItemProps.layout + subItemProps.path}
               component={subItemProps.component}
               key={subItemProps.path}
-            />)
+            />);
           });
           return subItemsRoute;
         } else {
@@ -133,8 +132,8 @@ class DashboardAdmin extends React.Component<Props, State> {
         <Sidebar
           routes={routesFilter}
           logoText={'Currículo APIT'}
-          userName={`Bienvenido, ${userName}`} 
-          userEmail={`${userEmail}`} 
+          userName={`Bienvenido, ${userName}`}
+          userEmail={`${userEmail}`}
           logo={logo}
           image={this.state.image}
           handleDrawerToggle={this.handleDrawerToggle}
@@ -156,15 +155,6 @@ class DashboardAdmin extends React.Component<Props, State> {
           ) : (
             <div className={classes.map}>{switchRoutes}</div>
           )}
-          {this.getRoute() ? <Footer /> : null}
-          {/* <FixedPlugin
-            handleImageClick={this.handleImageClick}
-            handleColorClick={this.handleColorClick}
-            bgColor={this.state.color}
-            bgImage={this.state.image}
-            handleFixedClick={this.handleFixedClick}
-            fixedClasses={this.state.fixedClasses}
-          /> */}
         </div>
       </div>
     );

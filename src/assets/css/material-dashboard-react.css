@@ -1,18 +1,3 @@
-/*!
-
- =========================================================
- * Material Dashboard React - v1.6.0 based on Material Dashboard - v1.2.0
- =========================================================
-
- * Product Page: http://www.creative-tim.com/product/material-dashboard-react
- * Copyright 2018 Creative Tim (http://www.creative-tim.com)
- * Licensed under MIT (https://github.com/creativetimofficial/material-dashboard-react/blob/master/LICENSE.md)
-
- =========================================================
-
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
- */
 .ct-grid {
   stroke: rgba(255, 255, 255, 0.2);
   stroke-width: 1px;
@@ -510,37 +495,37 @@ footer ul li a:hover {
   color: #209241 !important;
 }
 
-.MuiCheckbox-colorSecondary.Mui-checked{
+.MuiCheckbox-colorSecondary.Mui-checked {
   color: #209241 !important;
 }
 
-.MuiTabs-indicator{
+.MuiTabs-indicator {
   background-color: #209241 !important;
 }
 
-.MuiChip-colorPrimary{
+.MuiChip-colorPrimary {
   background-color: #209241 !important;
   color: #fff !important;
 }
 
-.MuiChip-root{
-  margin:2px 2px;
-  font-size:0.9125rem !important;
+.MuiChip-root {
+  margin: 2px 2px;
+  font-size: 0.9125rem !important;
   font-weight: 500;
 }
 
-.MuiAlert-standardSuccess{
-  border:solid #209241 2px !important;
+.MuiAlert-standardSuccess {
+  border: solid #209241 2px !important;
 }
 
-.MuiAlert-standardWarning{
-  border:solid #fba118 2px !important;
+.MuiAlert-standardWarning {
+  border: solid #fba118 2px !important;
 }
 
-.MuiAlert-standardInfo{
-  border:solid #4baaf5 2px !important;
+.MuiAlert-standardInfo {
+  border: solid #4baaf5 2px !important;
 }
 
-.MuiAlert-standardError{
-  border:solid #f55448 2px !important;
+.MuiAlert-standardError {
+  border: solid #f55448 2px !important;
 }

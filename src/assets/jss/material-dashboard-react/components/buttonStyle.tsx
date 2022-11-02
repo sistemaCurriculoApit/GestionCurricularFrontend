@@ -12,7 +12,7 @@ import {
 } from '../../material-dashboard-react';
 import { createStyles, Theme } from '@material-ui/core';
 
-const buttonStyle = (theme:Theme)=>createStyles({
+const buttonStyle = (theme: Theme) => createStyles({
   button: {
     minHeight: 'auto',
     minWidth: 'auto',
@@ -307,8 +307,8 @@ const buttonStyle = (theme:Theme)=>createStyles({
     height: '41px',
     minWidth: '41px',
     width: '41px',
-    '& .MuiButton-startIcon':{
-      margin:'0'
+    '& .MuiButton-startIcon': {
+      margin: '0'
     },
     '& .fab,& .fas,& .far,& .fal,& svg,& .material-icons': {
       marginRight: '0px'
@@ -341,17 +341,15 @@ const buttonStyle = (theme:Theme)=>createStyles({
       }
     }
   },
-  
-  
+
 });
 
 export const containerFloatButton = createStyles({
-  containerFloatButton:{
+  containerFloatButton: {
     position: 'fixed',
     bottom: '20px',
     right: '20px',
   }
-})
-
+});
 
 export default buttonStyle;

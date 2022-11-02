@@ -1,4 +1,4 @@
-import { backendBaseUrl, getHeaders } from './constants'
+import { backendBaseUrl, getHeaders } from './constants';
 
 export const getProgramasPaginated = async (data: any) => {
   return new Promise(resolve => {
@@ -10,49 +10,49 @@ export const getProgramasPaginated = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
-export const getAllProgramas = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
+export const getAllProgramas = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/programa/allNotPaginated?${query}`,{
+    fetch(`${backendBaseUrl}api/programa/allNotPaginated?${query}`, {
       headers,
       method: 'GET'
     })
-    .then(response => response.json())
-    .then(response => {
-      resolve(response)
-    })
-    .catch(error => resolve({ 
-      ...error 
-    }));
+      .then(response => response.json())
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => resolve({
+        ...error
+      }));
   });
-}
+};
 
-export const getAllProgramasNoToken = async(data:any)=>{
-  return new Promise(resolve=>{
-    let headers:any = getHeaders();
+export const getAllProgramasNoToken = async (data: any) => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
     let query = `search=${data.search}`;
-    fetch(`${backendBaseUrl}api/programa/allNotPaginatedNT?${query}`,{
+    fetch(`${backendBaseUrl}api/programa/allNotPaginatedNT?${query}`, {
       headers,
       method: 'GET'
     })
-    .then(response => response.json())
-    .then(response => {
-      resolve(response)
-    })
-    .catch(error => resolve({ 
-      ...error 
-    }));
+      .then(response => response.json())
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => resolve({
+        ...error
+      }));
   });
-}
+};
 
 export const createPrograma = async (data: any) => {
   return new Promise(resolve => {
@@ -64,13 +64,13 @@ export const createPrograma = async (data: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};
 
 export const updatePrograma = async (data: any, id: any) => {
   return new Promise(resolve => {
@@ -82,10 +82,10 @@ export const updatePrograma = async (data: any, id: any) => {
     })
       .then(response => response.json())
       .then(response => {
-        resolve(response)
+        resolve(response);
       })
       .catch(error => resolve({
         ...error
       }));
   });
-}
+};

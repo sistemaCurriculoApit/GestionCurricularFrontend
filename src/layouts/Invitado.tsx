@@ -10,7 +10,6 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import Navbar from '../components/Navbars/Navbar';
 import Footer from '../components/Footer/Footer';
 import Sidebar from '../components/Sidebar/Sidebar';
-import FixedPlugin from '../components/FixedPlugin/FixedPlugin';
 
 import routes from '../routes';
 
@@ -37,7 +36,6 @@ const switchRoutes = (
 
 const routesFilter = routes.filter(route => (route.layout === '/invitado'));
 
-
 interface Props {
   classes: any;
   location: any;
@@ -63,7 +61,7 @@ class DashboardInvitado extends React.Component<Props, State> {
       mobileOpen: false
     };
   }
-  
+
   handleImageClick = (i: string) => {
     this.setState({ image: i });
   }
@@ -123,7 +121,7 @@ class DashboardInvitado extends React.Component<Props, State> {
           logoText={'Currículo APIT'}
           logo={logo}
           image={this.state.image}
-          userName={`Bienvenido, usuario invitado`} 
+          userName={`Bienvenido, usuario invitado`}
           handleDrawerToggle={this.handleDrawerToggle}
           open={this.state.mobileOpen}
           color={this.state.color}
@@ -144,14 +142,6 @@ class DashboardInvitado extends React.Component<Props, State> {
             <div className={classes.map}>{switchRoutes}</div>
           )}
           {this.getRoute() ? <Footer /> : null}
-          {/* <FixedPlugin
-            handleImageClick={this.handleImageClick}
-            handleColorClick={this.handleColorClick}
-            bgColor={this.state.color}
-            bgImage={this.state.image}
-            handleFixedClick={this.handleFixedClick}
-            fixedClasses={this.state.fixedClasses}
-          /> */}
         </div>
       </div>
     );
