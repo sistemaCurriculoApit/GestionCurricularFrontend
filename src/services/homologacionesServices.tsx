@@ -1,3 +1,4 @@
+import { Homologation } from '../models';
 import { backendBaseUrl, getHeaders, buildQuery } from './constants';
 
 type HomologationsQuery = {
@@ -56,7 +57,7 @@ export const getHomologationsByPeriods = async (period: string, query: Homologat
   }
 };
 
-export const createHomologation = async (homologation: any): Promise<any> => {
+export const createHomologation = async (homologation: Homologation): Promise<any> => {
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/homologations`;
@@ -68,7 +69,7 @@ export const createHomologation = async (homologation: any): Promise<any> => {
   }
 };
 
-export const updateHomologations = async (homologationId: string, homologation: any): Promise<any> => {
+export const updateHomologations = async (homologationId: string, homologation: Homologation): Promise<any> => {
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/homologations/${homologationId}`;

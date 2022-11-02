@@ -1,3 +1,4 @@
+import { Advancement } from '../models';
 import { backendBaseUrl, getHeaders, buildQuery } from './constants';
 
 type AdvancementsQuery = {
@@ -82,7 +83,7 @@ export const getAdvancementsByPeriods = async (period: string, query: Advancemen
   }
 };
 
-export const createAdvancement = async (advancement: any): Promise<any> => {
+export const createAdvancement = async (advancement: Advancement): Promise<any> => {
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/advancements`;
@@ -94,7 +95,7 @@ export const createAdvancement = async (advancement: any): Promise<any> => {
   }
 };
 
-export const updateAdvancement = async (advancementId: string, advancement: any): Promise<any> => {
+export const updateAdvancement = async (advancementId: string, advancement: Advancement & any): Promise<any> => {
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/advancements/${advancementId}`;
