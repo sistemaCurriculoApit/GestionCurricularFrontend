@@ -49,6 +49,8 @@ import { getAllEquivalenciaByAsignatura } from '../../services/equivalenciasServ
 import { getHomologations, createHomologation, updateHomologations, HomologationsResponse } from '../../services/homologacionesServices';
 import { getAllEstudiantes } from '../../services/estudiantesServices';
 import { userProfilesObject } from '../../constants/generalConstants';
+import { Homologation } from '../../models';
+import { homologationAdapter } from '../../util/homologationAdapter';
 
 // Estilos generales usados en el modulo
 const styles = createStyles({
@@ -410,7 +412,7 @@ function Homologaciones(props: any) {
   );
 
   const handleCreateHomologacion = async () => {
-    const homologation = {
+    const homologation: Homologation = homologationAdapter({
       ...homologacionObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -420,7 +422,7 @@ function Homologaciones(props: any) {
       fechaDecision: estadoHomologacionSelected.id !== 2 ? moment(new Date()) : null,
       identificacionSolicitante: estudianteSelected.identificacion,
       estudianteId: estudianteSelected._id
-    };
+    });
     const response: any = await createHomologation(homologation);
     if (!response) {
       setSeverityAlert('error');
@@ -444,7 +446,7 @@ function Homologaciones(props: any) {
 
   const handleEditHomologacion = async () => {
     const fechaDecisionNew = homologacionObject.fechaDecision ? homologacionObject.fechaDecision.toDate() : moment(new Date());
-    const homologation = {
+    const homologation: Homologation = homologationAdapter({
       ...homologacionObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -454,7 +456,7 @@ function Homologaciones(props: any) {
       fechaDecision: estadoHomologacionSelected.id !== 2 ? fechaDecisionNew : null,
       identificacionSolicitante: estudianteSelected.identificacion,
       estudianteId: estudianteSelected._id
-    };
+    });
     const response: HomologationsResponse = await updateHomologations(homologacionObject._id, homologation);
     if (!response) {
       setSeverityAlert('warning');

@@ -52,6 +52,8 @@ import { getAsignaturaByListIds } from '../../services/asignaturasServices';
 import { getDocentesByListIds } from '../../services/docentesServices';
 import { getAllContenidoByAsignatura } from '../../services/contenidosServices';
 import { getAdvancements, createAdvancement, updateAdvancement, getAdvancementsByProfessorsEmail } from '../../services/avancesServices';
+import { Advancement } from '../../models';
+import { advancementAdapter } from '../../util/advancementAdapter';
 
 // Estilos generales usados en el modulo
 const styles = createStyles({
@@ -168,13 +170,11 @@ function AvancesAsignaturas(props: any) {
       setOpenModal(true);
       setOpenModalLoading(true);
       if (!isEdit) {
-        // Inicializacion de objetos
         setProgramaSelected({});
         setPlanSelected({});
         setAreaSelected({});
         setAsignaturaSelected({});
         setDocenteSelected({});
-        // inicializacion de listas
         setPlanesList([]);
         setAreasList([]);
         setAsignaturasList([]);
@@ -189,7 +189,6 @@ function AvancesAsignaturas(props: any) {
             añoAvance: moment(avanceToEdit.añoAvance)
           }
         );
-        // setAvanceObject(avanceToEdit);
       }
     } catch (error) {
       setOpenModalLoading(false);
@@ -394,7 +393,7 @@ function AvancesAsignaturas(props: any) {
   };
 
   const handleCreateAvance = async () => {
-    const advancement = {
+    const advancement: Advancement = advancementAdapter({
       ...avanceObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -403,7 +402,8 @@ function AvancesAsignaturas(props: any) {
       docenteId: docenteSelected._id,
       contenido: contenidoChecked.map((contenido: any) => ({ _id: contenido._id })),
       añoAvance: avanceObject.añoAvance.toDate()
-    };
+    });
+
     const response: any = await createAdvancement(advancement);
     if (!response) {
       setSeverityAlert('error');
@@ -435,7 +435,7 @@ function AvancesAsignaturas(props: any) {
   };
 
   const handleEditAvance = async () => {
-    const advancement = {
+    const advancement: Advancement = advancementAdapter({
       ...avanceObject,
       programaId: programaSelected._id,
       planId: planSelected._id,
@@ -444,7 +444,8 @@ function AvancesAsignaturas(props: any) {
       docenteId: docenteSelected._id,
       contenido: contenidoChecked.map((contenido: any) => ({ _id: contenido._id })),
       añoAvance: avanceObject.añoAvance.toDate()
-    };
+    });
+
     const response: any = await updateAdvancement(avanceObject._id, advancement);
     if (!response) {
       setSeverityAlert('warning');
