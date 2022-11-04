@@ -42,9 +42,25 @@
         ],
         "member-ordering": [
             true,
-            "public-before-private",
-            "static-before-instance",
-            "variables-before-functions"
+            {
+                "order": [
+                    "public-static-field",
+                    "public-static-method",
+                    "public-instance-field",
+                    "public-constructor",
+                    "public-instance-method",
+                    "protected-static-field",
+                    "protected-static-method",
+                    "protected-instance-field",
+                    "protected-constructor",
+                    "protected-instance-method",
+                    "private-static-field",
+                    "private-static-method",
+                    "private-instance-field",
+                    "private-constructor",
+                    "private-instance-method"
+                ]
+            }
         ],
         "no-any": false,
         "no-arg": true,
@@ -70,7 +86,6 @@
         "no-switch-case-fall-through": true,
         "no-trailing-whitespace": false,
         "no-unused-expression": false,
-        "no-use-before-declare": true,
         "one-line": [
             true,
             "check-catch",
