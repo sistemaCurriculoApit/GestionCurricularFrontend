@@ -10,4 +10,4 @@ export const ProgressBar: React.FC<{ value: number }> = ({ value }) => (
       <Typography variant="body2" color="text.secondary">{value}%</Typography>
     </Box>
   </Box>
-)
+);

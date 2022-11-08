@@ -6,8 +6,8 @@ import Navbar from '../components/Navbars/Navbar';
 import Sidebar from '../components/Sidebar/Sidebar';
 import routes from '../routes';
 import dashboardStyle from '../assets/jss/material-dashboard-react/layouts/dashboardStyle';
-import image from 'assets/img/sidebar-5.jpg';
-import logo from 'assets/img/logoPoli.png';
+import image from '../assets/img/sidebar-5.jpg';
+import logo from '../assets/img/logoPoli.png';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
 
 const switchRoutes = (

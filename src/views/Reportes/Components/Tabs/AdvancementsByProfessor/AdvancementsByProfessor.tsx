@@ -9,9 +9,8 @@ import { YearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
 import { TableDivider } from '../../TableDivider/TableDivider';
 import { TabProps } from '../types';
 import { parseAdvancementReport } from '../../../Util/Util';
-import { Select } from '../../../../../components';
+import { Select, FilterWrapper } from '../../../../../components';
 import { Advancement } from '../../../../../models';
-import { FilterWrapper } from '../../../Util/FiltersWrapper';
 import GridContainer from '../../../../../components/Grid/GridContainer';
 
 type AdvancementsByProfessorTabProps = TabProps;
@@ -57,7 +56,7 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
       const {
         advancements: _advancements,
         advancementsCount: _advancementsCount
-       }: AdvancementsResponse = await getAdvancementsByProfessors(selectedProfessorId, {
+      }: AdvancementsResponse = await getAdvancementsByProfessors(selectedProfessorId, {
         page: queryPage || 0,
         advancementYear,
         period: parseInt(period, 10)
@@ -90,7 +89,7 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
     professors.reduce((acc, _subject: any) => ({
       ...acc,
       [_subject._id]: _subject
-    }), {})), [professors])
+    }), {})), [professors]);
 
   useEffect(() => {
     setProfessors([]);
@@ -108,7 +107,7 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
       setProfessors(_professors);
       setSelectedProfessorId(_professors.length ? _professors[0]._id : null);
       setLoading(false);
-    })
+    });
 
     return () => controller.abort();
   }, [advancementYear, period]);
@@ -131,8 +130,8 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
           />
 
           <Select
-            name='professor-select'
-            label='Docente'
+            name="professor-select"
+            label="Docente"
             onChange={(e: SelectChangeEvent<string>) => setSelectedProfessorId(e.target.value)}
             value={selectedProfessorId}
             options={Object.keys(professorsIds)}

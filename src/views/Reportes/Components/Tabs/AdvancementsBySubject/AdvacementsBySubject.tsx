@@ -9,8 +9,7 @@ import { YearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
 import { TabProps } from '../types';
 import { parseAdvancementReport } from '../../../Util/Util';
 import { Advancement, Subject } from '../../../../../models';
-import { Select } from '../../../../../components';
-import { FilterWrapper } from '../../../Util/FiltersWrapper';
+import { Select, FilterWrapper } from '../../../../../components';
 import GridContainer from '../../../../../components/Grid/GridContainer';
 
 type AdvancementsBySubjectTabProps = TabProps;
@@ -75,7 +74,7 @@ export const AdvancementsBySubjectTab: React.FC<AdvancementsBySubjectTabProps> =
     subjects.reduce((acc, _subject: Subject) => ({
       ...acc,
       [_subject._id]: _subject
-    }), {})), [subjects])
+    }), {})), [subjects]);
 
   useEffect(() => {
     setSubjects([]);
@@ -93,7 +92,7 @@ export const AdvancementsBySubjectTab: React.FC<AdvancementsBySubjectTabProps> =
       setSubjects(_subjects);
       setSelectedSubjectId(_subjects.length ? _subjects[0]._id : '');
       setLoading(false);
-    })
+    });
 
     return () => controller.abort();
   }, [advancementYear, period]);
@@ -116,8 +115,8 @@ export const AdvancementsBySubjectTab: React.FC<AdvancementsBySubjectTabProps> =
           />
 
           <Select
-            name='subject-select'
-            label='Asignatura'
+            name="subject-select"
+            label="Asignatura"
             onChange={(e: SelectChangeEvent<string>) => setSelectedSubjectId(e.target.value)}
             value={selectedSubjectId}
             options={Object.keys(subjectIds)}

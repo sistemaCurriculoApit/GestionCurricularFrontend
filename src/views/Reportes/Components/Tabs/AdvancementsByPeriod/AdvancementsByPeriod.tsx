@@ -78,7 +78,7 @@ export const AdvancementsByPeriodTab: React.FC<AdvancementsByPeriodTabProps> = (
         <YearPeriodPicker
           setLoading={setLoading}
           getPeriods={getAdvancementsPeriods}
-          onChange={(_year, _period) => { setAdvancementYear(_year); setPeriod(_period) }}
+          onChange={(_year, _period) => { setAdvancementYear(_year); setPeriod(_period); }}
           width={300}
         />
 
