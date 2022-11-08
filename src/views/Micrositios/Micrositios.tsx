@@ -250,7 +250,7 @@ const Micrositios = ({ classes }: any) => {
                     const p = programsIds[_programId];
                     return `${p.codigo} - ${p.nombre}`;
                   }}
-                  xs={{ width: 300, '& > label.MuiFormLabel-root': { top: 0 } }}
+                  xs={{ minWidth: 300, width: '30%', '& > label.MuiFormLabel-root': { top: 0 } }}
                 />
 
                 <Select
@@ -263,7 +263,7 @@ const Micrositios = ({ classes }: any) => {
                     const p = plansIds[_planId];
                     return `${p.codigo} - ${p.nombre}`;
                   }}
-                  xs={{ width: 250, '& > label.MuiFormLabel-root': { top: 0 } }}
+                  xs={{ minWidth: 250, width: '25%', '& > label.MuiFormLabel-root': { top: 0 } }}
                 />
 
                 <Select
@@ -276,7 +276,7 @@ const Micrositios = ({ classes }: any) => {
                     const a = areasIds[_areaId];
                     return `${a.codigo} - ${a.nombre}`;
                   }}
-                  xs={{ width: 300, '& > label.MuiFormLabel-root': { top: 0 } }}
+                  xs={{ minWidth: 300, width: '30%', '& > label.MuiFormLabel-root': { top: 0 } }}
                 />
               </FilterWrapper>
               <GridContainer>
