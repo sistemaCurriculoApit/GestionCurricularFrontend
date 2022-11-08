@@ -54,9 +54,8 @@ const tableStyle = (theme: Theme) => createStyles({
   CellContent: {
     whiteSpace: 'pre-line',
     textOverflow: 'ellipsis',
-    display: 'block',
-    overflow: 'auto',
-    maxHeight: '150px'
+    display: 'grid',
+    overflow: 'auto'
   },
   tableResponsive: {
     width: '100%',
