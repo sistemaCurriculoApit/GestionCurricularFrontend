@@ -17,15 +17,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
-    "typeRoots": [
-      "./types",
-      "./node_modules/@types"
-    ],
-    "noFallthroughCasesInSwitch": true
+    "jsx": "preserve",
+    "typeRoots" : ["./types", "./node_modules/@types"],
   },
   "include": [
     "src",
-    "index.d.ts"
+    "index.d.ts",   // declaration file path
   ]
 }

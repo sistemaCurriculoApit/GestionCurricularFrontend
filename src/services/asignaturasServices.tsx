@@ -145,6 +145,18 @@ export const getAsignaturaByListIdsPaginatedNoToken = async (data: any) => {
   });
 };
 
+export const getSubjectsByAreaId = async ({ areaId, page = 0 }: { areaId: string, page?: number }) => {
+  try {
+    const headers = new Headers({ 'Content-Type': 'application/json' });
+    return await fetch(`${backendBaseUrl}/api/area/${areaId}/subjects?page=${page}`, { headers })
+      .then(response => response.ok ? response.json() : { subjects: [] })
+      .then(response => response.subjects)
+      .catch(() => []);
+  } catch {
+    return [];
+  }
+};
+
 export const createAsignatura = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();

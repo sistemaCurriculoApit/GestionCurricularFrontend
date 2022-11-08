@@ -4,9 +4,8 @@ import { createStyles } from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Link from '@material-ui/core/Link';
 import Card from '@material-ui/core/Card';
-import logoApit from 'assets/img/logoAPIT.png';
+import logoApit from '../../assets/img/logoAPIT.png';
 import jwt_decode from 'jwt-decode';
 import {
   successColor,

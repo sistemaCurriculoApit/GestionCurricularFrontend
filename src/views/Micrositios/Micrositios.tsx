@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { SelectChangeEvent, createStyles } from '@mui/material';
 import { withStyles } from '@material-ui/core/styles';
-import { TextField, createStyles } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
 
 import AlertComponent from '../../components/Alert/AlertComponent';
 import GridItem from '../../components/Grid/GridItem';
@@ -20,14 +19,11 @@ import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/com
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 
 import { tiposAsignatura } from '../../constants/generalConstants';
-import { getAllProgramasNoToken } from '../../services/programasServices';
-import { getPlanesByListIdsNoToken } from '../../services/planesServices';
-import { getAreasByListIdsNoToken } from '../../services/areasServices';
-import { getAllContenidoByAsignaturaNoToken } from '../../services/contenidosServices';
-import { getAsignaturaByListIdsPaginatedNoToken, GetFileAsignatura, getAllAsignaturasWithPlanCodeNT } from '../../services/asignaturasServices';
-import { getAllDocentesNT } from '../../services/docentesServices';
+import { getProgramasPopulated } from '../../services/programasServices';
+import { GetFileAsignatura, getSubjectsByAreaId } from '../../services/asignaturasServices';
 import { useSubjectModal } from './Components/Modal/Modal';
-import { transformSubjects } from './Util/SubjectTransformation';
+import { transformSubjects, subjectInitialValue } from './Util';
+import { Select, FilterWrapper } from '../../components';
 import { Subject } from '../../models';
 
 const styles = createStyles({
@@ -45,56 +41,59 @@ const styles = createStyles({
 const ID_ENGINEERING_PROGRAM = '1';
 const ID_ENGINEERING_PLAN = '8210';
 const ID_ENGINEERING_AREA = '3';
-const subjectInitialValue: Subject = {
-  _id: '',
-  nombre: '',
-  codigo: '',
-  semestre: '',
-  cantidadCredito: 1,
-  asignaturaTipo: {},
-  intensidadHorariaPractica: 0,
-  intensidadHorariaTeorica: 0,
-  intensidadHorariaIndependiente: 0,
-  intensidadHoraria: 0,
-  prerrequisitos: '',
-  correquisitos: '',
-  presentacionAsignatura: '',
-  justificacionAsignatura: '',
-  objetivoGeneral: '',
-  objetivosEspecificos: '',
-  competencias: '',
-  mediosEducativos: '',
-  evaluacion: '',
-  bibliografia: '',
-  cibergrafia: '',
-  contenido: [],
-  docente: [],
-  equivalencia: []
-};
 
 const Micrositios = ({ classes }: any) => {
   const [showAlert, setShowAlert] = useState<boolean>(false);
   const [severityAlert, setSeverityAlert] = useState<string>('');
   const [messageAlert, setMessagesAlert] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFirstTime, setIsFirstTime] = useState<boolean>(true);
 
   const [programs, setPrograms] = useState<any[]>([]);
-  const [selectedProgram, setSelectedProgram] = useState<any>(null);
   const [plans, setPlans] = useState<any[]>([]);
-  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [areas, setAreas] = useState<any[]>([]);
-  const [selectedArea, setSelectedArea] = useState<any>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+
+  const [selectedProgramId, setSelectedProgramId] = useState<string>('');
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+  const [selectedAreaId, setSelectedAreaId] = useState<string>('');
+  const [selectedSubject, setSelectedSubject] = useState<Subject>(subjectInitialValue);
   const [selectedSubjectType, setSelectedSubjectType] = useState<any>({});
 
-  const [professors, setProfessors] = useState<any>(null);
-  const [equivalences, setEquivalences] = useState<any>(null);
-  const [contents, setContents] = useState<any>(null);
-  const [subjects, setSubjects] = useState<any[]>([]);
   const [subjectsCount, setSubjectsCount] = useState(0);
-  const [page, setPage] = useState(0);
-  const [subject, setSubject] = useState<Subject>(subjectInitialValue);
-  const [isFirstTime, setIsFirstTime] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(0);
+
   const { Modal: SubjectModal, setIsModalOpen } = useSubjectModal();
+
+  const programsIds = useMemo(() => (
+    programs.reduce((acc, program) => ({ ...acc, [program._id]: program }), {})
+  ), [programs]);
+
+  const plansIds = useMemo(() => (
+    plans.reduce((acc, plan) => ({ ...acc, [plan._id]: plan }), {})
+  ), [plans]);
+
+  const areasIds = useMemo(() => (
+    areas.reduce((acc, area) => ({ ...acc, [area._id]: area }), {})
+  ), [areas])
+
+  const subjectTransformation = useMemo(() => transformSubjects({
+    subjects: subjects,
+    classes: classes,
+    subjectTypes: tiposAsignatura,
+    onStateClick: (_subject, subjectTypes) => {
+      setIsModalOpen(true);
+      setIsLoading(true);
+
+      setSelectedSubjectType(subjectTypes.find((_subjectType: any) => _subjectType.id === _subject.asignaturaTipo) || {});
+      setSelectedSubject(_subject);
+
+      setIsLoading(false);
+    },
+    onDownloadClick: (data) => {
+      getDataToDownloadFormat(data);
+    }
+  }), [subjects, classes, tiposAsignatura])
 
   const setMessage = ([level, message]: string[]) => {
     setSeverityAlert(level);
@@ -106,32 +105,16 @@ const Micrositios = ({ classes }: any) => {
   };
 
   const cleanSubject = () => {
-    setSubject(subjectInitialValue);
+    setSelectedSubject(subjectInitialValue);
     setIsModalOpen(false);
-  };
-
-  const getCompleteSubject = (_subject: Subject) => {
-    const docente = _subject.docente.map((professor: any) => professors[professor._id] || professor);
-    const contenido = _subject.contenido.map((content: any) => contents[content._id] || content);
-    const equivalencia = _subject.equivalencia.map((equivalency: any) => equivalences[equivalency._id] || equivalences);
-
-    return ({
-      ..._subject,
-      docente,
-      contenido,
-      equivalencia
-    });
   };
 
   const downloadCourseFormat = async (_subject?: any, fromObject?: boolean) => {
     setIsLoading(true);
-    const baseSubject = fromObject ? subject : _subject;
+    const baseSubject = fromObject ? selectedSubject : _subject;
     const asignaturaToGetFile = {
       ...baseSubject,
       asignaturaTipo: '',
-      docente: baseSubject.docente ? baseSubject.docente.map(({ _id }: any) => ({ _id })) : null,
-      contenido: baseSubject.contenido ? baseSubject.contenido.map(({ _id, nombre, descripcion }: any) => ({ _id, nombre, descripcion })) : null,
-      equivalencia: baseSubject.equivalencia ? baseSubject.equivalencia.map(({ asignatura }: any) => ({ _id: asignatura._id })) : null
     };
 
     const response: any = await GetFileAsignatura(asignaturaToGetFile);
@@ -142,93 +125,35 @@ const Micrositios = ({ classes }: any) => {
     setIsLoading(false);
   };
 
-  const getAreas = async () => {
-    const areaIds = selectedPlan.area.map((_plan: any) => _plan._id);
-
-    const response: any = await getAreasByListIdsNoToken({ search: '', areaIds });
-
-    if (!response || !response.areas) {
-      setAreas([]);
-      setIsLoading(false);
-      return;
-    }
-
-    const { areas: _areas } = response;
-    setAreas(_areas);
-
-    const defaultArea = !isFirstTime ? _areas[0] : _areas.find((area: any) => area.codigo === ID_ENGINEERING_AREA);
-    setSelectedArea(defaultArea);
-    setIsLoading(false);
-    return;
-  };
-
-  const getPlans = async () => {
-    setIsLoading(true);
-    const planIds = selectedProgram.plan.map((plan: any) => plan._id);
-
-    const response: any = await getPlanesByListIdsNoToken({ search: '', planIds });
-
-    if (!response || !response.planes) {
-      setPlans([]);
-      setIsLoading(false);
-      return;
-    }
-
-    const { planes } = response;
-
-    setPlans(planes);
-
-    const defaultPlan = !isFirstTime ? planes[0] : planes.find((plan: any) => plan.codigo === ID_ENGINEERING_PLAN);
-    setSelectedPlan(defaultPlan);
-    setIsLoading(false);
-    return;
-  };
-
   const getDataToDownloadFormat = (_subject?: any) => {
     cleanSubject();
     setSelectedSubjectType(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === _subject.asignaturaTipo) || {});
-
-    const subjectData = getCompleteSubject(_subject);
-    downloadCourseFormat(subjectData, false);
+    downloadCourseFormat(_subject, false);
   };
 
-  const getSubjects = async (_page?: any) => {
+  const getSubjects = async (_page?: number) => {
     setIsLoading(true);
+    setSubjectsCount(0);
 
     if (isFirstTime) {
       setIsFirstTime(false);
     }
 
-    const asignaturaIds = selectedArea.asignatura.map((_subject: Subject) => _subject._id);
-    const response: any = await getAsignaturaByListIdsPaginatedNoToken({
+    const _subjects: Subject[] = await getSubjectsByAreaId({
       page: _page,
-      asignaturaIds
+      areaId: selectedAreaId
     });
 
-    if (!response || !response.asignaturas || !response.asignaturas.length) {
+    if (!_subjects.length) {
       setSubjects([]);
       setSubjectsCount(0);
+      setIsLoading(false);
       setMessage(['info', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
       return;
     }
 
-    const _subjects = transformSubjects({
-      subjects: response.asignaturas,
-      classes: classes,
-      subjectTypes: tiposAsignatura,
-      onStateClick: (_subject, subjectTypes) => {
-        setIsModalOpen(true);
-        setIsLoading(true);
-        setSelectedSubjectType(subjectTypes.find((_subjectType: any) => _subjectType.id === _subject.asignaturaTipo) || {});
-        setSubject(getCompleteSubject(_subject));
-        setIsLoading(false);
-      },
-      onDownloadClick: (data) => {
-        getDataToDownloadFormat(data);
-      }
-    });
+    setSubjectsCount(areasIds[selectedAreaId].asignatura.length)
 
-    setSubjectsCount(response.totalAsignaturas);
     setSubjects(_subjects);
     setIsLoading(false);
   };
@@ -243,27 +168,11 @@ const Micrositios = ({ classes }: any) => {
     const init = async () => {
       setIsLoading(true);
       try {
-        const {programas} = await getAllProgramasNoToken({ search: '' });
-        setPrograms(programas);
-        const [
-          { docentes },
-          { contenidos },
-          { asignaturas }
-        ] = await Promise.all([
-          getAllDocentesNT({ search: '' }),
-          getAllContenidoByAsignaturaNoToken({ search: '' }),
-          getAllAsignaturasWithPlanCodeNT({ search: '' })
-        ]);
+        const _programs = await getProgramasPopulated();
+        const defaultProgram = !isFirstTime ? _programs[0] : _programs.find((program: any) => program.codigo === ID_ENGINEERING_PROGRAM);
 
-        const defaultProgram = !isFirstTime ? programas[0] : programas.find((program: any) => program.codigo === ID_ENGINEERING_PROGRAM);
-        const contentsHashMap = contenidos.reduce((acc: any, el: any) => ({ ...acc, [el._id]: el }), {});
-        const professorsHashMap = docentes.reduce((acc: any, el: any) => ({ ...acc, [el._id]: el }), {});
-        const subjectsHashMap = asignaturas.reduce((acc: any, el: any) => ({ ...acc, [el.asignatura._id]: el }), {});
-
-        setSelectedProgram(defaultProgram);
-        setProfessors(professorsHashMap);
-        setContents(contentsHashMap);
-        setEquivalences(subjectsHashMap);
+        setPrograms(_programs);
+        setSelectedProgramId(defaultProgram._id);
         setIsLoading(false);
       } catch {
         setMessage(['error', 'Intente de nuevo']);
@@ -275,29 +184,47 @@ const Micrositios = ({ classes }: any) => {
   }, []);
 
   useEffect(() => {
-    setSelectedPlan(null);
-    setSelectedArea(null);
+    setIsLoading(true);
+    setSelectedPlanId('');
+    setSelectedAreaId('');
     setPlans([]);
     setAreas([]);
     setSubjects([]);
     setSubjectsCount(0);
 
-    if (selectedProgram && selectedProgram._id) {
-      getPlans();
+    if (selectedProgramId) {
+      const { plan: _plan } = programsIds[selectedProgramId];
+      const defaultPlan = !isFirstTime ? _plan[0] : _plan.find((plan: any) => plan.codigo === ID_ENGINEERING_PLAN);
+
+      setPlans(_plan);
+      setSelectedPlanId(defaultPlan._id)
     }
-  }, [selectedProgram]);
+    setIsLoading(false);
+  }, [selectedProgramId]);
 
   useEffect(() => {
-    if (selectedPlan && selectedPlan._id) {
-      getAreas();
+    setIsLoading(true);
+    setSelectedAreaId('');
+    setAreas([]);
+
+    if (selectedPlanId) {
+      const { area: _areas } = plansIds[selectedPlanId];
+      const defaultArea = !isFirstTime ? _areas[0] : _areas.find((area: any) => area.codigo === ID_ENGINEERING_AREA);
+
+      setAreas(_areas);
+      setSelectedAreaId(defaultArea._id)
     }
-  }, [selectedPlan]);
+
+    setIsLoading(false);
+  }, [selectedPlanId]);
 
   useEffect(() => {
-    if (selectedArea && selectedArea._id) {
+    setSubjects([]);
+    if (selectedAreaId) {
+      setPage(0);
       getSubjects();
     }
-  }, [selectedArea]);
+  }, [selectedAreaId]);
 
   return (
     <div>
@@ -312,98 +239,50 @@ const Micrositios = ({ classes }: any) => {
             </CardHeader>
 
             <CardBody>
+              <FilterWrapper>
+                <Select
+                  name='programs-select'
+                  label="Programa"
+                  onChange={(e: SelectChangeEvent<string>) => setSelectedProgramId(e.target.value)}
+                  value={selectedProgramId}
+                  options={Object.keys(programsIds)}
+                  display={(_programId: string) => {
+                    const p = programsIds[_programId];
+                    return `${p.codigo} - ${p.nombre}`;
+                  }}
+                  xs={{ width: 300, '& > label.MuiFormLabel-root': { top: 0 } }}
+                />
 
+                <Select
+                  name='plans-select'
+                  label="Plan"
+                  onChange={(e: SelectChangeEvent<string>) => setSelectedPlanId(e.target.value)}
+                  value={selectedPlanId}
+                  options={Object.keys(plansIds)}
+                  display={(_planId: string) => {
+                    const p = plansIds[_planId];
+                    return `${p.codigo} - ${p.nombre}`;
+                  }}
+                  xs={{ width: 250, '& > label.MuiFormLabel-root': { top: 0 } }}
+                />
+
+                <Select
+                  name='area-select'
+                  label="Área"
+                  onChange={(e: SelectChangeEvent<string>) => setSelectedAreaId(e.target.value)}
+                  value={selectedAreaId}
+                  options={Object.keys(areasIds)}
+                  display={(_areaId: string) => {
+                    const a = areasIds[_areaId];
+                    return `${a.codigo} - ${a.nombre}`;
+                  }}
+                  xs={{ width: 300, '& > label.MuiFormLabel-root': { top: 0 } }}
+                />
+              </FilterWrapper>
               <GridContainer>
-                <GridItem xs={12} sm={12} md={4} >
-                  <Autocomplete
-                    id="tags-outlined"
-                    options={programs}
-                    getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
-                    disableClearable={true}
-                    filterSelectedOptions={true}
-                    onChange={(_, option) => {
-                      setSelectedProgram(option || {});
-                      setSelectedPlan({});
-                      setSelectedArea({});
-                      setPlans([]);
-                      setAreas([]);
-                      setSubjects([]);
-                      setSubjectsCount(0);
-
-                    }}
-                    value={selectedProgram}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="outlined-rol"
-                        label="Programa"
-                        variant="outlined"
-                        margin="dense"
-                        error={selectedProgram && !selectedProgram._id ? true : false}
-                        className={classes.CustomTextField}
-                      />
-                    )}
-                  />
-                </GridItem>
-                <GridItem xs={12} sm={12} md={4} >
-                  <Autocomplete
-                    id="tags-outlined"
-                    options={plans}
-                    getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
-                    disableClearable={true}
-                    filterSelectedOptions={true}
-                    onChange={(_, option) => {
-                      setSelectedPlan(option || {});
-                      setSelectedArea({});
-                      setAreas([]);
-                      setSubjects([]);
-                      setSubjectsCount(0);
-
-                    }}
-                    value={selectedPlan}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="outlined-rol"
-                        label="Plan"
-                        variant="outlined"
-                        margin="dense"
-                        error={selectedPlan && !selectedPlan._id ? true : false}
-                        className={classes.CustomTextField}
-                      />
-                    )}
-                  />
-                </GridItem>
-
-                <GridItem xs={12} sm={12} md={4} >
-                  <Autocomplete
-                    id="tags-outlined"
-                    options={areas}
-                    getOptionLabel={(option) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
-                    disableClearable={true}
-                    filterSelectedOptions={true}
-                    onChange={(_, option) => {
-                      setSelectedArea(option || {});
-                    }}
-                    value={selectedArea}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="outlined-rol"
-                        label="Área"
-                        variant="outlined"
-                        margin="dense"
-                        error={selectedArea && !selectedArea._id ? true : false}
-                        className={classes.CustomTextField}
-                      />
-                    )}
-                  />
-                </GridItem>
-
                 <GridItem xs={12} sm={12} md={12} >
                   <hr />
                 </GridItem>
-
               </GridContainer>
 
               {
@@ -423,7 +302,7 @@ const Micrositios = ({ classes }: any) => {
                         'Acciones',
                         'Descargas'
                       ]}
-                      tableData={subjects}
+                      tableData={subjectTransformation}
                     />
                   )
               }
@@ -440,7 +319,7 @@ const Micrositios = ({ classes }: any) => {
 
       <SubjectModal
         classes={classes}
-        subject={subject}
+        subject={selectedSubject}
         subjectTypes={tiposAsignatura}
         subjectTypesSelected={selectedSubjectType}
         downloadCourseFormat={downloadCourseFormat}

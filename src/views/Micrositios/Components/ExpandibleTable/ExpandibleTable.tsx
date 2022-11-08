@@ -49,7 +49,7 @@ const Row: React.FC<{ title: string, value: any, isList: boolean }> = ({ title, 
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell sx={{ maxWidth: '20px' }}>
+        <TableCell>
           <IconButton
             aria-label="expand row"
             size="small"
@@ -58,24 +58,24 @@ const Row: React.FC<{ title: string, value: any, isList: boolean }> = ({ title, 
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
+        <TableCell component="th" scope="row" sx={{ fontWeight: 500 }}>
           {title}
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={10}>
           <Collapse in={open} timeout="auto" unmountOnExit={true}>
             <Box sx={{ margin: 1 }}>
               {isList ? (
-              <ul>
-                {value.split('•')
-                .filter((item: string) => Boolean(item.length))
-                .map((item: string) => (
-                  <li>
-                    {item.trim()}
-                  </li>
-                )) }
-              </ul>
+                <ul>
+                  {value.split('•')
+                    .filter((item: string) => Boolean(item.length))
+                    .map((item: string, i: number) => (
+                      <li key={item + i}>
+                        {item.trim()}
+                      </li>
+                    ))}
+                </ul>
               ) : (<div>{value}</div>)}
             </Box>
           </Collapse>
@@ -91,8 +91,8 @@ export const ExpandibleTable: React.FC<{ data: Subject }> = ({ data }) => {
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            <TableCell sx={{ maxWidth: '20px' }}/>
-            <TableCell>Detalles de la asignatura</TableCell>
+            <TableCell sx={{ width: '1rem' }} />
+            <TableCell sx={{ fontWeight: 600 }}>Detalles de la asignatura</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

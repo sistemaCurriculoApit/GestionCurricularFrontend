@@ -54,6 +54,18 @@ export const getAllProgramasNoToken = async (data: any): Promise<any> => {
   });
 };
 
+export const getProgramasPopulated = async (): Promise<any> => {
+  try {
+    const headers = new Headers({ 'Content-Type': 'application/json' });
+    return await fetch(`${backendBaseUrl}/api/programa/`, { headers })
+      .then((response) => response.ok ? response.json() : { programs: [] })
+      .then((response) => response.programs)
+      .catch(() => [])
+  } catch {
+    return [];
+  }
+};
+
 export const createPrograma = async (data: any) => {
   return new Promise(resolve => {
     let headers: any = getHeaders();

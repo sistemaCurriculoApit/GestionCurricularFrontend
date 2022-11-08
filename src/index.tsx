@@ -11,7 +11,7 @@ import Docente from './layouts/Docente';
 import Invitado from './layouts/Invitado';
 import Estudiante from './layouts/Estudiante';
 
-import 'assets/css/material-dashboard-react.css?v=1.6.0';
+import './assets/css/material-dashboard-react.css';
 
 const history = createBrowserHistory();
 

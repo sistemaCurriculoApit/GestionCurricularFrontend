@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { TextField, Modal, Tooltip } from '@material-ui/core';
+import { Modal, Tooltip } from '@material-ui/core';
 import { Close, GetApp } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+import { ExpandibleTable } from '../ExpandibleTable/ExpandibleTable';
+import { SubjectBasicInfo } from '../SubjectBasicInfo/SubjectBasicInfo';
 import Button from '../../../../components/CustomButtons/Button';
 import GridItem from '../../../../components/Grid/GridItem';
 import GridContainer from '../../../../components/Grid/GridContainer';
 import CardHeader from '../../../../components/Card/CardHeader';
 import Card from '../../../../components/Card/Card';
 import Table from '../../../../components/Table/Table';
-import { ExpandibleTable } from '../Expandible Table/Expandible_Table';
 
 type ContentProps = {
   classes: any;
@@ -37,153 +37,13 @@ const Content: React.FC<ContentProps> = ({ subject, classes, subjectTypes, subje
       <GridItem xs={12} sm={12} md={12}>
         <h4 className={classes.cardTitleBlack}>Información de asignatura</h4>
       </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Código"
-          variant="outlined"
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.codigo}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Nombre"
-          variant="outlined"
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.nombre}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Créditos"
-          variant="outlined"
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          type={'number'}
-          value={subject.cantidadCredito}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <Autocomplete
-          id="tags-outlined"
-          options={subjectTypes}
-          getOptionLabel={(option) => option.title}
-          filterSelectedOptions={true}
-          disabled={true}
-          onChange={(_, option) => option}
-          value={subjectTypesSelected}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              id="outlined-estado-solicitud"
-              label="Tipo de asignatura"
-              variant="outlined"
-              margin="dense"
-              className={classes.CustomTextField}
-            />
-          )}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Horas Trabajo Presencial Teorico"
-          variant="outlined"
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          type={'number'}
-          value={subject.intensidadHorariaTeorica}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Horas Trabajo Presencial Practico"
-          variant="outlined"
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          type={'number'}
-          value={subject.intensidadHorariaPractica}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Horas Trabajo Independiente"
-          variant="outlined"
-          margin="dense"
-          className={classes.CustomTextField}
-          type={'number'}
-          disabled={true}
-          value={subject.intensidadHorariaIndependiente}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Total Horas Semanales"
-          variant="outlined"
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          type={'number'}
-          value={subject.intensidadHoraria}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Semestre"
-          variant="outlined"
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.semestre}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Prerrequisitos"
-          variant="outlined"
-          minRows={3}
-          maxRows={9}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.prerrequisitos}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Correquisitos"
-          variant="outlined"
-          minRows={3}
-          maxRows={9}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.correquisitos}
-        />
-      </GridItem>
+
+      <SubjectBasicInfo subject={subject} subjectTypesSelected={subjectTypesSelected} />
 
       <ExpandibleTable data={subject} />
 
       <GridItem xs={12} sm={12} md={12}>
-        <h4 className={classes.cardTitleBlack}>Contenidos de asignatura</h4>
+        <h4 style={{ padding: '1rem 0' }} className={classes.cardTitleBlack}>Contenidos de asignatura</h4>
       </GridItem>
 
       <GridItem xs={12} sm={12} md={12}>

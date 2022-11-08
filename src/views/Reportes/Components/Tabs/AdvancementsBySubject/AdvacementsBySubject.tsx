@@ -9,8 +9,7 @@ import { YearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
 import { TabProps } from '../types';
 import { parseAdvancementReport } from '../../../Util/Util';
 import { Advancement, Subject } from '../../../../../models';
-import { Select } from '../../../../../components';
-import { FilterWrapper } from '../../../Util/FiltersWrapper';
+import { Select, FilterWrapper } from '../../../../../components';
 import GridContainer from '../../../../../components/Grid/GridContainer';
 
 type AdvancementsBySubjectTabProps = TabProps;
