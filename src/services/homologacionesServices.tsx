@@ -27,7 +27,18 @@ export const getHomologations = async (query: HomologationsQuery): Promise<Homol
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as HomologationsResponse;
+    return { homologations: [], homologationsCount: 0 };
+  }
+};
+
+export const getHomologationsPeriods = async (signal?: AbortSignal): Promise<string[]> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/homologations/periods`;
+    const { periods }: { periods: string[] } = await fetch(url, { headers, signal }).then((res) => res.json())
+    return periods
+  } catch {
+    return [];
   }
 };
 
@@ -40,7 +51,7 @@ export const getHomologationsByApplicant = async (applicantId: string, query: Ho
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as HomologationsResponse;
+    return { homologations: [], homologationsCount: 0 };
   }
 };
 
@@ -53,7 +64,7 @@ export const getHomologationsByPeriods = async (period: string, query: Homologat
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as HomologationsResponse;
+    return { homologations: [], homologationsCount: 0 };
   }
 };
 

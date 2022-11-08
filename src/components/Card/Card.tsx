@@ -27,12 +27,4 @@ function Card({ ...props }: any) {
   );
 }
 
-// Card.propTypes = {
-//   classes: PropTypes.object.isRequired,
-//   className: PropTypes.string,
-//   plain: PropTypes.bool,
-//   profile: PropTypes.bool,
-//   chart: PropTypes.bool
-// };
-
 export default withStyles(cardStyle)(Card);

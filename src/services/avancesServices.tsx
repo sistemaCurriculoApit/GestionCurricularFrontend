@@ -1,4 +1,4 @@
-import { Advancement } from '../models';
+import { Advancement, Subject } from '../models';
 import { backendBaseUrl, getHeaders, buildQuery } from './constants';
 
 type AdvancementsQuery = {
@@ -27,7 +27,40 @@ export const getAdvancements = async (query: AdvancementsQuery): Promise<Advance
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as AdvancementsResponse;
+    return { advancements: [], advancementsCount: 0 };
+  }
+};
+
+export const getAdvancementsPeriods = async (signal?: AbortSignal): Promise<string[]> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/advancements/periods`;
+    const { periods }: { periods: string[] } = await fetch(url, { headers, signal }).then((res) => res.json())
+    return periods;
+  } catch {
+    return [];
+  }
+};
+
+export const getAdvancementsSubjects = async (year: string, period: string, signal?: AbortSignal): Promise<Subject[]> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/advancements/years/${year}/periods/${period}/subjects`;
+    const { subjects }: { subjects: Subject[] } = await fetch(url, { headers, signal }).then((res) => res.json())
+    return subjects;
+  } catch {
+    return [];
+  }
+};
+
+export const getAdvancementsProfessors = async (year: string, period: string, signal?: AbortSignal): Promise<Subject[]> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/advancements/years/${year}/periods/${period}/professors`;
+    const { professors }: { professors: any[] } = await fetch(url, { headers, signal }).then((res) => res.json())
+    return professors;
+  } catch {
+    return [];
   }
 };
 
@@ -40,7 +73,7 @@ export const getAdvancementsBySubject = async (subjectId: string, query: Advance
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as AdvancementsResponse;
+    return { advancements: [], advancementsCount: 0 };
   }
 };
 
@@ -53,7 +86,7 @@ export const getAdvancementsByProfessorsEmail = async (query: AdvancementsQuery)
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as AdvancementsResponse;
+    return { advancements: [], advancementsCount: 0 };
   }
 };
 
@@ -66,7 +99,7 @@ export const getAdvancementsByProfessors = async (professorId: string, query: Ad
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as AdvancementsResponse;
+    return { advancements: [], advancementsCount: 0 };
   }
 };
 
@@ -79,7 +112,7 @@ export const getAdvancementsByPeriods = async (period: string, query: Advancemen
     return await response.json();
   } catch (e) {
     console.error(e);
-    return {} as AdvancementsResponse;
+    return { advancements: [], advancementsCount: 0 };
   }
 };
 

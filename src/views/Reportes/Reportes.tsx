@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
-import withStyles from '@material-ui/core/styles/withStyles';
-import TabContext from '@material-ui/lab/TabContext';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import TabPanel from '@material-ui/lab/TabPanel';
-import Box from '@material-ui/core/Box';
+import React, { useEffect, useState } from 'react';
+import { Tab, Tabs, Box } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+import { TabContext, TabPanel } from '@material-ui/lab';
+import { ReportState } from './types';
 import 'moment/locale/es';
 
 import { createStyles } from '@material-ui/core';
@@ -16,22 +14,21 @@ import CardBody from '../../components/Card/CardBody';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
 import AlertComponent from '../../components/Alert/AlertComponent';
 
-// jss
 import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
 import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 
 import {
   AdvancementsBySubjectTab,
   AdvacementsByProfessorTab,
   AdvancementsByPeriodTab,
   HomologationsByApplicantTab,
-  HomologationsByPeriodTab
-} from './Components/Tabs';
-import { useExportModal } from './Components/Modal/Modal';
-import { ReportButton } from './Components/ReportButton/ReportButton';
+  HomologationsByPeriodTab,
+  useExportModal,
+  ReportButton
+} from './Components';
 
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
@@ -52,13 +49,13 @@ const Reportes: React.FC<any> = ({ classes }) => {
   const [tabSelection, setTabSelection] = useState<string>('1');
   const [openModalLoading, setOpenModalLoading] = useState<boolean>(false);
   const [paginationReport, setPaginationReport] = useState<any[]>([]);
-  const [reportingData, setReportingData] = useState<{ dataCount: number, reportFunc: (page: number) => Promise<void> }>({
+  const [reportingData, setReportingData] = useState<ReportState>({
     dataCount: 0,
     reportFunc: async () => { }
   });
   const { Modal: ReportModal, setIsModalOpen } = useExportModal();
 
-  const setError = ([severity, message]: string[]) => {
+  const setAlert = ([severity, message]: string[]) => {
     setSeverityAlert(severity);
     setShowAlert(true);
     setMessagesAlert(message);
@@ -76,6 +73,13 @@ const Reportes: React.FC<any> = ({ classes }) => {
     setPaginationReport(selectRange);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    setReportingData({
+      dataCount: 0,
+      reportFunc: async () => { }
+    });
+  }, [tabSelection]);
 
   return (
     <div>
@@ -107,9 +111,9 @@ const Reportes: React.FC<any> = ({ classes }) => {
                 <TabPanel value={'1'} >
                   <AdvancementsBySubjectTab
                     classes={classes}
-                    setError={setError}
+                    setAlert={setAlert}
                     setLoading={setOpenModalLoading}
-                    setPeportData={setReportingData}
+                    setReportData={setReportingData}
                   />
 
                 </TabPanel>
@@ -117,36 +121,36 @@ const Reportes: React.FC<any> = ({ classes }) => {
                 <TabPanel value={'2'} >
                   <AdvacementsByProfessorTab
                     classes={classes}
-                    setError={setError}
+                    setAlert={setAlert}
                     setLoading={setOpenModalLoading}
-                    setPeportData={setReportingData}
+                    setReportData={setReportingData}
                   />
                 </TabPanel>
 
                 <TabPanel value={'3'} >
                   <AdvancementsByPeriodTab
                     classes={classes}
-                    setError={setError}
+                    setAlert={setAlert}
                     setLoading={setOpenModalLoading}
-                    setPeportData={setReportingData}
+                    setReportData={setReportingData}
                   />
                 </TabPanel>
 
                 <TabPanel value={'4'} >
                   <HomologationsByApplicantTab
                     classes={classes}
-                    setError={setError}
+                    setAlert={setAlert}
                     setLoading={setOpenModalLoading}
-                    setPeportData={setReportingData}
+                    setReportData={setReportingData}
                   />
                 </TabPanel>
 
                 <TabPanel value={'5'} >
                   <HomologationsByPeriodTab
                     classes={classes}
-                    setError={setError}
+                    setAlert={setAlert}
                     setLoading={setOpenModalLoading}
-                    setPeportData={setReportingData}
+                    setReportData={setReportingData}
                   />
                 </TabPanel>
 
@@ -164,7 +168,7 @@ const Reportes: React.FC<any> = ({ classes }) => {
           if (reportingData.dataCount) {
             handleReportOpenModal();
           } else {
-            setError(['info', 'No hay datos para el reporte con los filtros seleccionados']);
+            setAlert(['info', 'No hay datos para el reporte con los filtros seleccionados']);
           }
         }}
       />
@@ -177,7 +181,7 @@ const Reportes: React.FC<any> = ({ classes }) => {
             setOpenModalLoading(true);
             reportingData.reportFunc(pageSelected);
           } else {
-            setError(['info', 'Seleccione el rango de datos para el reporte']);
+            setAlert(['info', 'Seleccione el rango de datos para el reporte']);
           }
         }}
       />

@@ -1,37 +1,35 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import GridContainer from '../../../../../components/Grid/GridContainer';
-import GridItem from '../../../../../components/Grid/GridItem';
-import { TextField } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { SelectChangeEvent } from '@mui/material';
 import { AdvacementReportTable } from '../../AdvacementReportTable/AdvacementReportTable';
 import { SearchButton } from '../../SearchButton/SearchButton';
 import { getAllDocentes } from '../../../../../services/docentesServices';
-import { AdvancementsResponse, getAdvancementsByProfessors } from '../../../../../services/avancesServices';
+import { AdvancementsResponse, getAdvancementsByProfessors, getAdvancementsPeriods, getAdvancementsProfessors } from '../../../../../services/avancesServices';
 import { DownloadAdvancementReport } from '../../../../../services/excelService';
-import { useYearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
+import { YearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
 import { TableDivider } from '../../TableDivider/TableDivider';
 import { TabProps } from '../types';
-import { parseAdvancement } from '../../../Util/Util';
+import { parseAdvancementReport } from '../../../Util/Util';
+import { Select } from '../../../../../components';
+import { Advancement } from '../../../../../models';
+import { FilterWrapper } from '../../../Util/FiltersWrapper';
+import GridContainer from '../../../../../components/Grid/GridContainer';
 
 type AdvancementsByProfessorTabProps = TabProps;
 const FILE_SUFIX = 'por_docente';
 
 export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps> = ({
   classes,
-  setError,
+  setAlert,
   setLoading,
-  setPeportData
+  setReportData
 }) => {
   const [advancementsCount, setAdvancementsCount] = useState<number>(0);
-  const [selectedProfessor, setSelectedProfessor] = useState<any>(null);
-  const [advancements, setAdvancements] = useState<any[]>([]);
+  const [selectedProfessorId, setSelectedProfessorId] = useState<string>('');
+  const [advancements, setAdvancements] = useState<Advancement[]>([]);
   const [page, setPage] = useState<number>(1);
   const [professors, setProfessors] = useState<any[]>([]);
-  const { year: advancementYear, period, YearPeriodPicker } = useYearPeriodPicker({
-    classes,
-    sizesYear: { xs: 12, sm: 12, md: 4 },
-    sizesPeriod: { xs: 12, sm: 12, md: 2 }
-  });
+  const [advancementYear, setAdvancementYear] = useState<string>('');
+  const [period, setPeriod] = useState<string>('');
 
   useEffect(() => {
     setLoading(true);
@@ -48,21 +46,25 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
   }, []);
 
   const handleAdvancementsByProfessor = useCallback(async (queryPage?: number, isReport?: boolean) => {
-    if (!advancementYear || !period || !selectedProfessor || !selectedProfessor._id) {
-      setError(['warning', 'Debe diligenciar todos los filtros']);
-      setLoading(false);
+    if (!advancementYear || !period || !selectedProfessorId) {
+      setAlert(['warning', 'Debe diligenciar todos los filtros']);
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response: AdvancementsResponse = await getAdvancementsByProfessors(selectedProfessor._id, {
+      const {
+        advancements: _advancements,
+        advancementsCount: _advancementsCount
+       }: AdvancementsResponse = await getAdvancementsByProfessors(selectedProfessorId, {
         page: queryPage || 0,
-        advancementYear: advancementYear.year().toString(),
+        advancementYear,
         period: parseInt(period, 10)
       });
 
-      if (!response || !response.advancements || !response.advancements.length) {
-        setError(['info', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
+      if (!_advancements.length) {
+        setAlert(['info', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
         setLoading(false);
         setAdvancements([]);
         setAdvancementsCount(0);
@@ -70,39 +72,49 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
       }
 
       if (isReport) {
-        const data = response.advancements.map(parseAdvancement(true));
-
-        await DownloadAdvancementReport(data, FILE_SUFIX);
+        await DownloadAdvancementReport(_advancements.map(parseAdvancementReport), FILE_SUFIX);
         setLoading(false);
         return;
       }
 
-      const parsedAdvancements = response.advancements.map(parseAdvancement());
-      setAdvancements(parsedAdvancements);
-      setAdvancementsCount(response.advancementsCount);
+      setAdvancements(_advancements);
+      setAdvancementsCount(_advancementsCount);
       setLoading(false);
     } catch {
-      setError(['error', 'Error consultando avances']);
+      setAlert(['error', 'Error consultando avances']);
       setLoading(false);
     }
-  }, [advancementYear, period, selectedProfessor]);
+  }, [advancementYear, period, selectedProfessorId]);
+
+  const professorsIds: { [key: string]: any } = useMemo(() => (
+    professors.reduce((acc, _subject: any) => ({
+      ...acc,
+      [_subject._id]: _subject
+    }), {})), [professors])
 
   useEffect(() => {
-    setPeportData({
-      dataCount: 0,
-      reportFunc: async () => { }
-    });
+    setProfessors([]);
+    setSelectedProfessorId('');
+    if (!advancementYear || !period) {
+      return;
+    }
 
-    return () => {
-      setPeportData({
-        dataCount: 0,
-        reportFunc: async () => { }
-      });
-    };
-  }, []);
+    setLoading(true);
+
+    const controller: AbortController = new AbortController();
+    const signal: AbortSignal = controller.signal;
+
+    getAdvancementsProfessors(advancementYear, period, signal).then((_professors: any[]) => {
+      setProfessors(_professors);
+      setSelectedProfessorId(_professors.length ? _professors[0]._id : null);
+      setLoading(false);
+    })
+
+    return () => controller.abort();
+  }, [advancementYear, period]);
 
   useEffect(() => {
-    setPeportData({
+    setReportData({
       dataCount: advancementsCount,
       reportFunc: (selectedPage: number) => handleAdvancementsByProfessor(selectedPage, true)
     });
@@ -111,32 +123,27 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
   return (
     <>
       <GridContainer>
-        <YearPeriodPicker />
-
-        <GridItem xs={12} sm={12} md={4} >
-          <Autocomplete
-            id="tags-outlined"
-            options={professors}
-            getOptionLabel={(option) => option._id ? `${option.nombre} - ${option.documento}` : ''}
-            disableClearable={true}
-            filterSelectedOptions={true}
-            onChange={(e, option) => setSelectedProfessor(option || null)}
-            value={selectedProfessor}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                id="outlined-rol"
-                label="Docente"
-                variant="outlined"
-                margin="dense"
-                className={classes.CustomTextField}
-              />
-            )}
+        <FilterWrapper>
+          <YearPeriodPicker
+            setLoading={setLoading}
+            getPeriods={getAdvancementsPeriods}
+            onChange={(_year, _period) => { setAdvancementYear(_year); setPeriod(_period); }}
           />
-        </GridItem>
 
+          <Select
+            name='professor-select'
+            label='Docente'
+            onChange={(e: SelectChangeEvent<string>) => setSelectedProfessorId(e.target.value)}
+            value={selectedProfessorId}
+            options={Object.keys(professorsIds)}
+            display={(_professorId: string) => {
+              const p = professorsIds[_professorId];
+              return `${p.nombre} - ${p.documento}`;
+            }}
+            xs={{ minWidth: 300 }}
+          />
+        </FilterWrapper>
         <SearchButton onClick={() => {
-          setLoading(true);
           handleAdvancementsByProfessor();
         }} />
 
@@ -149,7 +156,6 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
         totalPages={advancementsCount}
         page={page}
         onChangePage={(p: number) => {
-          setLoading(true);
           setPage(p + 1);
           handleAdvancementsByProfessor(p);
         }}

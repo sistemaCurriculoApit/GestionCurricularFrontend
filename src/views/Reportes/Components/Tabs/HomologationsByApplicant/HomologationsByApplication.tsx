@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import GridContainer from '../../../../../components/Grid/GridContainer';
-import GridItem from '../../../../../components/Grid/GridItem';
 import { TextField } from '@material-ui/core';
 import { SearchButton } from '../../SearchButton/SearchButton';
 import { DowloadHomologationsReport } from '../../../../../services/excelService';
@@ -8,34 +6,41 @@ import { TableDivider } from '../../TableDivider/TableDivider';
 import { HomologationsReportTable } from '../../HomologationsReportTable/HomologationsReportTable';
 import { getHomologationsByApplicant, HomologationsResponse } from '../../../../../services/homologacionesServices';
 import { TabProps } from '../types';
-import { parseHomologation } from '../../../Util/Util';
+import { parseHomologationReport } from '../../../Util/Util';
+import { Homologation } from '../../../../../models';
+import GridContainer from '../../../../../components/Grid/GridContainer';
+import GridItem from '../../../../../components/Grid/GridItem';
 
 type HomologationsByApplicantTabProps = TabProps;
 const FILE_SUFIX = 'por_aplicante';
 
 export const HomologationsByApplicantTab: React.FC<HomologationsByApplicantTabProps> = ({
   classes,
-  setError,
+  setAlert,
   setLoading,
-  setPeportData
+  setReportData
 }) => {
   const [homologationsCount, setHomologationsCount] = useState<number>(0);
-  const [homologations, setHomologations] = useState<any[]>([]);
+  const [homologations, setHomologations] = useState<Homologation[]>([]);
   const [applicantId, setApplicantId] = useState<string>('');
   const [page, setPage] = useState<number>(1);
 
   const handleHomologationsByApplicant = useCallback(async (queryPage?: number, isReport?: boolean) => {
     if (!applicantId) {
-      setError(['warning', 'Debe diligenciar todos los filtros']);
-      setLoading(false);
+      setAlert(['warning', 'Debe diligenciar todos los filtros']);
       return;
     }
+
+    setLoading(true);
+
     try {
+      const {
+        homologations: _homologations,
+        homologationsCount: _homologationsCount
+      }: HomologationsResponse = await getHomologationsByApplicant(applicantId, { page: queryPage || 0 });
 
-      const response: HomologationsResponse = await getHomologationsByApplicant(applicantId, { page: queryPage || 0 });
-
-      if (!response || !response.homologations || !response.homologations.length) {
-        setError(['warning', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
+      if (!_homologations.length) {
+        setAlert(['warning', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
         setLoading(false);
         setHomologations([]);
         setHomologationsCount(0);
@@ -43,43 +48,24 @@ export const HomologationsByApplicantTab: React.FC<HomologationsByApplicantTabPr
       }
 
       if (isReport) {
-        const data = response.homologations.map(parseHomologation(true));
-
-        await DowloadHomologationsReport(data, FILE_SUFIX);
+        await DowloadHomologationsReport(_homologations.map(parseHomologationReport), FILE_SUFIX);
         setLoading(false);
         return;
       }
 
-      const parsedHomologations = response.homologations.map(parseHomologation());
-
-      setHomologations(parsedHomologations);
-      setHomologationsCount(response.homologationsCount);
-
+      setHomologations(_homologations);
+      setHomologationsCount(_homologationsCount);
       setLoading(false);
       return;
     } catch {
-      setError(['error', 'Error consultando homologaciones']);
+      setAlert(['error', 'Error consultando homologaciones']);
       setLoading(false);
       return;
     }
   }, [applicantId]);
 
   useEffect(() => {
-    setPeportData({
-      dataCount: 0,
-      reportFunc: async () => { }
-    });
-
-    return () => {
-      setPeportData({
-        dataCount: 0,
-        reportFunc: async () => { }
-      });
-    };
-  }, []);
-
-  useEffect(() => {
-    setPeportData({
+    setReportData({
       dataCount: homologationsCount,
       reportFunc: (selectedPage: number) => handleHomologationsByApplicant(selectedPage, true)
     });
@@ -105,7 +91,6 @@ export const HomologationsByApplicantTab: React.FC<HomologationsByApplicantTabPr
         </GridItem>
 
         <SearchButton onClick={() => {
-          setLoading(true);
           handleHomologationsByApplicant();
         }} />
 
@@ -119,7 +104,6 @@ export const HomologationsByApplicantTab: React.FC<HomologationsByApplicantTabPr
         totalPages={homologationsCount}
         page={page}
         onChangePage={(p: any) => {
-          setLoading(true);
           setPage(p + 1);
           handleHomologationsByApplicant(p);
         }}
