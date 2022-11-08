@@ -1,77 +1,57 @@
-import React, { useState } from 'react';
-import moment, { Moment } from 'moment';
-import MomentUtils from '@date-io/moment';
-import GridItem from '../../../../components/Grid/GridItem';
-import { Autocomplete } from '@material-ui/lab';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
-import { TextField } from '@material-ui/core';
+import React, { useEffect, useState } from 'react';
+import { SelectChangeEvent } from '@mui/material'
+import { Select } from '../../../../components';
 
 type YearPeriodPickerProps = {
-  classes: any,
-  sizesYear: { xs: number, sm: number, md: number },
-  sizesPeriod: { xs: number, sm: number, md: number }
-};
+  onChange: (year: string, period: string) => void,
+  getPeriods: (signal?: AbortSignal) => Promise<string[]>,
+  setLoading?: (loading: boolean) => void,
+  width?: number,
+}
 
-type useYearPeriodPickerProps = (props: YearPeriodPickerProps) => {
-  year: Moment,
-  period: string,
-  YearPeriodPicker: React.FC
-};
-
-export const useYearPeriodPicker: useYearPeriodPickerProps = ({
-  classes,
-  sizesYear: { xs: xsy, sm: smy, md: mdy },
-  sizesPeriod: { xs: xsp, sm: smp, md: mdp }
+export const YearPeriodPicker: React.FC<YearPeriodPickerProps> = ({
+  onChange,
+  getPeriods,
+  setLoading = () => { },
+  width = 150
 }) => {
-  const [advancementYear, setAdvancementYear] = useState<Moment>(moment(new Date()));
-  const [period, setPeriod] = useState<string>('1');
+  const [yearPeriod, setYearPeriod] = useState<string>('');
+  const [periods, setPeriods] = useState<string[]>([]);
 
-  return {
-    year: advancementYear,
-    period,
-    YearPeriodPicker: () => (
-      <>
-        <GridItem xs={xsy} sm={smy} md={mdy}>
-          <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <DatePicker
-                views={['year']}
-                label="Año"
-                inputVariant="outlined"
-                margin="dense"
-                className={classes.CustomTextField}
-                format="YYYY"
-                value={advancementYear}
-                onChange={(newValue: any) => setAdvancementYear(moment(newValue || new Date()))}
-                clearable={false}
-                clearLabel="Limpiar"
-              />
-            </div>
-          </MuiPickersUtilsProvider>
-        </GridItem>
+  useEffect(() => {
+    setLoading(true);
+    const controller: AbortController = new AbortController();
+    const signal: AbortSignal = controller.signal;
 
-        <GridItem xs={xsp} sm={smp} md={mdp}>
-          <Autocomplete
-            id="tags-outlined"
-            options={['1', '2']}
-            getOptionLabel={(option) => option}
-            disableClearable={true}
-            filterSelectedOptions={true}
-            onChange={(e, option) => setPeriod(option || '1')}
-            value={period}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                id="outlined-estado-solicitud"
-                label="Periodo"
-                variant="outlined"
-                margin="dense"
-                className={classes.CustomTextField}
-              />
-            )}
-          />
-        </GridItem>
-      </>
-    )
-  };
+    getPeriods(signal).then((_periods) => {
+      setPeriods(_periods)
+      setLoading(false);
+    });
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const [year, period] = !yearPeriod ? [] : yearPeriod.split('-').map((val: string) => val.trim());
+    onChange(year, period);
+  }, [yearPeriod]);
+
+  useEffect(() => {
+    if (periods && periods.length) {
+      setYearPeriod(periods[0]);
+    }
+  }, [periods]);
+
+  return (
+    <>
+      <Select
+        name='year-period-select'
+        label='Año - Periodo'
+        onChange={(e: SelectChangeEvent<string>) => setYearPeriod(e.target.value)}
+        value={yearPeriod}
+        options={periods}
+        xs={{ minWidth: width }}
+      />
+    </>
+  )
 };

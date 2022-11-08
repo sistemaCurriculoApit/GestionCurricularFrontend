@@ -1,47 +1,49 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import GridContainer from '../../../../../components/Grid/GridContainer';
 import { AdvacementReportTable } from '../../AdvacementReportTable/AdvacementReportTable';
 import { SearchButton } from '../../SearchButton/SearchButton';
-import { AdvancementsResponse, getAdvancementsByPeriods } from '../../../../../services/avancesServices';
+import { AdvancementsResponse, getAdvancementsByPeriods, getAdvancementsPeriods } from '../../../../../services/avancesServices';
 import { DownloadAdvancementReport } from '../../../../../services/excelService';
 import { TableDivider } from '../../TableDivider/TableDivider';
-import { useYearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
+import { YearPeriodPicker } from '../../YearPeriodPicker/YearPeriodPicker';
 import { TabProps } from '../types';
-import { parseAdvancement } from '../../../Util/Util';
+import { parseAdvancementReport } from '../../../Util/Util';
+import { Advancement } from '../../../../../models';
+import GridContainer from '../../../../../components/Grid/GridContainer';
 
 type AdvancementsByPeriodTabProps = TabProps;
 const FILE_SUFIX = 'por_periodo';
 
 export const AdvancementsByPeriodTab: React.FC<AdvancementsByPeriodTabProps> = ({
   classes,
-  setError,
+  setAlert,
   setLoading,
-  setPeportData
+  setReportData
 }) => {
   const [advancementsCount, setAdvancementsCount] = useState<number>(0);
-  const [advancements, setAdvancements] = useState<any[]>([]);
+  const [advancements, setAdvancements] = useState<Advancement[]>([]);
   const [page, setPage] = useState<number>(1);
-  const { year: advancementYear, period, YearPeriodPicker } = useYearPeriodPicker({
-    classes,
-    sizesYear: { xs: 12, sm: 12, md: 5 },
-    sizesPeriod: { xs: 12, sm: 12, md: 5 }
-  });
+  const [advancementYear, setAdvancementYear] = useState<string>('');
+  const [period, setPeriod] = useState<string>('');
 
   const handleAdvancementsByPeriod = useCallback(async (queryPage?: number, isReport?: boolean) => {
     if (!advancementYear || !period) {
-      setError(['warning', 'Debe diligenciar todos los filtros']);
-      setLoading(false);
+      setAlert(['warning', 'Debe diligenciar todos los filtros']);
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response: AdvancementsResponse = await getAdvancementsByPeriods(period, {
+      const {
+        advancements: _advancements,
+        advancementsCount: _advancementsCount
+      }: AdvancementsResponse = await getAdvancementsByPeriods(period, {
         page: queryPage || 0,
-        advancementYear: advancementYear.year().toString(),
+        advancementYear,
       });
 
-      if (!response || !response.advancements || !response.advancements.length) {
-        setError(['info', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
+      if (!_advancements.length) {
+        setAlert(['info', 'No se encontraron registros en la base de datos, por favor prueba con otros filtros']);
         setLoading(false);
         setAdvancements([]);
         setAdvancementsCount(0);
@@ -49,39 +51,22 @@ export const AdvancementsByPeriodTab: React.FC<AdvancementsByPeriodTabProps> = (
       }
 
       if (isReport) {
-        const data = response.advancements.map(parseAdvancement(true));
-
-        await DownloadAdvancementReport(data, FILE_SUFIX);
+        await DownloadAdvancementReport(_advancements.map(parseAdvancementReport), FILE_SUFIX);
         setLoading(false);
         return;
       }
 
-      const parsedAdvancements = response.advancements.map(parseAdvancement());
-      setAdvancements(parsedAdvancements);
-      setAdvancementsCount(response.advancementsCount);
+      setAdvancements(_advancements);
+      setAdvancementsCount(_advancementsCount);
       setLoading(false);
     } catch {
-      setError(['error', 'Error consultando avances']);
+      setAlert(['error', 'Error consultando avances']);
       setLoading(false);
     }
   }, [advancementYear, period]);
 
   useEffect(() => {
-    setPeportData({
-      dataCount: 0,
-      reportFunc: async () => { }
-    });
-
-    return () => {
-      setPeportData({
-        dataCount: 0,
-        reportFunc: async () => { }
-      });
-    };
-  }, []);
-
-  useEffect(() => {
-    setPeportData({
+    setReportData({
       dataCount: advancementsCount,
       reportFunc: (selectedPage: number) => handleAdvancementsByPeriod(selectedPage, true)
     });
@@ -90,10 +75,14 @@ export const AdvancementsByPeriodTab: React.FC<AdvancementsByPeriodTabProps> = (
   return (
     <>
       <GridContainer>
-        <YearPeriodPicker />
+        <YearPeriodPicker
+          setLoading={setLoading}
+          getPeriods={getAdvancementsPeriods}
+          onChange={(_year, _period) => { setAdvancementYear(_year); setPeriod(_period) }}
+          width={300}
+        />
 
         <SearchButton onClick={() => {
-          setLoading(true);
           handleAdvancementsByPeriod();
         }} />
 
@@ -106,7 +95,6 @@ export const AdvancementsByPeriodTab: React.FC<AdvancementsByPeriodTabProps> = (
         totalPages={advancementsCount}
         page={page}
         onChangePage={(p: any) => {
-          setLoading(true);
           setPage(p + 1);
           handleAdvancementsByPeriod(p);
         }}

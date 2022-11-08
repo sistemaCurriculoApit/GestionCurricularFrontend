@@ -1,4 +1,3 @@
-// importacion de dependencias y servicios
 import React, { useEffect, useState } from 'react';
 import ChartistGraph from 'react-chartist';
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -201,7 +200,6 @@ function Dashboard(props: any) {
                 data={{ labels: dataBaseLineChart.data.labels, series: [avancesChart] }}
                 type="Line"
                 options={{ ...dataBaseLineChart.options }}
-              // listener={dataBaseLineChart.animation}
               />
             </CardHeader>
             <CardBody>

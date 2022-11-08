@@ -1,6 +1,5 @@
 import { backendBaseUrl, getHeaders } from './constants';
 import { saveAs } from 'file-saver';
-import { Subject } from '../models';
 
 export const getAsignaturasPaginated = async (data: any) => {
   return new Promise(resolve => {
