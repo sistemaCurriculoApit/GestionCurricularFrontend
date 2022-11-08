@@ -35,7 +35,7 @@ export const getAdvancementsPeriods = async (signal?: AbortSignal): Promise<stri
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/advancements/periods`;
-    const { periods }: { periods: string[] } = await fetch(url, { headers, signal }).then((res) => res.json())
+    const { periods }: { periods: string[] } = await fetch(url, { headers, signal }).then((res) => res.json());
     return periods;
   } catch {
     return [];
@@ -46,7 +46,7 @@ export const getAdvancementsSubjects = async (year: string, period: string, sign
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/advancements/years/${year}/periods/${period}/subjects`;
-    const { subjects }: { subjects: Subject[] } = await fetch(url, { headers, signal }).then((res) => res.json())
+    const { subjects }: { subjects: Subject[] } = await fetch(url, { headers, signal }).then((res) => res.json());
     return subjects;
   } catch {
     return [];
@@ -57,7 +57,7 @@ export const getAdvancementsProfessors = async (year: string, period: string, si
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/advancements/years/${year}/periods/${period}/professors`;
-    const { professors }: { professors: any[] } = await fetch(url, { headers, signal }).then((res) => res.json())
+    const { professors }: { professors: any[] } = await fetch(url, { headers, signal }).then((res) => res.json());
     return professors;
   } catch {
     return [];

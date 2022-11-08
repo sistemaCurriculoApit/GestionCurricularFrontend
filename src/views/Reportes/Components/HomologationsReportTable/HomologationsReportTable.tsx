@@ -18,7 +18,7 @@ export const HomologationsReportTable: React.FC<HomologationsReportTableProps> =
   page,
   totalPages
 }) => {
-  const _homologations = useMemo(() => homologations.map(parseHomologation), [homologations])
+  const _homologations = useMemo(() => homologations.map(parseHomologation), [homologations]);
 
   return (
     <ReportTable
@@ -27,7 +27,7 @@ export const HomologationsReportTable: React.FC<HomologationsReportTableProps> =
       onChangePage={onChangePage}
       page={page}
       totalPages={totalPages}
-      message='No se encontraron homologaciones en la base de datos'
+      message="No se encontraron homologaciones en la base de datos"
       headers={[
         'Semestre',
         'Identificacion del solicitante',

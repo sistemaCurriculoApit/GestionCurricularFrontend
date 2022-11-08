@@ -9,7 +9,7 @@ type SelectProps = {
   onChange?: ((event: SelectChangeEvent<string>, child: React.ReactNode) => void),
   display?: (option: string) => string,
   xs?: object,
-}
+};
 
 export const Select: React.FC<SelectProps> = ({
   name,
@@ -20,7 +20,7 @@ export const Select: React.FC<SelectProps> = ({
   display = (item: string) => item,
   xs
 }) => {
-  const nameTag = useMemo(() => name.trim().split(' ').join(''), [name])
+  const nameTag = useMemo(() => name.trim().split(' ').join(''), [name]);
 
   return (
     <FormControl size="small" sx={{
@@ -41,5 +41,5 @@ export const Select: React.FC<SelectProps> = ({
         ))}
       </MaterialSelect>
     </ FormControl>
-  )
-}
+  );
+};

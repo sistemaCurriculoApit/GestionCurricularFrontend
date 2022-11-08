@@ -35,8 +35,8 @@ export const getHomologationsPeriods = async (signal?: AbortSignal): Promise<str
   try {
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/homologations/periods`;
-    const { periods }: { periods: string[] } = await fetch(url, { headers, signal }).then((res) => res.json())
-    return periods
+    const { periods }: { periods: string[] } = await fetch(url, { headers, signal }).then((res) => res.json());
+    return periods;
   } catch {
     return [];
   }

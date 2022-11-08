@@ -18,7 +18,7 @@ export const AdvacementReportTable: React.FC<AdvacementReportTableProps> = ({
   page,
   totalPages
 }) => {
-  const _advancements = useMemo(() => advancements.map(parseAdvancement), [advancements])
+  const _advancements = useMemo(() => advancements.map(parseAdvancement), [advancements]);
 
   return (
     <ReportTable

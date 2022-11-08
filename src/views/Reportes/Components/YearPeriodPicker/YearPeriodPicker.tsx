@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SelectChangeEvent } from '@mui/material'
+import { SelectChangeEvent } from '@mui/material';
 import { Select } from '../../../../components';
 
 type YearPeriodPickerProps = {
@@ -7,7 +7,7 @@ type YearPeriodPickerProps = {
   getPeriods: (signal?: AbortSignal) => Promise<string[]>,
   setLoading?: (loading: boolean) => void,
   width?: number,
-}
+};
 
 export const YearPeriodPicker: React.FC<YearPeriodPickerProps> = ({
   onChange,
@@ -24,7 +24,7 @@ export const YearPeriodPicker: React.FC<YearPeriodPickerProps> = ({
     const signal: AbortSignal = controller.signal;
 
     getPeriods(signal).then((_periods) => {
-      setPeriods(_periods)
+      setPeriods(_periods);
       setLoading(false);
     });
 
@@ -45,13 +45,13 @@ export const YearPeriodPicker: React.FC<YearPeriodPickerProps> = ({
   return (
     <>
       <Select
-        name='year-period-select'
-        label='Año - Periodo'
+        name="year-period-select"
+        label="Año - Periodo"
         onChange={(e: SelectChangeEvent<string>) => setYearPeriod(e.target.value)}
         value={yearPeriod}
         options={periods}
         xs={{ minWidth: width }}
       />
     </>
-  )
+  );
 };

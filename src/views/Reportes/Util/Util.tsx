@@ -15,7 +15,7 @@ export const parseHomologation = (homologation: any) => {
     homologation.descripcion,
     (<Tooltip title={creationDate.format('D/MM/YYYY, h:mm:ss a')}><span>{creationDate.fromNow()}</span></Tooltip>),
     (<Tooltip title={updateDate.format('D/MM/YYYY, h:mm:ss a')}><span>{updateDate.fromNow()}</span></Tooltip>),
-  ]
+  ];
 };
 
 export const parseHomologationReport = (añoHomologacion: any) => ({
@@ -39,7 +39,7 @@ export const parseAdvancement = (advancement: any) => {
     advancement.descripcion,
     (<Tooltip title={creationDate.format('D/MM/YYYY, h:mm:ss a')}><span>{creationDate.fromNow()}</span></Tooltip>),
     (<Tooltip title={updateDate.format('D/MM/YYYY, h:mm:ss a')}><span>{updateDate.fromNow()}</span></Tooltip>)
-  ]
+  ];
 };
 
 export const parseAdvancementReport = (advancement: any) => ({
