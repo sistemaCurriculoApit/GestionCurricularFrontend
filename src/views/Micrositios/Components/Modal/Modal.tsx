@@ -8,6 +8,7 @@ import GridContainer from '../../../../components/Grid/GridContainer';
 import CardHeader from '../../../../components/Card/CardHeader';
 import Card from '../../../../components/Card/Card';
 import Table from '../../../../components/Table/Table';
+import { ExpandibleTable } from '../Expandible Table/Expandible_Table';
 
 type ContentProps = {
   classes: any;
@@ -178,140 +179,8 @@ const Content: React.FC<ContentProps> = ({ subject, classes, subjectTypes, subje
           value={subject.correquisitos}
         />
       </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Presentacion de la asignatura"
-          variant="outlined"
-          minRows={3}
-          maxRows={9}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.presentacionAsignatura}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Justificacion"
-          variant="outlined"
-          minRows={3}
-          maxRows={9}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.justificacionAsignatura}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Objetivo General"
-          variant="outlined"
-          minRows={3}
-          maxRows={9}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.objetivoGeneral}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Objetivos Especificos"
-          variant="outlined"
-          minRows={3}
-          maxRows={9}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.objetivosEspecificos}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Competencias a Desarrollar"
-          variant="outlined"
-          minRows={5}
-          maxRows={10}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.competencias}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Medios Educativos"
-          variant="outlined"
-          minRows={5}
-          maxRows={10}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.mediosEducativos}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={4} >
-        <TextField
-          id="outlined-email"
-          label="Evaluacion"
-          variant="outlined"
-          minRows={5}
-          maxRows={10}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.evaluacion}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Bibliografia"
-          variant="outlined"
-          minRows={4}
-          maxRows={10}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.bibliografia}
-        />
-      </GridItem>
-      <GridItem xs={12} sm={12} md={6} >
-        <TextField
-          id="outlined-email"
-          label="Cibergrafia"
-          variant="outlined"
-          minRows={4}
-          maxRows={10}
-          multiline={true}
-          margin="dense"
-          disabled={true}
-          className={classes.CustomTextField}
-          value={subject.cibergrafia}
-        />
-      </GridItem>
 
-      <GridItem xs={12} sm={12} md={12} >
-        <br />
-      </GridItem>
-
-      <GridItem xs={12} sm={12} md={12} >
-        <hr />
-      </GridItem>
+      <ExpandibleTable data={subject} />
 
       <GridItem xs={12} sm={12} md={12}>
         <h4 className={classes.cardTitleBlack}>Contenidos de asignatura</h4>

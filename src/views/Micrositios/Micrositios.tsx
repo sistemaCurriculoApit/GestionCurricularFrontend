@@ -243,19 +243,17 @@ const Micrositios = ({ classes }: any) => {
     const init = async () => {
       setIsLoading(true);
       try {
+        const {programas} = await getAllProgramasNoToken({ search: '' });
+        setPrograms(programas);
         const [
           { docentes },
           { contenidos },
-          { asignaturas },
-          { programas }
+          { asignaturas }
         ] = await Promise.all([
           getAllDocentesNT({ search: '' }),
           getAllContenidoByAsignaturaNoToken({ search: '' }),
-          getAllAsignaturasWithPlanCodeNT({ search: '' }),
-          getAllProgramasNoToken({ search: '' })
+          getAllAsignaturasWithPlanCodeNT({ search: '' })
         ]);
-
-        setPrograms(programas);
 
         const defaultProgram = !isFirstTime ? programas[0] : programas.find((program: any) => program.codigo === ID_ENGINEERING_PROGRAM);
         const contentsHashMap = contenidos.reduce((acc: any, el: any) => ({ ...acc, [el._id]: el }), {});
