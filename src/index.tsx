@@ -6,7 +6,8 @@ import { userProfilesObject } from './constants/generalConstants';
 
 import Login from './layouts/Login';
 import Admin from './layouts/Admin';
-import Coordinador from './layouts/Coordinador';
+import CoordinadorPrograma from './layouts/CoordinadorPrograma';
+import CoordinadorArea from './layouts/CoordinadorArea';
 import Docente from './layouts/Docente';
 import Invitado from './layouts/Invitado';
 import Estudiante from './layouts/Estudiante';
@@ -35,12 +36,21 @@ const App: React.FC = () => {
           </Switch>
 
         );
-      case userProfilesObject.coor.id.toString():
+      case userProfilesObject.coorProg.id.toString():
         return (
 
           <Switch>
-            <Route path="/coordinador" component={Coordinador} />
-            <Redirect to={'/coordinador/actas'} from={'/'} />
+            <Route path="/coordinadorPrograma" component={CoordinadorPrograma} />
+            <Redirect to={'/coordinadorPrograma/actas'} from={'/'} />
+          </Switch>
+
+        );
+      case userProfilesObject.coorArea.id.toString():
+        return (
+
+          <Switch>
+            <Route path="/coordinadorArea" component={CoordinadorArea} />
+            <Redirect to={'/coordinadorArea/avancesAsignatura'} from={'/'} />
           </Switch>
 
         );
@@ -49,7 +59,7 @@ const App: React.FC = () => {
 
           <Switch>
             <Route path="/docente" component={Docente} />
-            <Redirect to={'/docente/avancesAsignatura'} from={'/'} />
+            <Redirect to={'/docente/actas'} from={'/'} />
           </Switch>
 
         );

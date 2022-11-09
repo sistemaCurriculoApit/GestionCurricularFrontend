@@ -9,4 +9,5 @@ export type Advancement = {
   period: string,
   advancementPercentage: string,
   description: string,
+  agreement: any[]
 };

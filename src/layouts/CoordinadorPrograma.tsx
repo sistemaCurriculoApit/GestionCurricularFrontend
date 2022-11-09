@@ -17,7 +17,7 @@ import logo from '../assets/img/logoPoli.png';
 const switchRoutes = (
   <Switch>
     {routes.map((prop, key) => {
-      if (prop.layout === '/coordinador') {
+      if (prop.layout === '/coordinadorPrograma') {
         return (
           <Route
             path={prop.layout + prop.path}
@@ -30,7 +30,7 @@ const switchRoutes = (
   </Switch>
 );
 
-const routesFilter = routes.filter(route => (route.layout === '/coordinador'));
+const routesFilter = routes.filter(route => (route.layout === '/coordinadorPrograma'));
 
 interface Props {
   classes: any;

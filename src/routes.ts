@@ -151,58 +151,88 @@ const dashboardRoutes = [
     layout: '/admin'
   },
 
-  // ACCESOS DE  COORDINADOR
+  // ACCESOS DE  COORDINADOR DE PROGRAMA
   {
     path: '/homologacion',
     name: 'Homologación de asignaturas',
     icon: LibraryBooks,
     component: Homologaciones,
-    layout: '/coordinador'
+    layout: '/coordinadorPrograma'
   },
   {
     path: '/avancesAsignatura',
     name: 'Avances de asignaturas',
     icon: HourglassEmpty,
     component: AvancesAsignaturas,
-    layout: '/coordinador'
+    layout: '/coordinadorPrograma'
   },
   {
     path: '/actas',
     name: 'Actas',
     icon: Description,
     component: Actas,
-    layout: '/coordinador'
+    layout: '/coordinadorPrograma'
   },
   {
     path: '/reportes',
     name: 'Reportes',
     icon: Assessment,
     component: Reportes,
-    layout: '/coordinador'
+    layout: '/coordinadorPrograma'
   },
   {
     path: '/micrositio',
     name: 'Micrositio',
     icon: Web,
     component: Micrositios,
-    layout: '/coordinador'
+    layout: '/coordinadorPrograma'
   },
   {
     path: '/Manual',
     name: 'Manual de usuario',
     icon: Web,
     component: ManualUsuario,
-    layout: '/coordinador'
+    layout: '/coordinadorPrograma'
   },
 
-  // ACCESOS DE  DOCENTE
+  // ACCESOS DE  COORDINADOR DE AREA
+  {
+    path: '/homologacion',
+    name: 'Homologación de asignaturas',
+    icon: LibraryBooks,
+    component: Homologaciones,
+    layout: '/coordinadorArea'
+  },
   {
     path: '/avancesAsignatura',
     name: 'Avances de asignaturas',
     icon: HourglassEmpty,
     component: AvancesAsignaturas,
-    layout: '/docente'
+    layout: '/coordinadorArea'
   },
+  {
+    path: '/reportes',
+    name: 'Reportes',
+    icon: Assessment,
+    component: Reportes,
+    layout: '/coordinadorArea'
+  },
+  {
+    path: '/micrositio',
+    name: 'Micrositio',
+    icon: Web,
+    component: Micrositios,
+    layout: '/coordinadorArea'
+  },
+  {
+    path: '/Manual',
+    name: 'Manual de usuario',
+    icon: Web,
+    component: ManualUsuario,
+    layout: '/coordinadorArea'
+  },
+
+  // ACCESOS DE  DOCENTE
   {
     path: '/actas',
     name: 'Actas',

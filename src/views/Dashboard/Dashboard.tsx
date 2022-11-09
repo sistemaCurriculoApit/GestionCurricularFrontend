@@ -86,8 +86,12 @@ function Dashboard(props: any) {
           props.history.push('/admin/actas', { openModalCreate: true });
 
           break;
-        case userProfilesObject.coor.id:
-          props.history.push('/coordinador/actas', { openModalCreate: true });
+        case userProfilesObject.coorProg.id:
+          props.history.push('/coordinadorPrograma/actas', { openModalCreate: true });
+
+          break;
+        case userProfilesObject.coorArea.id:
+          props.history.push('/coordinadorArea/actas', { openModalCreate: true });
 
           break;
         case userProfilesObject.doc.id:
@@ -171,7 +175,8 @@ function Dashboard(props: any) {
             </CardHeader>
             {
               idProfile && (parseInt(idProfile, 10) === userProfilesObject.admin.id ||
-                parseInt(idProfile, 10) === userProfilesObject.coor.id ||
+                parseInt(idProfile, 10) === userProfilesObject.coorProg.id ||
+                parseInt(idProfile, 10) === userProfilesObject.coorArea.id ||
                 parseInt(idProfile, 10) === userProfilesObject.doc.id)
                 ?
                 <CardFooter stats={true}>

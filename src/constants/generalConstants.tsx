@@ -5,9 +5,9 @@ export const userProfilesObject = {
     id: 1,
     title: 'Administrador',
   },
-  coor: {
+  coorProg: {
     id: 2,
-    title: 'Coordinador',
+    title: 'CoordinadorPrograma',
   },
   doc: {
     id: 3,
@@ -16,6 +16,10 @@ export const userProfilesObject = {
   est: {
     id: 4,
     title: 'Estudiante',
+  },
+  coorArea: {
+    id: 5,
+    title: 'CoordinadorArea',
   }
 };
 

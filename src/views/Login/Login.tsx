@@ -61,8 +61,8 @@ function Login(props: any) {
   const handleLogin = async (guest?: Boolean) => {
     if (guest) {
       localStorage.setItem('token', '-1');
-      localStorage.setItem('idProfileLoggedUser', '5');
-      document.location.reload();
+      localStorage.setItem('idProfileLoggedUser', '-1');
+      document.location.reload()
     } else {
       if ((email && password) || googleIdentity) {
         // Ingreso roles del sistema con credenciales

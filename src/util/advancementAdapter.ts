@@ -11,4 +11,5 @@ export const advancementAdapter = (advancement: any): Advancement => ({
   period: advancement.periodo,
   advancementPercentage: advancement.porcentajeAvance,
   description: advancement.descripcion,
+  agreement: advancement.concertacion
 });
