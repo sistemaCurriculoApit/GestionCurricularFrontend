@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { AdvacementReportTable } from '../../AdvacementReportTable/AdvacementReportTable';
+import { AdvacementResumeTable } from '../../AdvancementResumeTable/AdvancementResumeTable';
 import { SearchButton } from '../../SearchButton/SearchButton';
 import { AdvancementsResponse, getAdvancementsByPeriods, getAdvancementsPeriods } from '../../../../../services/avancesServices';
 import { DownloadAdvancementReport } from '../../../../../services/excelService';
@@ -99,6 +100,8 @@ export const AdvancementsByPeriodTab: React.FC<AdvancementsByPeriodTabProps> = (
           handleAdvancementsByPeriod(p);
         }}
       />
+
+      <AdvacementResumeTable advancements={advancements} />
     </>
   );
 };
