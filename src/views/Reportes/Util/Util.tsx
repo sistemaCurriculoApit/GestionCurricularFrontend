@@ -29,12 +29,43 @@ export const parseHomologationReport = (añoHomologacion: any) => ({
   fechaActualizacion: moment(añoHomologacion.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
 });
 
+const getProfessorName = (professor: any) => professor ? professor.nombre : '-';
+
+const parseAdvancementResume = (advancement: any) => [
+  advancement.asignaturaId.nombre,
+  getProfessorName(advancement.docenteId),
+  advancement.porcentajeAvance
+];
+
+export const parseToResume = (advancements: any[]) => {
+  const result = advancements
+    .map(parseAdvancementResume)
+    .reduce((acc: { [key: string]: number }, [subject, professor, value]) => {
+      const key = `${subject},${professor}`;
+
+      return { ...acc, [key]: value + (acc[key] || 0) }
+    }, {});
+
+  return Object
+    .keys(result)
+    .map((key) => {
+      const [subject, professor] = key.split(',');
+
+      return [
+        subject,
+        professor,
+        <ProgressBar value={result[key]} />
+      ]
+    })
+}
+
 export const parseAdvancement = (advancement: any) => {
   const creationDate = moment(advancement.fechaCreacion);
   const updateDate = moment(advancement.fechaActualizacion);
 
   return [
     advancement.asignaturaId.nombre,
+    getProfessorName(advancement.docenteId),
     <ProgressBar value={advancement.porcentajeAvance} />,
     advancement.descripcion,
     (<Tooltip title={creationDate.format('D/MM/YYYY, h:mm:ss a')}><span>{creationDate.fromNow()}</span></Tooltip>),

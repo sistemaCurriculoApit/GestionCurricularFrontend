@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SelectChangeEvent } from '@mui/material';
 import { AdvacementReportTable } from '../../AdvacementReportTable/AdvacementReportTable';
+import { AdvacementResumeTable } from '../../AdvancementResumeTable/AdvancementResumeTable';
 import { SearchButton } from '../../SearchButton/SearchButton';
 import { getAllDocentes } from '../../../../../services/docentesServices';
 import { AdvancementsResponse, getAdvancementsByProfessors, getAdvancementsPeriods, getAdvancementsProfessors } from '../../../../../services/avancesServices';
@@ -159,6 +160,8 @@ export const AdvacementsByProfessorTab: React.FC<AdvancementsByProfessorTabProps
           handleAdvancementsByProfessor(p);
         }}
       />
+
+      <AdvacementResumeTable advancements={advancements} />
     </>
   );
 };

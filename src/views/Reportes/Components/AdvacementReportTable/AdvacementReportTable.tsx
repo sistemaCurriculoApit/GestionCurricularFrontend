@@ -30,10 +30,11 @@ export const AdvacementReportTable: React.FC<AdvacementReportTableProps> = ({
       message="No se encontraron avances en la base de datos"
       headers={[
         'Asignatura',
+        'Docente',
         'Porcentaje de avance',
         'Descripción',
-        'Fecha de creación',
-        'Fecha ultima actualización'
+        'Creado',
+        'Actualizado'
       ]}
     />
   );
