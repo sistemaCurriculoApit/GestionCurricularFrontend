@@ -141,3 +141,15 @@ export const updateAdvancement = async (advancementId: string, advancement: Adva
     return null;
   }
 };
+
+export const removeAdvancement = async (advancementId: string): Promise<null | void> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/advancements/${advancementId}`;
+    const response = await fetch(url, { headers, method: 'DELETE'});
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};

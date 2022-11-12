@@ -15,6 +15,7 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import Delete from '@material-ui/icons/Delete';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import moment from 'moment';
 import 'moment/locale/es';
@@ -38,9 +39,9 @@ import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/com
 import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
 import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 import { container, containerFormModal, containerFooterModal, chipMargin, modalForm } from '../../assets/jss/material-dashboard-react';
-
+import { userProfilesObject } from '../../constants/generalConstants';
 import { AnythingObject } from '../../constants/generalConstants';
-import { getActasPaginated, createActa, updateActa } from '../../services/actasServices';
+import { getActasPaginated, createActa, updateActa, removeActa } from '../../services/actasServices';
 
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
@@ -58,20 +59,23 @@ const styles = createStyles({
 function Actas(props: any) {
   const { classes } = props;
   const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
-
+  debugger
   const [showAlert, setShowAlert] = useState(false);
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
   const [searchField, setSearchField] = useState('');
   const [openMoreFilters, setOpenMoreFilters] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [openModalDelete, setOpenModalDelete] = useState(false);
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateActaFrom, setDateActaFrom] = useState<any>(null);
   const [dateActaTo, setDateActaTo] = useState<any>(null);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
   const [listAssistants, setListAssistants] = useState([]);
-  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [blockAdminPermissions, setBlockAdministradorPermissions] = useState<boolean>();
+  const [blockDocentePermissions, setBlockDocentePermissions] = useState<boolean>();
+  const [isEdit, setIsEdit] = useState<boolean>(true);
   const [actasList, setActasList] = useState([]);
   const [totalActas, setTotalActas] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -86,6 +90,19 @@ function Actas(props: any) {
 
   const setDataEditOrViewActa = (data: any) => {
     setOpenModal(true);
+    setActaObject({
+      _id: data._id,
+      actividad: data.actividad,
+      lugar: data.lugar,
+      tema: data.tema,
+      conclusion: data.conclusion,
+      fechaActa: moment(data.fechaActa),
+    });
+    setListAssistants(data.asistente.split('||'));
+  };
+
+  const setDataDeleteActa = (data: any) => {
+    setOpenModalDelete(true);
     setActaObject({
       _id: data._id,
       actividad: data.actividad,
@@ -132,7 +149,26 @@ function Actas(props: any) {
                   setDataEditOrViewActa(data);
                 }} />
             </div>
-          </Tooltip>
+          </Tooltip>,
+          blockAdminPermission() || blockDocentePermission() ? null:
+          <Tooltip 
+          id="filterTooltip" 
+          title="Eliminar acta" 
+          placement="top" classes={{ tooltip: classes.tooltip }}
+          >
+            <div className={classes.buttonHeaderContainer}>
+              <Button 
+                key={'filtersButton'} 
+                color={'primary'} 
+                size="sm" 
+                round={true} 
+                variant="outlined" 
+                justIcon={true} 
+                startIcon={<Delete />}
+                onClick={() => setDataDeleteActa(data)}
+              />
+            </div>
+          </Tooltip> 
         ];
         return arrayData;
       });
@@ -146,6 +182,54 @@ function Actas(props: any) {
     setOpenModalLoading(false);
   };
 
+
+  const blockAdminPermission = () => {
+    if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.admin.id.toString()) {
+      setBlockAdministradorPermissions(true);
+      return true;
+    } else {
+      setBlockAdministradorPermissions(false);
+      return false;
+    }
+  };
+
+  const blockDocentePermission = () => {
+    if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.doc.id.toString()) {
+      setBlockDocentePermissions(true);
+      return true;
+    } else {
+      setBlockDocentePermissions(false);
+      return false;
+    }
+  };
+
+  const viewTable = () => {
+    let table;
+    if(blockAdminPermissions || blockDocentePermissions){
+      table =[
+        'Actividad',
+        'Fecha',
+        'Lugar',
+        'Asistentes',
+        'Temas',
+        'Ver detalles',
+        'Acciones',
+        ''
+      ]
+    } else {
+      table =[
+        'Actividad',
+        'Fecha',
+        'Lugar',
+        'Asistentes',
+        'Temas',
+        'Ver detalles',
+        'Acciones',
+        'Eliminar'
+      ]
+    }
+    return table;
+  }
   useEffect(() => {
     setOpenModalLoading(true);
     getActas();
@@ -223,6 +307,30 @@ function Actas(props: any) {
         setShowAlert(false);
       }, 1000);
       setOpenModal(false);
+      getActas();
+    }
+  };
+
+  const handleDeleteActa = async () => {
+    setOpenModalLoading(true);
+    const response: any = await removeActa(actaObject._id);
+    debugger
+    if (response && response.error) {
+      setSeverityAlert('error');
+      setShowAlert(true);
+      setMessagesAlert('Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Acta eliminada satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalDelete(false);
       getActas();
     }
   };
@@ -447,15 +555,7 @@ function Actas(props: any) {
                   : (
                     <Table
                       tableHeaderColor="success"
-                      tableHead={[
-                        'Actividad',
-                        'Fecha',
-                        'Lugar',
-                        'Asistentes',
-                        'Temas',
-                        'Ver detalles',
-                        'Acciones'
-                      ]}
+                      tableHead={viewTable()}
                       tableData={actasList}
                     />)
               }
@@ -484,6 +584,7 @@ function Actas(props: any) {
                     fechaActa: new Date()
                   }
                 );
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -674,6 +775,54 @@ function Actas(props: any) {
                     </Button>
                   </div>) : null
               }
+            </Card>
+          </GridItem>
+        </div>
+      </Modal>
+      <Modal
+        open={openModalDelete}
+        className={classes.modalForm}
+        // onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div className={classes.centerContent}>
+          <GridItem xs={6} sm={4} md={4} >
+            <Card className={classes.container}>
+            <CardHeader color="success">
+                <div className={classes.TitleFilterContainer}>
+                  <h4 className={classes.cardTitleWhite}>Eliminar acta</h4>
+                  <div className={classes.headerActions}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
+                      <div className={classes.buttonHeaderContainer}>
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModalDelete(false); }} />
+                      </div>
+                    </Tooltip>
+                  </div>
+                </div>
+              </CardHeader >
+              <h4>¿Está seguro de que desea eliminar la siguiente acta?</h4>
+              <div>
+                <Button
+                  key={'filtersButton'}
+                  color={'primary'}
+                  round={true}
+                  variant="outlined"
+                  onClick={() => handleDeleteActa()} >
+                  {'Si'}
+                </Button>
+              </div>
+              <div>
+                <Button
+                  key={'filtersButton'}
+                  color={'primary'}
+                  round={true}
+                  variant="outlined"
+                  onClick={() => setOpenModalDelete(false)} >
+                  {'No'}
+                </Button>
+              </div>
             </Card>
           </GridItem>
         </div>

@@ -84,7 +84,7 @@ function Dashboard(props: any) {
       switch (parseInt(idProfile, 10)) {
         case userProfilesObject.admin.id:
           props.history.push('/admin/actas', { openModalCreate: true });
-
+    
           break;
         case userProfilesObject.coorProg.id:
           props.history.push('/coordinadorPrograma/actas', { openModalCreate: true });

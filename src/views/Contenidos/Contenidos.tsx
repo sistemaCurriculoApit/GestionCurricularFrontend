@@ -11,6 +11,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import moment from 'moment';
 import 'moment/locale/es';
@@ -66,7 +67,7 @@ function Contenidos(props: any) {
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
-
+  const [isEdit, setIsEdit] = useState<boolean>();
   const [contenidoList, setContenidosList] = useState([]);
   const [totalContenidos, setTotalContenidos] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
@@ -110,10 +111,20 @@ function Contenidos(props: any) {
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          <Tooltip id="filterTooltip" title="Ver contenidos" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditContenido(data);
+                }} />
+            </div>
+          </Tooltip>,
           <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
                 onClick={() => {
+                  setIsEdit(true);
                   setDataEditContenido(data);
                 }} />
             </div>
@@ -360,6 +371,7 @@ function Contenidos(props: any) {
                       'Descripción',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver contenidos',
                       'Acciones'
                     ]}
                     tableData={contenidoList}
@@ -389,6 +401,7 @@ function Contenidos(props: any) {
                     contenidoSemana: '',
                   }
                 );
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -408,7 +421,12 @@ function Contenidos(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{contenidoObject._id ? 'Editar' : 'Crear'} contenido</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{contenidoObject._id ? 'Editar' : 'Crear'} contenido</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles del contenido</h4>
+                  }
                   <div className={classes.headerActions}>
                     <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -428,6 +446,7 @@ function Contenidos(props: any) {
                   className={classes.CustomTextField}
                   error={!contenidoObject.codigo ? true : false}
                   value={contenidoObject.codigo}
+                  disabled={!isEdit}
                   onChange={(event) => {
                     setContenidoObject({ ...contenidoObject, codigo: event.target.value });
                   }}
@@ -440,6 +459,7 @@ function Contenidos(props: any) {
                   className={classes.CustomTextField}
                   error={!contenidoObject.nombre ? true : false}
                   value={contenidoObject.nombre}
+                  disabled={!isEdit}
                   onChange={(event) => {
                     setContenidoObject({ ...contenidoObject, nombre: event.target.value });
                   }}
@@ -454,6 +474,7 @@ function Contenidos(props: any) {
                   multiline={true}
                   className={classes.CustomTextField}
                   value={contenidoObject.descripcion}
+                  disabled={!isEdit}
                   onChange={(event) => {
                     setContenidoObject({ ...contenidoObject, descripcion: event.target.value });
                   }}
@@ -465,20 +486,23 @@ function Contenidos(props: any) {
                   margin="dense"
                   className={classes.CustomTextField}
                   value={contenidoObject.contenidoSemana}
+                  disabled={!isEdit}
                   onChange={(event) => {
                     setContenidoObject({ ...contenidoObject, contenidoSemana: event.target.value });
                   }}
                 />
 
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveContenido(); }} >
-                  {'Guardar'}
-                </Button>
-
-              </div>
-
+              {
+                isEdit ? (
+                  <div className={classes.containerFooterModal} >
+                  <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSaveContenido(); }} >
+                    {'Guardar'}
+                  </Button>
+                  </div>
+                ) : null
+              }
             </Card>
           </GridItem>
         </div>

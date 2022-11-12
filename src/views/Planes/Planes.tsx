@@ -13,6 +13,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import moment from 'moment';
 import 'moment/locale/es';
@@ -65,7 +66,7 @@ function Planes(props: any) {
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
-
+  const [isEdit, setIsEdit] = useState<boolean>();
   const [planesList, setPlanesList] = useState([]);
   const [areasList, setAreasList] = useState([]);
   const [totalPlanes, setTotalPlanes] = useState(0);
@@ -132,10 +133,20 @@ function Planes(props: any) {
           data.descripcion,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          <Tooltip id="filterTooltip" title="Ver planes" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditPlan(data);
+                }} />
+            </div>
+          </Tooltip>,
           <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
                 onClick={() => {
+                  setIsEdit(true);
                   setDataEditPlan(data);
                 }} />
             </div>
@@ -387,7 +398,8 @@ function Planes(props: any) {
                       'Descripcion',
                       'Fecha de creación',
                       'Fecha ultima actualización',
-                      'Acciones'
+                      'Ver detalles',
+                      'Acciones',
                     ]}
                     tableData={planesList}
                   />
@@ -415,6 +427,7 @@ function Planes(props: any) {
                     area: [],
                   }
                 );
+                setIsEdit(true);
               }}
             />
           </div>
@@ -435,7 +448,12 @@ function Planes(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{planObject._id ? 'Editar' : 'Crear'} plan</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{planObject._id ? 'Editar' : 'Crear'} plan</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles del plan</h4>
+                  }
                   <div className={classes.headerActions}>
                     <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -457,6 +475,7 @@ function Planes(props: any) {
                       className={classes.CustomTextField}
                       error={!planObject.codigo ? true : false}
                       value={planObject.codigo}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setPlanObject({ ...planObject, codigo: event.target.value });
                       }}
@@ -472,6 +491,7 @@ function Planes(props: any) {
                       className={classes.CustomTextField}
                       error={!planObject.nombre ? true : false}
                       value={planObject.nombre}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setPlanObject({ ...planObject, nombre: event.target.value });
                       }}
@@ -488,6 +508,7 @@ function Planes(props: any) {
                       multiline={true}
                       className={classes.CustomTextField}
                       value={planObject.descripcion}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setPlanObject({ ...planObject, descripcion: event.target.value });
                       }}
@@ -501,6 +522,7 @@ function Planes(props: any) {
                       getOptionLabel={(option) => `${option.codigo} - ${option.nombre}`}
                       filterSelectedOptions={true}
                       value={planObject.area}
+                      disabled={!isEdit}
                       onChange={(event, value) => {
                         setPlanObject({ ...planObject, area: value });
                       }}
@@ -519,14 +541,14 @@ function Planes(props: any) {
                   </GridItem>
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
+              {isEdit ? (
+                <div className={classes.containerFooterModal} >
                 <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                   onClick={() => { handleSavePlan(); }} >
                   {'Guardar'}
                 </Button>
-
               </div>
-
+              ):null}   
             </Card>
           </GridItem>
         </div>

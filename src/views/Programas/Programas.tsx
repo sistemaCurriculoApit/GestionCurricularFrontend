@@ -14,6 +14,7 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import moment from 'moment';
 import 'moment/locale/es';
 
@@ -65,7 +66,7 @@ function Programas(props: any) {
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
-
+  const [isEdit, setIsEdit] = useState<boolean>();
   const [programasList, setProgramasList] = useState([]);
   const [planesList, setPlanesList] = useState([]);
   const [totalProgramas, setTotalProgramas] = useState(0);
@@ -132,6 +133,17 @@ function Programas(props: any) {
         moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
         moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
         (
+          <Tooltip id="filterTooltip" title="Ver programas" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditPrograma(data);
+                }} />
+            </div>
+          </Tooltip>
+        ),
+        (
           <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button
@@ -142,7 +154,9 @@ function Programas(props: any) {
                 justIcon={true}
                 variant="outlined"
                 startIcon={<EditIcon />}
-                onClick={() => setDataEditPrograma(data)} />
+                onClick={() => {
+                  setIsEdit(true);
+                  setDataEditPrograma(data);}} />
             </div>
           </Tooltip>
         )
@@ -378,6 +392,7 @@ function Programas(props: any) {
                       'Descripcion',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver programas',
                       'Acciones'
                     ]}
                     tableData={programasList}
@@ -406,6 +421,7 @@ function Programas(props: any) {
                     plan: [],
                   }
                 );
+                setIsEdit(true);
               }}
             />
           </div>
@@ -426,7 +442,12 @@ function Programas(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{programaObject._id ? 'Editar' : 'Crear'} programa</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{programaObject._id ? 'Editar' : 'Crear'} programa</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles del programa</h4>
+                  }
                   <div className={classes.headerActions}>
                     <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -448,6 +469,7 @@ function Programas(props: any) {
                       className={classes.CustomTextField}
                       error={!programaObject.codigo ? true : false}
                       value={programaObject.codigo}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setProgramaObject({ ...programaObject, codigo: event.target.value });
                       }}
@@ -463,6 +485,7 @@ function Programas(props: any) {
                       className={classes.CustomTextField}
                       error={!programaObject.nombre ? true : false}
                       value={programaObject.nombre}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setProgramaObject({ ...programaObject, nombre: event.target.value });
                       }}
@@ -479,6 +502,7 @@ function Programas(props: any) {
                       maxRows={10}
                       multiline={true}
                       value={programaObject.descripcion}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setProgramaObject({ ...programaObject, descripcion: event.target.value });
                       }}
@@ -492,6 +516,7 @@ function Programas(props: any) {
                       getOptionLabel={(option) => `${option.codigo} - ${option.nombre}`}
                       filterSelectedOptions={true}
                       value={programaObject.plan}
+                      disabled={!isEdit}
                       onChange={(event, value) => {
                         setProgramaObject({ ...programaObject, plan: value });
                       }}
@@ -510,12 +535,14 @@ function Programas(props: any) {
                   </GridItem>
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSavePrograma(); }} >
-                  {'Guardar'}
-                </Button>
-              </div>
+              {isEdit ? (
+                <div className={classes.containerFooterModal} >
+                  <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSavePrograma(); }} >
+                    {'Guardar'}
+                  </Button>
+                </div>
+              ) : null}
             </Card>
           </GridItem>
         </div>

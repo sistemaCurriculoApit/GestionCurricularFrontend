@@ -53,3 +53,20 @@ export const updateActa = async (data: any, id: any) => {
       }));
   });
 };
+
+export const removeActa = async (actaId: string): Promise<null | void> => {
+  return new Promise(resolve => {
+    let headers: any = getHeaders();
+    fetch(`${backendBaseUrl}/api/acta/${actaId}`, {
+      headers,
+      method: 'DELETE'
+    })
+      .then(response => response.json())
+      .then(response => {
+        resolve(response);
+      })
+      .catch(error => resolve({
+        ...error
+      }));
+  });
+};

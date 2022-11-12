@@ -12,6 +12,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import GetApp from '@material-ui/icons/GetApp';
 import moment from 'moment';
@@ -71,6 +72,7 @@ function Asignaturas(props: any) {
   const [openMoreFilters, setOpenMoreFilters] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [openModalLoading, setOpenModalLoading] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>();
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
   const [tipoAsignaturaSelected, setTipoAsignaturaSelected] = useState<AnythingObject>({});
@@ -313,10 +315,20 @@ function Asignaturas(props: any) {
           data.semestre,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          <Tooltip id="filterTooltip" title="Ver detalles de asignaturas" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditAsignatura(data);
+                }} />
+            </div>
+          </Tooltip>,
           <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
                 onClick={() => {
+                  setIsEdit(true);
                   setDataEditAsignatura(data);
                 }} />
             </div>
@@ -572,6 +584,7 @@ function Asignaturas(props: any) {
                       'Semestre',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver asignaturas',
                       'Acciones',
                       'Descargas'
                     ]}
@@ -620,6 +633,7 @@ function Asignaturas(props: any) {
                     equivalencia: []
                   }
                 );
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -651,7 +665,12 @@ function Asignaturas(props: any) {
                         : null
                     }
                   </div>
-                  <h4 className={classes.cardTitleWhite}>{asignaturaObject._id ? 'Editar' : 'Crear'} asignaturas</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{asignaturaObject._id ? 'Editar' : 'Crear'} asignaturas</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles de la asignatura</h4>
+                  }
                   <div className={classes.headerActions}>
                     <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -672,6 +691,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.codigo ? true : false}
+                      disabled={!isEdit}
                       value={asignaturaObject.codigo}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, codigo: event.target.value });
@@ -687,6 +707,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.nombre ? true : false}
                       value={asignaturaObject.nombre}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, nombre: event.target.value });
                       }}
@@ -702,6 +723,7 @@ function Asignaturas(props: any) {
                       type={'number'}
                       error={isNaN(asignaturaObject.cantidadCredito) || !asignaturaObject.cantidadCredito ? true : false}
                       value={asignaturaObject.cantidadCredito}
+                      disabled={!isEdit}
                       onKeyPress={event => {
                         if (event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
@@ -723,6 +745,7 @@ function Asignaturas(props: any) {
                       options={tiposAsignatura}
                       getOptionLabel={(option) => option.title}
                       filterSelectedOptions={true}
+                      disabled={!isEdit}
                       onChange={(e, option) => {
                         if (option.id === 0) {
                           setAsignaturaObject({
@@ -767,7 +790,7 @@ function Asignaturas(props: any) {
                       label="Horas Trabajo Presencial Teorico"
                       variant="outlined"
                       margin="dense"
-                      disabled={(!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 0 && tipoAsignaturaSelected.id !== 2)}
+                      disabled={(!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 0 && tipoAsignaturaSelected.id !== 2) || !isEdit}
                       className={classes.CustomTextField}
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaTeorica}
@@ -793,7 +816,7 @@ function Asignaturas(props: any) {
                       label="Horas Trabajo Presencial Practico"
                       variant="outlined"
                       margin="dense"
-                      disabled={!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 1 && tipoAsignaturaSelected.id !== 2}
+                      disabled={(!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 1 && tipoAsignaturaSelected.id !== 2) || !isEdit}
                       className={classes.CustomTextField}
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaPractica}
@@ -823,6 +846,7 @@ function Asignaturas(props: any) {
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaIndependiente}
                       error={isNaN(asignaturaObject.intensidadHorariaIndependiente) ? true : false}
+                      disabled={!isEdit}
                       onKeyPress={event => {
                         if (event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
@@ -872,6 +896,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.semestre ? true : false}
+                      disabled={!isEdit}
                       value={asignaturaObject.semestre}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, semestre: event.target.value });
@@ -894,6 +919,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.prerrequisitos}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, prerrequisitos: event.target.value });
                       }}
@@ -910,6 +936,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.correquisitos}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, correquisitos: event.target.value });
                       }}
@@ -927,6 +954,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.presentacionAsignatura ? true : false}
                       value={asignaturaObject.presentacionAsignatura}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, presentacionAsignatura: event.target.value });
                       }}
@@ -944,6 +972,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.justificacionAsignatura ? true : false}
                       value={asignaturaObject.justificacionAsignatura}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, justificacionAsignatura: event.target.value });
                       }}
@@ -961,6 +990,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.objetivoGeneral ? true : false}
                       value={asignaturaObject.objetivoGeneral}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, objetivoGeneral: event.target.value });
                       }}
@@ -978,6 +1008,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.objetivosEspecificos ? true : false}
                       value={asignaturaObject.objetivosEspecificos}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, objetivosEspecificos: event.target.value });
                       }}
@@ -995,6 +1026,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.competencias ? true : false}
                       value={asignaturaObject.competencias}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, competencias: event.target.value });
                       }}
@@ -1012,6 +1044,7 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.mediosEducativos ? true : false}
                       value={asignaturaObject.mediosEducativos}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, mediosEducativos: event.target.value });
                       }}
@@ -1028,6 +1061,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.evaluacion}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, evaluacion: event.target.value });
                       }}
@@ -1041,6 +1075,7 @@ function Asignaturas(props: any) {
                       getOptionLabel={(option: any) => `${option.nombre} - ${option.documento}`}
                       filterSelectedOptions={true}
                       value={asignaturaObject.docente}
+                      disabled={!isEdit}
                       onChange={(e, value) => {
                         setAsignaturaObject({ ...asignaturaObject, docente: value });
                       }}
@@ -1064,6 +1099,7 @@ function Asignaturas(props: any) {
                       getOptionLabel={(option: any) => `${option.codigo} - ${option.nombre}`}
                       filterSelectedOptions={true}
                       value={asignaturaObject.contenido}
+                      disabled={!isEdit}
                       onChange={(e, value) => {
                         setAsignaturaObject({ ...asignaturaObject, contenido: value });
                       }}
@@ -1088,6 +1124,7 @@ function Asignaturas(props: any) {
                       getOptionLabel={(option: any) => `${option.codigoPlan}: ${option.asignatura.codigo} - ${option.asignatura.nombre}`}
                       filterSelectedOptions={true}
                       value={asignaturaObject.equivalencia}
+                      disabled={!isEdit}
                       onChange={(e, value) => {
                         setAsignaturaObject({ ...asignaturaObject, equivalencia: value });
                       }}
@@ -1114,6 +1151,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.bibliografia}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, bibliografia: event.target.value });
                       }}
@@ -1130,6 +1168,7 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.cibergrafia}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAsignaturaObject({ ...asignaturaObject, cibergrafia: event.target.value });
                       }}
@@ -1137,14 +1176,16 @@ function Asignaturas(props: any) {
                   </GridItem>
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveAsignatura(); }} >
-                  {'Guardar'}
-                </Button>
-
-              </div>
-
+              {
+                isEdit ? (
+                  <div className={classes.containerFooterModal} >
+                    <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                      onClick={() => { handleSaveAsignatura(); }} >
+                      {'Guardar'}
+                    </Button>
+                  </div>
+                ) : null
+              }
             </Card>
           </GridItem>
         </div>

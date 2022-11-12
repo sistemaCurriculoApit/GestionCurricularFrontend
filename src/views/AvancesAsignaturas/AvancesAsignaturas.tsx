@@ -52,7 +52,7 @@ import { getAreasByListIds } from '../../services/areasServices';
 import { getAsignaturaByListIds } from '../../services/asignaturasServices';
 import { getDocentesByListIds } from '../../services/docentesServices';
 import { getAllContenidoByAsignatura } from '../../services/contenidosServices';
-import { getAdvancements, createAdvancement, updateAdvancement, getAdvancementsByProfessorsEmail } from '../../services/avancesServices';
+import { getAdvancements, createAdvancement, updateAdvancement, getAdvancementsByProfessorsEmail, removeAdvancement } from '../../services/avancesServices';
 import { Advancement } from '../../models';
 import { advancementAdapter } from '../../util/advancementAdapter';
 
@@ -82,6 +82,7 @@ function AvancesAsignaturas(props: any) {
   const [searchField, setSearchField] = useState('');
   const [openMoreFilters, setOpenMoreFilters] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [openModalDelete, setOpenModalDelete] = useState(false);
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
@@ -100,7 +101,8 @@ function AvancesAsignaturas(props: any) {
   const [contenidoChecked, setContenidoChecked] = useState<any[]>([]);
   const [blockByEditAvance, setBlockByEditAvance] = useState<boolean>(false);
   const [blockCoordinatorPermissions, setBlockCoordinatorPermissions] = useState<boolean>(false);
-  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [blockAdminPermissions, setBlockAdministradorPermissions] = useState<boolean>();
+  const [isEdit, setIsEdit] = useState<boolean>(true);
   const [blockDocentePermissions, setBlockDocentePermissions] = useState<boolean>();
   const [isFirstLoading, setIsFirstLoading] = useState<boolean>(true);
   const [idProfile, setIdProfile] = useState<any>();
@@ -110,6 +112,7 @@ function AvancesAsignaturas(props: any) {
   const [pagePagination, setPagePagination] = useState(1);
   const [concertacionChecked, setConcertacionChecked] = useState<any[]>([]);
   const [avanceObject, setAvanceObject] = useState<AnythingObject>({
+    _id: '',
     programaId: '',
     planId: '',
     asignaturaId: '',
@@ -142,7 +145,16 @@ function AvancesAsignaturas(props: any) {
         setBlockCoordinatorPermissions(false);
         return false;
       }
-    
+  };
+
+  const blockAdminPermission = () => {
+    if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.admin.id.toString()) {
+      setBlockAdministradorPermissions(true);
+      return true;
+    } else {
+      setBlockAdministradorPermissions(false);
+      return false;
+    }
   };
 
   const getProgramas = async (isEdit?: boolean, avanceToEdit?: any) => {
@@ -179,6 +191,19 @@ function AvancesAsignaturas(props: any) {
         'Eliminar'
       ]
     } else {
+        table = [
+          'Año del avance',
+          'Periodo',
+          'Porcentaje de avance',
+          'Descripción',
+          'Fecha de creación',
+          'Fecha ultima actualización',
+          '',
+          'Acciones',
+          ''
+        ]
+    }
+    if(blockAdminPermissions){
       table = [
         'Año del avance',
         'Periodo',
@@ -186,7 +211,7 @@ function AvancesAsignaturas(props: any) {
         'Descripción',
         'Fecha de creación',
         'Fecha ultima actualización',
-        '',
+        'Ver detalles',
         'Acciones',
         ''
       ]
@@ -231,6 +256,18 @@ function AvancesAsignaturas(props: any) {
     } catch (error) {
       setOpenModalLoading(false);
     }
+  };
+
+  const setDataDeleteAvances = (data: any) => {
+    setOpenModalDelete(true);
+    setAvanceObject({
+      _id: data._id,
+      actividad: data.actividad,
+      lugar: data.lugar,
+      tema: data.tema,
+      conclusion: data.conclusion,
+      fechaActa: moment(data.fechaActa),
+    });
   };
 
   const getAvances = async (page?: any, byEmailDocente?: boolean, emailDocente?: any) => {
@@ -309,7 +346,7 @@ function AvancesAsignaturas(props: any) {
           </Tooltip>
         ),
         (    
-          blockCoordinatorPermission() ?  null :  
+          blockCoordinatorPermission() || blockAdminPermission() ?  null :  
           <Tooltip 
             id="filterTooltip" 
             title="Eliminar avance" 
@@ -324,6 +361,7 @@ function AvancesAsignaturas(props: any) {
                 variant="outlined" 
                 justIcon={true} 
                 startIcon={<Delete />}
+                onClick={() => setDataDeleteAvances(data)}
               />
             </div>
           </Tooltip>  
@@ -552,6 +590,7 @@ function AvancesAsignaturas(props: any) {
   const handleSaveAvance = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
+    debugger
     if (isValid) {
       if (avanceObject._id) {
         handleEditAvance();
@@ -567,6 +606,38 @@ function AvancesAsignaturas(props: any) {
         setShowAlert(false);
       }, 1000);
       setOpenModalLoading(false);
+    }
+  };
+
+  const handleDeleteAvance = async () => {
+    setOpenModalLoading(true);
+    const response: any = await removeAdvancement(avanceObject._id);
+    if (!response) {
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert('Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Avance de asignatura eliminado satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      const idProf = localStorage.getItem('idProfileLoggedUser');
+      const emailDocente = localStorage.getItem('userEmail');
+      if (idProf === userProfilesObject.doc.id.toString()) {
+        setAvancesList([]);
+        getAvances(0, true, emailDocente);
+        setBlockDocentePermissions(true);
+        setIsFirstLoading(true);
+      } else {
+        getAvances(0, false, null);
+      }
+      setOpenModalDelete(false);
     }
   };
 
@@ -586,6 +657,12 @@ function AvancesAsignaturas(props: any) {
       setBlockCoordinatorPermissions(false);
     }
 
+    // Bloquear permisos de Admin para eliminar programa
+    if (idProf === userProfilesObject.admin.id.toString()) {
+      setBlockAdministradorPermissions(true);
+    } else {
+      setBlockAdministradorPermissions(false);
+    }
 
     if (idProf === userProfilesObject.doc.id.toString()) {
       setAvancesList([]);
@@ -751,6 +828,7 @@ function AvancesAsignaturas(props: any) {
         setConcertacionChecked(newChecked);
         break
       }
+      default:{}
     }
 
   };
@@ -931,7 +1009,7 @@ function AvancesAsignaturas(props: any) {
                         porcentajeAvance: null,
                         descripcion: '',
                       }
-                    );
+                    );setIsEdit(true)
                   }}
                 />
               </div>
@@ -1327,6 +1405,54 @@ function AvancesAsignaturas(props: any) {
 
                 </div>
               }
+            </Card>
+          </GridItem>
+        </div>
+      </Modal>
+      <Modal
+        open={openModalDelete}
+        className={classes.modalForm}
+        // onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div className={classes.centerContent}>
+          <GridItem xs={6} sm={4} md={4} >
+            <Card className={classes.container}>
+            <CardHeader color="success">
+                <div className={classes.TitleFilterContainer}>
+                  <h4 className={classes.cardTitleWhite}>Eliminar avance de asignatura</h4>
+                  <div className={classes.headerActions}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
+                      <div className={classes.buttonHeaderContainer}>
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModalDelete(false); }} />
+                      </div>
+                    </Tooltip>
+                  </div>
+                </div>
+              </CardHeader >
+              <h4>¿Está seguro de que desea eliminar el siguiente avance?</h4>
+              <div>
+                <Button
+                  key={'filtersButton'}
+                  color={'primary'}
+                  round={true}
+                  variant="outlined"
+                  onClick={() => handleDeleteAvance()} >
+                  {'Si'}
+                </Button>
+              </div>
+              <div>
+                <Button
+                  key={'filtersButton'}
+                  color={'primary'}
+                  round={true}
+                  variant="outlined"
+                  onClick={() => setOpenModalDelete(false)} >
+                  {'No'}
+                </Button>
+              </div>
             </Card>
           </GridItem>
         </div>

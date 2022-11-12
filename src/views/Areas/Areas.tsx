@@ -12,6 +12,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import moment from 'moment';
 import 'moment/locale/es';
@@ -63,7 +64,7 @@ function Areas(props: any) {
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
-
+  const [isEdit, setIsEdit] = useState<boolean>();
   const [areasList, setAreasList] = useState([]);
   const [asignaturasList, setAsignaturasList] = useState([]);
   const [totalAreas, setTotalAreas] = useState(0);
@@ -134,10 +135,22 @@ function Areas(props: any) {
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           (
+            <Tooltip id="filterTooltip" title="Ver áreas" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditArea(data);
+                }} />
+            </div>
+          </Tooltip>
+          ),
+          (
             <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
               <div className={classes.buttonHeaderContainer}>
                 <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
                   onClick={() => {
+                    setIsEdit(true);
                     setDataEditArea(data);
                   }} />
               </div>
@@ -362,6 +375,7 @@ function Areas(props: any) {
                       'Descripcion',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver áreas',
                       'Acciones'
                     ]}
                     tableData={areasList}
@@ -390,6 +404,7 @@ function Areas(props: any) {
                     asignatura: [],
                   }
                 );
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -409,7 +424,12 @@ function Areas(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{areaObject._id ? 'Editar' : 'Crear'} área</h4>
+                  {
+                    isEdit ?
+                    <h4 className={classes.cardTitleWhite}>{areaObject._id ? 'Editar' : 'Crear'} área</h4>
+                    :
+                    <h4 className={classes.cardTitleWhite}>Detalles del área</h4>
+                  }
                   <div className={classes.headerActions}>
                     <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -430,6 +450,7 @@ function Areas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!areaObject.codigo ? true : false}
+                      disabled={!isEdit}
                       value={areaObject.codigo}
                       onChange={(event) => {
                         setAreaObject({ ...areaObject, codigo: event.target.value });
@@ -446,6 +467,7 @@ function Areas(props: any) {
                       className={classes.CustomTextField}
                       error={!areaObject.nombre ? true : false}
                       value={areaObject.nombre}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAreaObject({ ...areaObject, nombre: event.target.value });
                       }}
@@ -462,6 +484,7 @@ function Areas(props: any) {
                       maxRows={10}
                       multiline={true}
                       value={areaObject.descripcion}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setAreaObject({ ...areaObject, descripcion: event.target.value });
                       }}
@@ -477,6 +500,7 @@ function Areas(props: any) {
                       getOptionLabel={(option) => `${option.codigo} - ${option.nombre}`}
                       filterSelectedOptions={true}
                       value={areaObject.asignatura}
+                      disabled={!isEdit}
                       onChange={(event, value) => {
                         setAreaObject({ ...areaObject, asignatura: value });
                       }}
@@ -495,14 +519,15 @@ function Areas(props: any) {
                   </GridItem>
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveAarea(); }} >
-                  {'Guardar'}
-                </Button>
-
-              </div>
-
+              { isEdit ? (
+                <div className={classes.containerFooterModal} >
+                  <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSaveAarea(); }} >
+                    {'Guardar'}
+                  </Button>
+                </div>
+                ) : null
+              }
             </Card>
           </GridItem>
         </div>

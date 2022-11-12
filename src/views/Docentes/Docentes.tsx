@@ -11,6 +11,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import moment from 'moment';
 import 'moment/locale/es';
@@ -62,6 +63,7 @@ function Docentes(props: any) {
   const [openModal, setOpenModal] = useState(false);
   const [searchField, setSearchField] = useState('');
   const [openModalLoading, setOpenModalLoading] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>(true);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>();
   const [dateCreationTo, setDateCreationTo] = useState<any>();
   const [docentesList, setDocentesList] = useState([]);
@@ -124,10 +126,20 @@ function Docentes(props: any) {
           data.documento,
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          <Tooltip id="filterTooltip" title="Ver docentes" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditDocente(data);
+                }} />
+            </div>
+          </Tooltip>,
           <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
             <div className={classes.buttonHeaderContainer}>
               <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
                 onClick={() => {
+                  setIsEdit(true);
                   setDataEditDocente(data);
 
                 }} />
@@ -378,6 +390,7 @@ function Docentes(props: any) {
                       'Numero de documento',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver docentes',
                       'Acciones'
                     ]}
                     tableData={docentesList}
@@ -405,6 +418,7 @@ function Docentes(props: any) {
                   email: '',
                   document: ''
                 });
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -424,7 +438,12 @@ function Docentes(props: any) {
               <Card className={classes.container}>
                 <CardHeader color="success">
                   <div className={classes.TitleFilterContainer}>
-                    <h4 className={classes.cardTitleWhite}>{docenteObject._id ? 'Editar' : 'Crear'} docente</h4>
+                    {
+                      isEdit ?
+                        <h4 className={classes.cardTitleWhite}>{docenteObject._id ? 'Editar' : 'Crear'} docente</h4>
+                        :
+                        <h4 className={classes.cardTitleWhite}>Detalles del docente</h4>
+                    }
                     <div className={classes.headerActions}>
                       <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                         <div className={classes.buttonHeaderContainer}>
@@ -455,6 +474,7 @@ function Docentes(props: any) {
                     className={classes.CustomTextField}
                     error={!docenteObject.name ? true : false}
                     value={docenteObject.name}
+                    disabled={!isEdit}
                     onChange={(event) => {
                       setDocenteObject({ ...docenteObject, name: event.target.value });
                     }}
@@ -468,6 +488,7 @@ function Docentes(props: any) {
                     error={errorEmail.error}
                     helperText={errorEmail.mensaje}
                     value={docenteObject.email}
+                    disabled={!isEdit}
                     onChange={(event) => {
                       if (!event.target.value.match(emailDomainRegexValidation)) {
                         setErrorEmail({ error: true, mensaje: 'El formato del correo no es válido' });
@@ -485,6 +506,7 @@ function Docentes(props: any) {
                     margin="dense"
                     className={classes.CustomTextField}
                     value={docenteObject.document}
+                    disabled={!isEdit}
                     onChange={(event) => {
                       setDocenteObject({ ...docenteObject, document: event.target.value });
                     }}
@@ -524,14 +546,16 @@ function Docentes(props: any) {
                 <GridItem xs={12} sm={12} md={12} >
                   <br />
                 </GridItem>
-                <div className={classes.containerFooterModal} >
-                  <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
-                    onClick={() => { handleSaveDocente(); }} >
-                    {'Guardar'}
-                  </Button>
-
-                </div>
-
+               {
+                isEdit ? (
+                  <div className={classes.containerFooterModal} >
+                    <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                      onClick={() => { handleSaveDocente(); }} >
+                      {'Guardar'}
+                    </Button>
+                  </div>
+                ) : null
+               }
               </Card>
             </GridItem>
           </GridContainer>

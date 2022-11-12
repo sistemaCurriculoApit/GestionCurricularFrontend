@@ -17,6 +17,7 @@ import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import Delete from '@material-ui/icons/Delete';
 import moment from 'moment';
 import 'moment/locale/es';
 
@@ -46,7 +47,7 @@ import { getPlanesByListIds } from '../../services/planesServices';
 import { getAllAsignaturasByPlan } from '../../services/asignaturasServices';
 import { getAllContenidoByAsignatura } from '../../services/contenidosServices';
 import { getAllEquivalenciaByAsignatura } from '../../services/equivalenciasServices';
-import { getHomologations, createHomologation, updateHomologations, HomologationsResponse } from '../../services/homologacionesServices';
+import { getHomologations, createHomologation, updateHomologations, HomologationsResponse, removeHomologations } from '../../services/homologacionesServices';
 import { getAllEstudiantes } from '../../services/estudiantesServices';
 import { userProfilesObject } from '../../constants/generalConstants';
 import { Homologation } from '../../models';
@@ -78,6 +79,7 @@ function Homologaciones(props: any) {
   const [searchField, setSearchField] = useState('');
   const [openMoreFilters, setOpenMoreFilters] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [openModalDelete, setOpenModalDelete] = useState(false);
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
@@ -93,13 +95,17 @@ function Homologaciones(props: any) {
   const [contenidosList, setContenidosList] = useState([]);
   const [equivalenciasList, setEquivalenciasList] = useState([]);
   const [estudiantesList, setEstudiantesList] = useState([]);
-  const [blockEstudienteSelected, setBlockEstudianteSelected] = useState<boolean>();
+  const [blockEstudienteSelected, setBlockEstudianteSelected] = useState<boolean>(false);
+  const [blockAdminPermissions, setBlockAdministradorPermissions] = useState<boolean>();
+  const [blockCoordPermissions, setBlockCoordPermissions] = useState<boolean>();
+  const [edit, setEdit] = useState<boolean>(true);
   const [isBlockEditByPermissions, setIsBlockEditByPermissions] = useState<boolean>();
   const [homologacionList, setHomologacionesList] = useState([]);
   const [totalHomologaciones, setTotalHomologaciones] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
   const [firstLoading, setFirstLoading] = useState<boolean>(true);
   const [homologacionObject, setHomologacionObject] = useState<AnythingObject>({
+    _id: '',
     programaId: '',
     planId: '',
     asignaturaId: '',
@@ -133,6 +139,7 @@ function Homologaciones(props: any) {
 
   const cleanAndCloseModal = () => {
     setHomologacionObject({
+      _id: '',
       programaId: '',
       planId: '',
       asignaturaId: '',
@@ -195,6 +202,8 @@ function Homologaciones(props: any) {
     return estudiantes.estudiantes;
   };
 
+  
+
   const getProgramas = async (isEdit?: boolean, homologacionToEdit?: any) => {
     let response: any = await getAllProgramas({
       search: '',
@@ -213,6 +222,68 @@ function Homologaciones(props: any) {
     }
   };
 
+  const blockAdminPermission = () => {
+    if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.admin.id.toString()) {
+      setBlockAdministradorPermissions(true);
+      return true;
+    } else {
+      setBlockAdministradorPermissions(false);
+      return false;
+    }
+  };
+
+  const blockCoorAreaPermission = () => {
+    if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.coorArea.id.toString()) {
+      setBlockCoordPermissions(true);
+      return true;
+    } else {
+      setBlockCoordPermissions(false);
+      return false;
+    }
+  };
+
+  const viewTable = () => {
+    let table;
+    if(!isBlockEditByPermissions){
+      table =[
+        'Identificacion del solicitante',
+        'Nombre del solicitante',
+        'Asignatura del solicitante',
+        'Descripcion',
+        'Fecha de creación',
+        'Fecha ultima actualización',
+        'Ver detalles',
+        'Acciones',
+        'Eliminar'
+      ]
+    } else {
+      table = [
+        'Identificacion del solicitante',
+        'Nombre del solicitante',
+        'Asignatura del solicitante',
+        'Descripcion',
+        'Fecha de creación',
+        'Fecha ultima actualización',
+        '',
+        'Acciones',
+        ''
+      ]
+    }
+    if(blockAdminPermissions || blockCoordPermissions){
+      table =[
+        'Identificacion del solicitante',
+        'Nombre del solicitante',
+        'Asignatura del solicitante',
+        'Descripcion',
+        'Fecha de creación',
+        'Fecha ultima actualización',
+        'Ver detalles',
+        'Acciones',
+        ''
+      ]
+    }
+    return table;
+  }
   const handleOpenModal = (isEdit?: boolean, homologacionToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -254,10 +325,22 @@ function Homologaciones(props: any) {
 
   const setDataEditHomologacion = (data: any) => {
     try {
-      handleOpenModal(true, data);
+      handleOpenModal(edit, data);
     } catch (error) {
       setOpenModalLoading(false);
     }
+  };
+
+  const setDataDeleteHomologacion = (data: any) => {
+    setOpenModalDelete(true);
+    setHomologacionObject({
+      _id: data._id,
+      actividad: data.actividad,
+      lugar: data.lugar,
+      tema: data.tema,
+      conclusion: data.conclusion,
+      fechaActa: moment(data.fechaActa),
+    });
   };
 
   const getHomologaciones = async (page?: any) => {
@@ -292,6 +375,28 @@ function Homologaciones(props: any) {
         data.descripcion,
         moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
         moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+        (    
+          blockStudentPermission() ?  null :  
+          <Tooltip 
+            id="filterTooltip" 
+            title="Ver Detalle de Homologacion" 
+            placement="top" classes={{ tooltip: classes.tooltip }}
+          >
+            <div className={classes.buttonHeaderContainer}>
+              <Button 
+                key={'filtersButton'} 
+                color={'primary'} 
+                size="sm" 
+                round={true} 
+                variant="outlined" 
+                justIcon={true} 
+                startIcon={<VisibilityIcon />}
+                onClick={() => {setEdit(false);
+                  setDataEditHomologacion(data)}}
+              />
+            </div>
+          </Tooltip>  
+        ),
         (
           <Tooltip
             id="filterTooltip"
@@ -307,9 +412,31 @@ function Homologaciones(props: any) {
                 variant="outlined"
                 justIcon={true}
                 startIcon={!blockStudentPermission() ? <EditIcon /> : <VisibilityIcon />}
-                onClick={() => setDataEditHomologacion(data)} />
+                onClick={() => {blockStudentPermission() ? setEdit(false) : setEdit(true);
+                  setDataEditHomologacion(data)}} />
             </div>
           </Tooltip>
+        ),
+        (    
+          blockStudentPermission() || blockAdminPermission() || blockCoorAreaPermission() ?  null :  
+          <Tooltip 
+            id="filterTooltip" 
+            title="Eliminar homologación" 
+            placement="top" classes={{ tooltip: classes.tooltip }}
+          >
+            <div className={classes.buttonHeaderContainer}>
+              <Button 
+                key={'filtersButton'} 
+                color={'primary'} 
+                size="sm" 
+                round={true} 
+                variant="outlined" 
+                justIcon={true} 
+                startIcon={<Delete />}
+                onClick={() => setDataDeleteHomologacion(data)}
+              />
+            </div>
+          </Tooltip>  
         )
       ]);
       setTotalHomologaciones(response.homologationsCount);
@@ -501,6 +628,30 @@ function Homologaciones(props: any) {
     }
   };
 
+  const handleDeleteHomologacion = async () => {
+    setOpenModalLoading(true);
+    const response: any = await removeHomologations(homologacionObject._id);
+    if (!response) {
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert('Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Homologación eliminada satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      cleanAndCloseModal();
+      setOpenModalDelete(false);
+      getHomologaciones();
+    }
+  };
+
   useEffect(() => {
     blockStudentPermission();
     setOpenModalLoading(true);
@@ -522,6 +673,27 @@ function Homologaciones(props: any) {
           descripcion: ''
         }
       );
+
+      // Bloquear permisos de estudiante programa
+      if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.est.id.toString()) {
+        setBlockEstudianteSelected(true);
+      } else {
+        setBlockEstudianteSelected(false);
+      }
+    
+      // Bloquear permisos de admin programa
+      if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.admin.id.toString()) {
+        setBlockAdministradorPermissions(true);
+      } else {
+        setBlockAdministradorPermissions(false);
+      }
+
+      // Bloquear permisos de coordinador de area programa
+      if (localStorage.getItem('idProfileLoggedUser') === userProfilesObject.coorArea.id.toString()) {
+        setBlockCoordPermissions(true);
+      } else {
+        setBlockCoordPermissions(false);
+      }
     }
   }, []);
 
@@ -732,15 +904,7 @@ function Homologaciones(props: any) {
                   :
                   <Table
                     tableHeaderColor="success"
-                    tableHead={[
-                      'Identificacion del solicitante',
-                      'Nombre del solicitante',
-                      'Asignatura del solicitante',
-                      'Descripcion',
-                      'Fecha de creación',
-                      'Fecha ultima actualización',
-                      'Acciones'
-                    ]}
+                    tableHead={viewTable()}
                     tableData={homologacionList}
                   />
               }
@@ -774,7 +938,7 @@ function Homologaciones(props: any) {
                     periodo: '1',
                     estadoHomologacion: {},
                     descripcion: ''
-                  });
+                  });setEdit(true)
                 }} />
             </div>
           </Tooltip>
@@ -795,7 +959,7 @@ function Homologaciones(props: any) {
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
                   {
-                    isBlockEditByPermissions ?
+                    isBlockEditByPermissions || !edit ?
                       <h4 className={classes.cardTitleWhite}>Ver detalles de homologación</h4>
                       :
                       <h4 className={classes.cardTitleWhite}>{homologacionObject._id ? 'Editar' : 'Crear'} homologación</h4>
@@ -826,7 +990,7 @@ function Homologaciones(props: any) {
                       filterSelectedOptions={true}
                       onChange={(e, option) => { setEstudianteSelected(option || {}); }}
                       value={estudianteSelected}
-                      disabled={blockEstudienteSelected || isBlockEditByPermissions}
+                      disabled={blockEstudienteSelected || isBlockEditByPermissions || !edit}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -922,7 +1086,7 @@ function Homologaciones(props: any) {
                       options={programasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions={true}
-                      disabled={isBlockEditByPermissions}
+                      disabled={isBlockEditByPermissions || !edit}
                       onChange={(e, option) => {
                         setProgramaSelected(option || {});
                         setPlanSelected({});
@@ -949,7 +1113,7 @@ function Homologaciones(props: any) {
                       options={planesList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions={true}
-                      disabled={isBlockEditByPermissions}
+                      disabled={isBlockEditByPermissions || !edit}
                       onChange={(e, option) => {
                         setPlanSelected(option || {});
                         setAsignaturaSelected({});
@@ -976,7 +1140,7 @@ function Homologaciones(props: any) {
                       options={asignaturasList}
                       getOptionLabel={(option: any) => option._id ? `${option.codigo} - ${option.nombre}` : ''}
                       filterSelectedOptions={true}
-                      disabled={isBlockEditByPermissions}
+                      disabled={isBlockEditByPermissions || !edit}
                       onChange={(e, option) => setAsignaturaSelected(option || {})}
                       value={asignaturaSelected}
                       renderInput={(params) => (
@@ -1047,7 +1211,7 @@ function Homologaciones(props: any) {
                       label="Asignatura origen de solicitud"
                       variant="outlined"
                       margin="dense"
-                      disabled={isBlockEditByPermissions}
+                      disabled={isBlockEditByPermissions || !edit}
                       className={classes.CustomTextField}
                       error={!homologacionObject.asignaturaSolicitante ? true : false}
                       value={homologacionObject.asignaturaSolicitante}
@@ -1066,7 +1230,7 @@ function Homologaciones(props: any) {
                           margin="dense"
                           className={classes.CustomTextField}
                           format="MMM DD, YYYY"
-                          disabled={isBlockEditByPermissions}
+                          disabled={isBlockEditByPermissions || !edit}
                           value={homologacionObject.añoHomologacion}
                           onChange={(newValue: any) => {
                             setHomologacionObject({ ...homologacionObject, añoHomologacion: newValue });
@@ -1113,7 +1277,7 @@ function Homologaciones(props: any) {
                       options={['1', '2']}
                       getOptionLabel={(option) => option}
                       filterSelectedOptions={true}
-                      disabled={isBlockEditByPermissions}
+                      disabled={isBlockEditByPermissions || !edit}
                       onChange={(e, option) => setHomologacionObject({ ...homologacionObject, periodo: option })}
                       value={homologacionObject.periodo}
                       renderInput={(params) => (
@@ -1136,7 +1300,7 @@ function Homologaciones(props: any) {
                       options={estadosHomologacion}
                       getOptionLabel={(option) => option.title}
                       filterSelectedOptions={true}
-                      disabled={isBlockEditByPermissions}
+                      disabled={isBlockEditByPermissions || !edit}
                       onChange={(e, option) => setEstadoHomologacionSelected(option || {})}
                       value={estadoHomologacionSelected}
                       renderInput={(params) => (
@@ -1163,7 +1327,7 @@ function Homologaciones(props: any) {
                       minRows={4}
                       maxRows={10}
                       multiline={true}
-                      disabled={isBlockEditByPermissions}
+                      disabled={isBlockEditByPermissions || !edit}
                       value={homologacionObject.descripcion}
                       onChange={(event) => {
                         setHomologacionObject({ ...homologacionObject, descripcion: event.target.value });
@@ -1174,15 +1338,62 @@ function Homologaciones(props: any) {
                 </GridContainer>
               </div>
 
-              {!isBlockEditByPermissions ?
-                <div className={classes.containerFooterModal} >
+              {!isBlockEditByPermissions || edit ?
+                 <div className={classes.containerFooterModal} >
                   <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                     onClick={() => { handleSaveHomologacion(); }} >
                     {'Guardar'}
                   </Button>
                 </div>
                 : null}
-
+            </Card>
+          </GridItem>
+        </div>
+      </Modal>
+      <Modal
+        open={openModalDelete}
+        className={classes.modalForm}
+        // onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <div className={classes.centerContent}>
+          <GridItem xs={6} sm={4} md={4} >
+            <Card className={classes.container}>
+            <CardHeader color="success">
+                <div className={classes.TitleFilterContainer}>
+                  <h4 className={classes.cardTitleWhite}>Eliminar homologación</h4>
+                  <div className={classes.headerActions}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
+                      <div className={classes.buttonHeaderContainer}>
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModalDelete(false); }} />
+                      </div>
+                    </Tooltip>
+                  </div>
+                </div>
+              </CardHeader >
+              <h4>¿Está seguro de que desea eliminar la siguiente homologación?</h4>
+              <div>
+                <Button
+                  key={'filtersButton'}
+                  color={'primary'}
+                  round={true}
+                  variant="outlined"
+                  onClick={() => handleDeleteHomologacion()} >
+                  {'Si'}
+                </Button>
+              </div>
+              <div>
+                <Button
+                  key={'filtersButton'}
+                  color={'primary'}
+                  round={true}
+                  variant="outlined"
+                  onClick={() => setOpenModalDelete(false)} >
+                  {'No'}
+                </Button>
+              </div>
             </Card>
           </GridItem>
         </div>

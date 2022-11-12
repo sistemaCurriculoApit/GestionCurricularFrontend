@@ -91,3 +91,16 @@ export const updateHomologations = async (homologationId: string, homologation: 
     return null;
   }
 };
+
+export const removeHomologations = async (homologationId: string): Promise<null | void> => {
+  try {
+    const headers = getHeaders();
+    const url = `${backendBaseUrl}/api/homologations/${homologationId}`;
+    const response = await fetch(url, { headers, method: 'DELETE'});
+    return await response.json();
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
+

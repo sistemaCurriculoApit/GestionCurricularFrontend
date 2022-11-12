@@ -13,6 +13,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import ClearIcon from '@material-ui/icons/Clear';
 import CheckIcon from '@material-ui/icons/Check';
@@ -68,6 +69,7 @@ function Usuarios(props: any) {
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [updatePassword, setUpdatePassword] = useState(false);
   const [openMoreFilters, setOpenMoreFilters] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>(true);
   const [searchField, setSearchField] = useState('');
   const [dateCreationFrom, setDateCreationFrom] = useState<any>();
   const [dateCreationTo, setDateCreationTo] = useState<any>();
@@ -169,6 +171,17 @@ function Usuarios(props: any) {
           moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
           moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
           (
+            <Tooltip id="filterTooltip" title="Ver usuarios" placement="top" classes={{ tooltip: classes.tooltip }}>
+              <div className={classes.buttonHeaderContainer}>
+                <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                  onClick={() => {
+                    setIsEdit(false);
+                    setDataEditUser(data);
+                  }} />
+              </div>
+            </Tooltip>
+          ),
+          (
             <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
               <div className={classes.buttonHeaderContainer}>
                 <Button
@@ -179,7 +192,10 @@ function Usuarios(props: any) {
                   justIcon={true}
                   variant="outlined"
                   startIcon={<EditIcon />}
-                  onClick={() => setDataEditUser(data)} />
+                  onClick={() => {
+                    setIsEdit(true);
+                    setDataEditUser(data);
+                  }} />
               </div>
             </Tooltip>
           )
@@ -512,6 +528,7 @@ function Usuarios(props: any) {
                       'Identificación',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver usuarios',
                       'Acciones'
                     ]}
                     tableData={userList}
@@ -540,6 +557,7 @@ function Usuarios(props: any) {
                   password: '',
                   passwordConfirm: '',
                 });
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -558,7 +576,12 @@ function Usuarios(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{userObject._id ? 'Editar' : 'Crear'} usuario</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{userObject._id ? 'Editar' : 'Crear'} usuario</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles del usuario</h4>
+                  }
                   <div className={classes.headerActions}>
                     <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
@@ -583,6 +606,7 @@ function Usuarios(props: any) {
                       value={userObject.name}
                       defaultValue={''}
                       error={!userObject.name ? true : false}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         setUserObject({ ...userObject, name: event.target.value });
                       }}
@@ -598,6 +622,7 @@ function Usuarios(props: any) {
                       className={classes.CustomTextField}
                       error={!userObject.identificacion ? true : false}
                       value={userObject.identificacion}
+                      disabled={!isEdit}
                       onChange={(event) => setUserObject({ ...userObject, identificacion: event.target.value })}
                     />
                   </GridItem>
@@ -614,6 +639,7 @@ function Usuarios(props: any) {
                       helperText={errorEmail.mensaje}
                       className={classes.CustomTextField}
                       value={userObject.email}
+                      disabled={!isEdit}
                       onChange={(event) => {
                         if (!event.target.value.match(emailDomainRegexValidation)) {
                           setErrorEmail({ error: true, mensaje: 'El formato del correo no es válido' });
@@ -633,6 +659,7 @@ function Usuarios(props: any) {
                       filterSelectedOptions={true}
                       onChange={(e, option) => { setUserRoleData(option || {}); }}
                       value={userObject.role}
+                      disabled={!isEdit}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -651,6 +678,7 @@ function Usuarios(props: any) {
                       <GridItem xs={12} sm={12} md={6} >
                         <Checkbox
                           checked={updatePassword}
+                          disabled={!isEdit}
                           onClick={() => { setUpdatePassword(!updatePassword); }}
                           checkedIcon={<CheckIcon className={classes.checkedIcon} />}
                           icon={<CheckIcon className={classes.uncheckedIcon} />}
@@ -782,14 +810,16 @@ function Usuarios(props: any) {
 
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveUser(); }}>
-                  {'Guardar'}
-                </Button>
-
-              </div>
-
+              {
+                isEdit ? (
+                  <div className={classes.containerFooterModal} >
+                    <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSaveUser(); }}>
+                      {'Guardar'}
+                    </Button>
+                  </div>
+                ) : null
+              }
             </Card>
           </GridItem>
         </div>
