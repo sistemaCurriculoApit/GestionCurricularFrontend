@@ -1338,7 +1338,7 @@ function Homologaciones(props: any) {
                 </GridContainer>
               </div>
 
-              {!isBlockEditByPermissions || edit ?
+              {edit ?
                  <div className={classes.containerFooterModal} >
                   <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                     onClick={() => { handleSaveHomologacion(); }} >
