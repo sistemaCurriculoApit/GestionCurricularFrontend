@@ -430,7 +430,7 @@ function AvancesAsignaturas(props: any) {
     if (response && response.asignaturas) {
       setAsignaturasList(response.asignaturas);
       if (isEdit && avanceToEdit.asignaturaId) {
-        let findAsignatura = response.asignaturas.find((plan: any) => plan._id === avanceToEdit.asignaturaId);
+        let findAsignatura = response.asignaturas.find((plan: any) => plan._id === avanceToEdit.asignaturaId._id);
         if (findAsignatura) {
           setAsignaturaSelected({ ...findAsignatura });
         }
@@ -453,7 +453,7 @@ function AvancesAsignaturas(props: any) {
     if (response && response.docentes) {
       setDocentesList(response.docentes);
       if (isEdit && avanceToEdit.docenteId) {
-        let findDocente = response.docentes.find((docente: any) => docente._id === avanceToEdit.docenteId);
+        let findDocente = response.docentes.find((docente: any) => docente._id === avanceToEdit.docenteId._id);
         if (findDocente) {
           setDocenteSelected({ ...findDocente });
         }
@@ -1281,7 +1281,7 @@ function AvancesAsignaturas(props: any) {
                                   <ListItemSecondaryAction>
                                     <Checkbox
                                       edge="end"
-                                      disabled={blockCoordinatorPermissions}
+                                      disabled={blockCoordinatorPermissions || !isEdit}
                                       onChange={handleToggleCheck(concertacion, "concertacion")}
                                       checked={concertacionChecked.findIndex((check: any) => (check.nombre === concertacion.nombre)) !== -1 || concertacion.visto}
                                       inputProps={{ 'aria-labelledby': labelId }}
