@@ -59,7 +59,6 @@ const styles = createStyles({
 function Actas(props: any) {
   const { classes } = props;
   const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
-  debugger
   const [showAlert, setShowAlert] = useState(false);
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
@@ -314,7 +313,6 @@ function Actas(props: any) {
   const handleDeleteActa = async () => {
     setOpenModalLoading(true);
     const response: any = await removeActa(actaObject._id);
-    debugger
     if (response && response.error) {
       setSeverityAlert('error');
       setShowAlert(true);

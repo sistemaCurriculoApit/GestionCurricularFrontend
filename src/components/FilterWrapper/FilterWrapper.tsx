@@ -1,7 +1,7 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
 import { fromEvent, Subscription } from 'rxjs';
 
-const isLarge = (): boolean => window.matchMedia('(min-width: 1281px)').matches;
+const isLarge = (): boolean => window.matchMedia('(min-width: 1440px)').matches;
 
 export const FilterWrapper: React.FC<PropsWithChildren<any>> = ({ children }) => {
   const [isLargeScreen, setIsLargeScreen] = useState<boolean>(isLarge());

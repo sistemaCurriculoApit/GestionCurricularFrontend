@@ -220,7 +220,6 @@ function AvancesAsignaturas(props: any) {
   };
   
   const handleOpenModal = (isEdit?: boolean, avanceToEdit?: any) => {
-    debugger
     try {
       setOpenModal(true);
       setOpenModalLoading(true);
@@ -340,7 +339,6 @@ function AvancesAsignaturas(props: any) {
                 startIcon={!blockCoordinatorPermission() ? <EditIcon /> : <VisibilityIcon />}
                 onClick={() => {setIsEdit(true);
                   setDataEditAvance(data)}}
-                debugger
               />
             </div>
           </Tooltip>
@@ -589,9 +587,7 @@ function AvancesAsignaturas(props: any) {
 
   const handleSaveAvance = () => {
     setOpenModalLoading(true);
-    let isValid = validateFields();
-    debugger
-    if (isValid) {
+    if (validateFields()) {
       if (avanceObject._id) {
         handleEditAvance();
       } else {
