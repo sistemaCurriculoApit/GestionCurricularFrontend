@@ -3,10 +3,7 @@ import ChartistGraph from 'react-chartist';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Chip from '@material-ui/core/Chip';
 
-import AccountCircle from '@material-ui/icons/AccountCircle';
-import DescriptionIcon from '@material-ui/icons/Description';
-import AssignmentIndIcon from '@material-ui/icons/AssignmentInd';
-
+import { AccountCircle, Description as DescriptionIcon, AssignmentInd as AssignmentIndIcon } from '@material-ui/icons';
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
 import Card from '../../components/Card/Card';
@@ -26,7 +23,6 @@ import { userProfilesObject } from '../../constants/generalConstants';
 
 import { getDashboardData, getDashboardHomologacionesChart, getDashboardAvancesChart } from '../../services/dashboardServices';
 
-// Constante de los meses del año para ser mostrados en las graficas
 const MonthsArray = [
   'Enero',
   'Febrero',
@@ -43,7 +39,6 @@ const MonthsArray = [
 ];
 
 function Dashboard(props: any) {
-
   const { classes } = props;
 
   const [openModalLoading, setOpenModalLoading] = useState(false);
@@ -56,9 +51,11 @@ function Dashboard(props: any) {
   const idProfile = localStorage.getItem('idProfileLoggedUser');
 
   const getData = async (page?: any) => {
-    let response: any = await getDashboardData();
-    let homologacionesChartData: any = await getDashboardHomologacionesChart();
-    let avancesChartData: any = await getDashboardAvancesChart();
+    const [
+      response,
+      homologacionesChartData,
+      avancesChartData
+    ]: any[] = await Promise.all([getDashboardData(), getDashboardHomologacionesChart(), getDashboardAvancesChart()]);
 
     if (response) {
       setTotalUsers(response.totalUsers);
@@ -84,7 +81,7 @@ function Dashboard(props: any) {
       switch (parseInt(idProfile, 10)) {
         case userProfilesObject.admin.id:
           props.history.push('/admin/actas', { openModalCreate: true });
-    
+
           break;
         case userProfilesObject.coorProg.id:
           props.history.push('/coordinadorPrograma/actas', { openModalCreate: true });
@@ -239,8 +236,6 @@ function Dashboard(props: any) {
                 data={{ labels: dataBaseBarChart.data.labels, series: [homologacionesChart] }}
                 type="Bar"
                 options={{ ...dataBaseBarChart.options }}
-              // responsiveOptions={dataBaseBarChart.responsiveOptions}
-              // listener={dataBaseBarChart.animation}
               />
             </CardHeader>
             <CardBody>
@@ -272,9 +267,5 @@ function Dashboard(props: any) {
     </div>
   );
 }
-
-// Dashboard.propTypes = {
-//   classes: PropTypes.object.isRequired
-// };
 
 export default withStyles(dashboardStyle)(Dashboard);

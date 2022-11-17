@@ -24,7 +24,6 @@ export const getAdvancements = async (query: AdvancementsQuery): Promise<Advance
     const headers = getHeaders();
     const url = `${backendBaseUrl}/api/advancements?${queryString}`;
     const response = await fetch(url, { headers, method: 'GET' });
-    debugger
     return await response.json();
   } catch (e) {
     console.error(e);
@@ -132,7 +131,6 @@ export const createAdvancement = async (advancement: Advancement): Promise<any> 
 export const updateAdvancement = async (advancementId: string, advancement: Advancement & any): Promise<any> => {
   try {
     const headers = getHeaders();
-    debugger
     const url = `${backendBaseUrl}/api/advancements/${advancementId}`;
     const response = await fetch(url, { headers, method: 'PUT', body: JSON.stringify(advancement) });
     return await response.json();
