@@ -1,7 +1,5 @@
-//importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
-import MomentUtils from "@date-io/moment";
-// @material-ui/core components
+import MomentUtils from '@date-io/moment';
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
 import Modal from '@material-ui/core/Modal';
@@ -14,13 +12,14 @@ import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
-import EditIcon from '@material-ui/icons/Edit';   
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import EditIcon from '@material-ui/icons/Edit';
 import GetApp from '@material-ui/icons/GetApp';
-import moment from "moment";
-import "moment/locale/es";
+import moment from 'moment';
+import 'moment/locale/es';
 
 // core components
-import { createStyles, Divider } from '@material-ui/core';
+import { createStyles } from '@material-ui/core';
 import GridItem from '../../components/Grid/GridItem';
 import GridContainer from '../../components/Grid/GridContainer';
 import Table from '../../components/Table/Table';
@@ -30,31 +29,26 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 
-//jss
-import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
-import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
+// jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
 import {
   container,
   containerFormModal,
   containerFooterModal,
   containerCardForm,
   modalForm
-} from '../../assets/jss/material-dashboard-react'
+} from '../../assets/jss/material-dashboard-react';
 
-//formato de asignatura
+import { AnythingObject, tiposAsignatura } from '../../constants/generalConstants';
+import { getAsignaturasPaginated, createAsignatura, updateAsignatura, GetFileAsignatura, getAllAsignaturasWithPlanCode } from '../../services/asignaturasServices';
+import { getAllDocentes } from '../../services/docentesServices';
+import { getAllContenidos } from '../../services/contenidosServices';
 
-
-import { AnythingObject, tiposAsignatura} from '../../constants/generalConstants'
-import { getAsignaturasPaginated, createAsignatura, updateAsignatura, GetFileAsignatura, getAllAsignaturasWithPlanCode } from "../../services/asignaturasServices"
-import { getAllDocentes } from "../../services/docentesServices"
-import { getAllContenidos } from "../../services/contenidosServices"
-
-
-//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -68,11 +62,7 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
-
-//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Asignaturas(props: any) {
-  
-  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -82,6 +72,7 @@ function Asignaturas(props: any) {
   const [openMoreFilters, setOpenMoreFilters] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [openModalLoading, setOpenModalLoading] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>();
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
   const [tipoAsignaturaSelected, setTipoAsignaturaSelected] = useState<AnythingObject>({});
@@ -102,200 +93,71 @@ function Asignaturas(props: any) {
     intensidadHorariaTeorica: 0,
     intensidadHorariaIndependiente: 0,
     intensidadHoraria: 0,
-    prerrequisitos:'',
-    correquisitos:'',
-    presentacionAsignatura:'',
-    justificacionAsignatura:'',
-    objetivoGeneral:'',
-    objetivosEspecificos:'',
-    competencias:'',
-    mediosEducativos:'',
-    evaluacion:'',
-    bibliografia:'',
-    cibergrafia:'',
+    prerrequisitos: '',
+    correquisitos: '',
+    presentacionAsignatura: '',
+    justificacionAsignatura: '',
+    objetivoGeneral: '',
+    objetivosEspecificos: '',
+    competencias: '',
+    mediosEducativos: '',
+    evaluacion: '',
+    bibliografia: '',
+    cibergrafia: '',
     contenido: [],
     docente: [],
     equivalencia: []
   });
 
-  //Al iniciar el componente se obtienen las asignaturas
-  useEffect(() => {
+  const validateFields = () => (
+    asignaturaObject.codigo &&
+    asignaturaObject.nombre &&
+    asignaturaObject.semestre &&
+    asignaturaObject.cantidadCredito &&
+    asignaturaObject.intensidadHorariaIndependiente &&
+    asignaturaObject.cantidadCredito &&
+    asignaturaObject.presentacionAsignatura &&
+    asignaturaObject.justificacionAsignatura &&
+    asignaturaObject.objetivoGeneral &&
+    asignaturaObject.objetivosEspecificos &&
+    asignaturaObject.competencias &&
+    asignaturaObject.mediosEducativos &&
+    (
+      (tipoAsignaturaSelected.id === 0 && asignaturaObject.intensidadHorariaTeorica) ||
+      (tipoAsignaturaSelected.id === 1 && asignaturaObject.intensidadHorariaPractica) ||
+      (tipoAsignaturaSelected.id === 2 && asignaturaObject.intensidadHorariaPractica && asignaturaObject.intensidadHorariaTeorica)
+    )
+  );
+
+  const downloadCourseFormat = async (asignaturaToDownload?: any, fromObject?: boolean) => {
     setOpenModalLoading(true);
-    getAsignaturas();
-  }, [])
-
-  //Actualizacion de la lista de asingaturas si el componente de busqueda es modificado
-  useEffect(() => {
-    if (!searchField) {
-      setOpenModalLoading(true);
-      getAsignaturas();
-    }
-  }, [searchField])
-
-  
-  //Metodo de obtencion de asignaturas
-  const getAsignaturas = async (page?: any) => {
-    //Llamado al backend y construcción de los parametros de consulta
-    let response: any = await getAsignaturasPaginated({
-      page: page ? page : 0,
-      search: searchField,
-      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
-      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
-    });
-    setPagePagination(page ? page + 1 : 1);
-    if (response.asignaturas && response.asignaturas.length) {
-      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-      let asignaturas = response.asignaturas.map((data: any) => {
-        let arrayData = [
-          data.codigo,
-          data.nombre,
-          data.cantidadCredito,
-          data.intensidadHoraria,
-          data.semestre,
-          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
-                onClick={() => {
-                  setDataEditAsignatura(data);
-                }} />
-            </div>
-          </Tooltip>,
-          <Tooltip id='filterTooltip' title="Descargar formato asignatura" placement='top' classes={{ tooltip: classes.tooltip }}>
-          <div className={classes.buttonHeaderContainer}>
-            <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<GetApp />}
-              onClick={() => {
-                getDataToDownloadFormat(data);
-              }} />
-          </div>
-        </Tooltip>
-        ];
-        return arrayData;
-      });
-      setTotalAsignaturas(response.totalAsignaturas);
-      setAsignaturasList(asignaturas);
-    } else {
-      setTotalAsignaturas(0);
-      setAsignaturasList([]);
-
-    }
-    setOpenModalLoading(false);
-  }
-
-
-  const getDataToDownloadFormat = async (asignaturaToDownload?: any) =>{
-    try {
-      cleanAsignaturaObjectAndSetOpenModal()
-      setOpenModalLoading(true);
-      setTipoAsignaturaSelected(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === asignaturaToDownload.asignaturaTipo) || {});
-      let asignaturaData = await getDocentes(true, asignaturaToDownload);
-      downloadCourseFormat(asignaturaData, false)
-    } catch (error) {
-      setOpenModalLoading(false);
-    }
-  }
-
-
-  //Obtencion de los docentes para la modal, cuando se crea o se edita una asignatura
-  const getDocentes = async (isEdit?: boolean, asignaturaToEdit?: any) => {
-    let response: any = await getAllDocentes({
-      search: '',
-    });
-    let docentesSelected = [];
-    if (response && response.docentes) {
-      setDocenteList(response.docentes);
-      if (isEdit && asignaturaToEdit.docente && asignaturaToEdit.docente.length) {
-        for (let i = 0; i < asignaturaToEdit.docente.length; i++) {
-          let findDocente = response.docentes.find((docente: any) => docente._id === asignaturaToEdit.docente[i]._id)
-          if (findDocente) {
-            docentesSelected.push(findDocente);
-          }
-        }
-      }
-    }
-    const result = await getContenidos(isEdit, { ...asignaturaToEdit, docente: docentesSelected });
-    return result;
-  }
-
-  //Obtencion de los docentes para la modal, cuando se crea o se edita una asignatura
-  const getContenidos = async (isEdit?: boolean, asignaturaToEdit?: any) => {
-    let response: any = await getAllContenidos({
-      search: '',
-    });
-    let contenidosSelected = [];
-    if (response && response.contenidos) {
-      setContenidoList(response.contenidos);
-      if (isEdit && asignaturaToEdit.contenido && asignaturaToEdit.contenido.length) {
-        for (let i = 0; i < asignaturaToEdit.contenido.length; i++) {
-          let findContenido = response.contenidos.find((contenido: any) => contenido._id === asignaturaToEdit.contenido[i]._id)
-          if (findContenido) {
-            contenidosSelected.push(findContenido);
-          }
-        }
-      }
-    }
-    const result = await getEquivalencias(isEdit, { ...asignaturaToEdit, contenido: contenidosSelected });
-    return result;
-  }
-
-  const getEquivalencias = async (isEdit?: boolean, asignaturaToEdit?: any) => {
-    let response: any = await getAllAsignaturasWithPlanCode({
-      search: '',
-    });
-    let equivalenciasSelected = [];
-      if (response && (response.asignaturas)){
-      var newAsignaturasList = response.asignaturas.filter((item:any) => item.asignatura._id !== asignaturaToEdit._id);
-      setEquivalenciaList(newAsignaturasList);
-      if (isEdit && asignaturaToEdit.equivalencia.length){
-        for (let i=0; i<asignaturaToEdit.equivalencia.length; i++){
-          let findEquivalencia = response.asignaturas.find((asignatura:any) => asignatura.asignatura._id === asignaturaToEdit.equivalencia[i]._id)
-          if (findEquivalencia){
-            equivalenciasSelected.push(findEquivalencia);
-          }
-        }
-      }
-    }
-    if (!asignaturaToEdit.intensidadHorariaPractica) asignaturaToEdit.intensidadHorariaPractica = 0;
-    if (!asignaturaToEdit.intensidadHorariaTeorica) asignaturaToEdit.intensidadHorariaTeorica = 0;
-    if (!asignaturaToEdit.intensidadHorariaIndependiente) asignaturaToEdit.intensidadHorariaIndependiente = 0;
-    if (!asignaturaToEdit.intensidadHoraria) asignaturaToEdit.intensidadHoraria = 0;
-    setAsignaturaObject({ ...asignaturaToEdit, equivalencia: equivalenciasSelected });
-    const result = {...asignaturaToEdit, equivalencia: equivalenciasSelected} 
-    setOpenModalLoading(false);
-    return result;
-  }
-
-  const downloadCourseFormat = async(asignaturaToDownload?:any, fromObject?:boolean) => {
-    setOpenModalLoading(true);
-    let asignaturaToGetFile:any
-    if (fromObject){
+    let asignaturaToGetFile: any;
+    if (fromObject) {
       asignaturaToGetFile = {
         ...asignaturaObject,
         asignaturaTipo: tipoAsignaturaSelected.id,
         docente: asignaturaObject.docente ? asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })) : null,
         contenido: asignaturaObject.contenido ? asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })) : null,
-        equivalencia: asignaturaObject.equivalencia ? asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id})) : null
+        equivalencia: asignaturaObject.equivalencia ? asignaturaObject.equivalencia.map((equivalencia: any) => ({ _id: equivalencia.asignatura._id })) : null
       };
-    }else{
+    } else {
       asignaturaToGetFile = {
         ...asignaturaToDownload,
         asignaturaTipo: tipoAsignaturaSelected.id,
         docente: asignaturaToDownload.docente ? asignaturaToDownload.docente.map((docente: any) => ({ _id: docente._id })) : null,
-        contenido:  asignaturaToDownload.contenido ? asignaturaToDownload.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })) : null,
-        equivalencia: asignaturaToDownload.equivalencia ? asignaturaToDownload.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id})) : null
+        contenido: asignaturaToDownload.contenido ? asignaturaToDownload.contenido.map((contenido: any) => ({ _id: contenido._id, nombre: contenido.nombre, descripcion: contenido.descripcion })) : null,
+        equivalencia: asignaturaToDownload.equivalencia ? asignaturaToDownload.equivalencia.map((equivalencia: any) => ({ _id: equivalencia.asignatura._id })) : null
       };
     }
-    let response: any = await GetFileAsignatura(asignaturaToGetFile)
-    if (!response){
+    let response: any = await GetFileAsignatura(asignaturaToGetFile);
+    if (!response) {
       setSeverityAlert('error');
       setShowAlert(true);
       setMessagesAlert('Ocurrio un error generando el archivo PDF.');
       setTimeout(() => {
         setShowAlert(false);
       }, 1000);
-    }
-    else{
+    } else {
       setSeverityAlert('success');
       setShowAlert(true);
       setMessagesAlert('archivo PDF generado satisfactoriamente.');
@@ -304,13 +166,6 @@ function Asignaturas(props: any) {
       }, 1000);
     }
     setOpenModalLoading(false);
-  }
-
-  //Cuando se cambia de pagina se ejecuta el metodo getAsignaturas con la pagina solicitada
-  const onChangePage = (page: number) => {
-    setOpenModalLoading(true);
-    getAsignaturas(page);
-
   };
 
   const cleanAsignaturaObjectAndSetOpenModal = () => {
@@ -325,34 +180,103 @@ function Asignaturas(props: any) {
       intensidadHorariaTeorica: 0,
       intensidadHorariaIndependiente: 0,
       intensidadHoraria: 0,
-      prerrequisitos:'',
-      correquisitos:'',
-      presentacionAsignatura:'',
-      justificacionAsignatura:'',
-      objetivoGeneral:'',
-      objetivosEspecificos:'',
-      competencias:'',
-      mediosEducativos:'',
-      evaluacion:'',
-      bibliografia:'',
-      cibergrafia:'',
+      prerrequisitos: '',
+      correquisitos: '',
+      presentacionAsignatura: '',
+      justificacionAsignatura: '',
+      objetivoGeneral: '',
+      objetivosEspecificos: '',
+      competencias: '',
+      mediosEducativos: '',
+      evaluacion: '',
+      bibliografia: '',
+      cibergrafia: '',
       contenido: [],
       docente: [],
       equivalencia: []
-    })
-    setOpenModal(false)
-  }
+    });
+    setOpenModal(false);
+  };
 
-  //Se establecen los datos de una asignatura a editar en la modal
-  const setDataEditAsignatura = (data: any) => {
+  const getEquivalencias = async (isEdit?: boolean, asignaturaToEdit?: any) => {
+    let response: any = await getAllAsignaturasWithPlanCode({
+      search: '',
+    });
+    let equivalenciasSelected = [];
+    if (response && (response.asignaturas)) {
+      var newAsignaturasList = response.asignaturas.filter((item: any) => item.asignatura._id !== asignaturaToEdit._id);
+      setEquivalenciaList(newAsignaturasList);
+      if (isEdit && asignaturaToEdit.equivalencia.length) {
+        for (let i = 0; i < asignaturaToEdit.equivalencia.length; i++) {
+          let findEquivalencia = response.asignaturas.find((asignatura: any) => asignatura.asignatura._id === asignaturaToEdit.equivalencia[i]._id);
+          if (findEquivalencia) {
+            equivalenciasSelected.push(findEquivalencia);
+          }
+        }
+      }
+    }
+    if (!asignaturaToEdit.intensidadHorariaPractica) { asignaturaToEdit.intensidadHorariaPractica = 0; }
+    if (!asignaturaToEdit.intensidadHorariaTeorica) { asignaturaToEdit.intensidadHorariaTeorica = 0; }
+    if (!asignaturaToEdit.intensidadHorariaIndependiente) { asignaturaToEdit.intensidadHorariaIndependiente = 0; }
+    if (!asignaturaToEdit.intensidadHoraria) { asignaturaToEdit.intensidadHoraria = 0; }
+    setAsignaturaObject({ ...asignaturaToEdit, equivalencia: equivalenciasSelected });
+    const result = { ...asignaturaToEdit, equivalencia: equivalenciasSelected };
+    setOpenModalLoading(false);
+    return result;
+  };
+
+  const getContenidos = async (isEdit?: boolean, asignaturaToEdit?: any) => {
+    let response: any = await getAllContenidos({
+      search: '',
+    });
+    let contenidosSelected = [];
+    if (response && response.contenidos) {
+      setContenidoList(response.contenidos);
+      if (isEdit && asignaturaToEdit.contenido && asignaturaToEdit.contenido.length) {
+        for (let i = 0; i < asignaturaToEdit.contenido.length; i++) {
+          let findContenido = response.contenidos.find((contenido: any) => contenido._id === asignaturaToEdit.contenido[i]._id);
+          if (findContenido) {
+            contenidosSelected.push(findContenido);
+          }
+        }
+      }
+    }
+    const result = await getEquivalencias(isEdit, { ...asignaturaToEdit, contenido: contenidosSelected });
+    return result;
+  };
+
+  const getDocentes = async (isEdit?: boolean, asignaturaToEdit?: any) => {
+    let response: any = await getAllDocentes({
+      search: '',
+    });
+    let docentesSelected = [];
+    if (response && response.docentes) {
+      setDocenteList(response.docentes);
+      if (isEdit && asignaturaToEdit.docente && asignaturaToEdit.docente.length) {
+        for (let i = 0; i < asignaturaToEdit.docente.length; i++) {
+          let findDocente = response.docentes.find((docente: any) => docente._id === asignaturaToEdit.docente[i]._id);
+          if (findDocente) {
+            docentesSelected.push(findDocente);
+          }
+        }
+      }
+    }
+    const result = await getContenidos(isEdit, { ...asignaturaToEdit, docente: docentesSelected });
+    return result;
+  };
+
+  const getDataToDownloadFormat = async (asignaturaToDownload?: any) => {
     try {
-      handleOpenModal(true, data);
+      cleanAsignaturaObjectAndSetOpenModal();
+      setOpenModalLoading(true);
+      setTipoAsignaturaSelected(tiposAsignatura.find((tipoAsignatura: any) => tipoAsignatura.id === asignaturaToDownload.asignaturaTipo) || {});
+      let asignaturaData = await getDocentes(true, asignaturaToDownload);
+      downloadCourseFormat(asignaturaData, false);
     } catch (error) {
       setOpenModalLoading(false);
     }
   };
 
-  //Metodo que controla la apertura de la modal con el fin de obtener los docentes y los contenidos
   const handleOpenModal = (isEdit?: boolean, asignaturaToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -362,18 +286,145 @@ function Asignaturas(props: any) {
     } catch (error) {
       setOpenModalLoading(false);
     }
-  }
+  };
 
-  //Manejador de la accion guardar de la modal, se encarga de crear o editar
+  const setDataEditAsignatura = (data: any) => {
+    try {
+      handleOpenModal(true, data);
+    } catch (error) {
+      setOpenModalLoading(false);
+    }
+  };
+
+  const getAsignaturas = async (page?: any) => {
+    let response: any = await getAsignaturasPaginated({
+      page: page ? page : 0,
+      search: searchField,
+      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+    });
+    setPagePagination(page ? page + 1 : 1);
+    if (response.asignaturas && response.asignaturas.length) {
+      // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+      let asignaturas = response.asignaturas.map((data: any) => {
+        let arrayData = [
+          data.codigo,
+          data.nombre,
+          data.cantidadCredito,
+          data.intensidadHoraria,
+          data.semestre,
+          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          <Tooltip id="filterTooltip" title="Ver detalles de asignaturas" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditAsignatura(data);
+                }} />
+            </div>
+          </Tooltip>,
+          <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<EditIcon />}
+                onClick={() => {
+                  setIsEdit(true);
+                  setDataEditAsignatura(data);
+                }} />
+            </div>
+          </Tooltip>,
+          <Tooltip id="filterTooltip" title="Descargar formato asignatura" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<GetApp />}
+                onClick={() => {
+                  getDataToDownloadFormat(data);
+                }} />
+            </div>
+          </Tooltip>
+        ];
+        return arrayData;
+      });
+      setTotalAsignaturas(response.totalAsignaturas);
+      setAsignaturasList(asignaturas);
+    } else {
+      setTotalAsignaturas(0);
+      setAsignaturasList([]);
+    }
+    setOpenModalLoading(false);
+  };
+
+  const onChangePage = (page: number) => {
+    setOpenModalLoading(true);
+    getAsignaturas(page);
+  };
+
+  const handleEditAsignatura = async () => {
+    let asignaturaToSave = {
+      ...asignaturaObject,
+      asignaturaTipo: tipoAsignaturaSelected.id,
+      docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
+      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
+      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({ _id: equivalencia.asignatura._id }))
+    };
+    let response: any = await updateAsignatura(asignaturaToSave, asignaturaObject._id);
+    if (response && response.error) {
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Asignatura editada satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      cleanAsignaturaObjectAndSetOpenModal();
+      getAsignaturas();
+    }
+  };
+
+  const handleCreateAsignatura = async () => {
+    let asignaturaToSave = {
+      ...asignaturaObject,
+      asignaturaTipo: tipoAsignaturaSelected.id,
+      docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
+      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
+      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({ _id: equivalencia.asignatura._id }))
+    };
+    let response: any = await createAsignatura(asignaturaToSave);
+    if (response && response.error) {
+      setSeverityAlert('error');
+      setShowAlert(true);
+      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Asignatura creada satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      cleanAsignaturaObjectAndSetOpenModal();
+      getAsignaturas();
+    }
+  };
+
   const handleSaveAsignatura = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
     if (isValid) {
       if (asignaturaObject._id) {
-        //EDITAR
+        // EDITAR
         handleEditAsignatura();
       } else {
-        //CREAR
+        // CREAR
         handleCreateAsignatura();
       }
 
@@ -388,94 +439,18 @@ function Asignaturas(props: any) {
     }
   };
 
-  //Metodo para crear una Asignatura
-  const handleCreateAsignatura = async () => {
-    let asignaturaToSave = {
-      ...asignaturaObject,
-      asignaturaTipo: tipoAsignaturaSelected.id,
-      docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
-      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
-      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
-    };
-    let response: any = await createAsignatura(asignaturaToSave);
-    if (response && response.error) {
-      setSeverityAlert('error');
-      setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-    } else {
-      setSeverityAlert('success');
-      setShowAlert(true);
-      setMessagesAlert('Asignatura creada satisfactoriamente');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      cleanAsignaturaObjectAndSetOpenModal()
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getAsignaturas();
+  }, []);
+
+  useEffect(() => {
+    if (!searchField) {
+      setOpenModalLoading(true);
       getAsignaturas();
     }
-  }
+  }, [searchField]);
 
-  //Metodo para editar una Asignatura
-  const handleEditAsignatura = async () => {
-    let asignaturaToSave = {
-      ...asignaturaObject,
-      asignaturaTipo: tipoAsignaturaSelected.id,
-      docente: asignaturaObject.docente.map((docente: any) => ({ _id: docente._id })),
-      contenido: asignaturaObject.contenido.map((contenido: any) => ({ _id: contenido._id })),
-      equivalencia: asignaturaObject.equivalencia.map((equivalencia: any) => ({_id: equivalencia.asignatura._id}))
-    };
-    let response: any = await updateAsignatura(asignaturaToSave, asignaturaObject._id);
-    if (response && response.error) {
-      setSeverityAlert('warning');
-      setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-    } else {
-      setSeverityAlert('success');
-      setShowAlert(true);
-      setMessagesAlert('Asignatura editada satisfactoriamente');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      cleanAsignaturaObjectAndSetOpenModal()
-      getAsignaturas();
-    }
-  }
-
-  //Validacion de campos obligatorios para la creacion y edicion
-  const validateFields = () => {
-    if (
-      asignaturaObject.codigo &&
-      asignaturaObject.nombre &&
-      asignaturaObject.semestre &&
-      asignaturaObject.cantidadCredito &&
-      asignaturaObject.intensidadHorariaIndependiente &&
-      asignaturaObject.cantidadCredito &&
-      asignaturaObject.presentacionAsignatura &&
-      asignaturaObject.justificacionAsignatura &&
-      asignaturaObject.objetivoGeneral &&
-      asignaturaObject.objetivosEspecificos &&
-      asignaturaObject.competencias &&
-      asignaturaObject.mediosEducativos &&
-      (
-        (tipoAsignaturaSelected.id === 0 && asignaturaObject.intensidadHorariaTeorica) || 
-        (tipoAsignaturaSelected.id === 1 && asignaturaObject.intensidadHorariaPractica) || 
-        (tipoAsignaturaSelected.id === 2 && asignaturaObject.intensidadHorariaPractica && asignaturaObject.intensidadHorariaTeorica)
-      ) 
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -496,16 +471,16 @@ function Asignaturas(props: any) {
                     onChange={(event) => setSearchField(event.target.value)}
                     InputProps={{
                       endAdornment:
-                        <Button key={'searchButton'} color={'primary'} round variant="outlined" size='sm' justIcon startIcon={<ClearIcon />}
+                        <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" size="sm" justIcon={true} startIcon={<ClearIcon />}
                           onClick={() => {
-                            setSearchField('')
+                            setSearchField('');
                           }} />
                     }}
                   />
 
-                  <Tooltip id='searchTooltip' title="Buscar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="searchTooltip" title="Buscar" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
+                      <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<Search />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getAsignaturas();
@@ -513,10 +488,10 @@ function Asignaturas(props: any) {
                       />
                     </div>
                   </Tooltip>
-                  <Tooltip id='filterTooltip' title="Más filtros" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="filterTooltip" title="Más filtros" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" justIcon startIcon={<FilterList />}
-                        onClick={() => { setOpenMoreFilters(!openMoreFilters) }} />
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<FilterList />}
+                        onClick={() => { setOpenMoreFilters(!openMoreFilters); }} />
                     </div>
                   </Tooltip>
                 </div>
@@ -526,7 +501,7 @@ function Asignaturas(props: any) {
                   <div>
                     <Card className={classes.cardFilters}>
                       <div >
-                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                           <GridContainer>
                             <GridItem xs={12} sm={12} md={12}>
                               <h4 className={classes.cardTitleBlack}>Fecha de creación</h4>
@@ -535,16 +510,16 @@ function Asignaturas(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha desde"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationFrom}
                                   onChange={(newValue: any) => {
                                     setDateCreationFrom(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationFrom ? (
@@ -558,16 +533,16 @@ function Asignaturas(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha hasta"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationTo}
                                   onChange={(newValue: any) => {
                                     setDateCreationTo(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationTo ? (
@@ -580,7 +555,7 @@ function Asignaturas(props: any) {
                         </MuiPickersUtilsProvider>
                       </div>
                       <div className={classes.containerFooterCard} >
-                        <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                        <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                           onClick={() => {
                             setOpenModalLoading(true);
                             getAsignaturas();
@@ -609,6 +584,7 @@ function Asignaturas(props: any) {
                       'Semestre',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver asignaturas',
                       'Acciones',
                       'Descargas'
                     ]}
@@ -625,9 +601,9 @@ function Asignaturas(props: any) {
         </GridItem>
       </GridContainer>
       <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nueva asignatura" placement='left' classes={{ tooltip: classes.tooltip }}>
+        <Tooltip id="addTooltip" title="Crear nueva asignatura" placement="left" classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} round={true} justIcon={true} startIcon={<AddIcon />}
               onClick={() => {
                 handleOpenModal(false,
                   {
@@ -637,26 +613,27 @@ function Asignaturas(props: any) {
                     semestre: '',
                     cantidadCredito: 1,
                     asignaturaTipo: {},
-                    intensidadHorariaPractica:0,
-                    intensidadHorariaTeorica:0,
-                    intensidadHorariaIndependiente:0,
-                    intensidadHoraria:0,
-                    prerrequisitos:'',
-                    correquisitos:'',
-                    presentacionAsignatura:'',
-                    justificacionAsignatura:'',
-                    objetivoGeneral:'',
-                    objetivosEspecificos:'',
-                    competencias:'',
-                    mediosEducativos:'',
-                    evaluacion:'',
-                    bibliografia:'',
-                    cibergrafia:'',
+                    intensidadHorariaPractica: 0,
+                    intensidadHorariaTeorica: 0,
+                    intensidadHorariaIndependiente: 0,
+                    intensidadHoraria: 0,
+                    prerrequisitos: '',
+                    correquisitos: '',
+                    presentacionAsignatura: '',
+                    justificacionAsignatura: '',
+                    objetivoGeneral: '',
+                    objetivosEspecificos: '',
+                    competencias: '',
+                    mediosEducativos: '',
+                    evaluacion: '',
+                    bibliografia: '',
+                    cibergrafia: '',
                     contenido: [],
                     docente: [],
                     equivalencia: []
                   }
-                )
+                );
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -676,24 +653,29 @@ function Asignaturas(props: any) {
             <Card className={classes.containerCardForm}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                <div className={classes.headerActions} style={{alignItems:'left'}}>
+                  <div className={classes.headerActions} style={{ alignItems: 'left' }}>
                     {
-                          asignaturaObject._id ?
-                          <Tooltip id='filterTooltip' title="Descargar formato de asignatura" placement='top' classes={{ tooltip: classes.tooltip }}>
-                            <div>
-                            <Button key={'filtersButton'} color={'secondary'} size='md' round variant="outlined" justIcon startIcon={<GetApp />}
-                                onClick={() => { downloadCourseFormat(null, true) }} />
-                            </div>
-                          </Tooltip>
-                          : null
+                      asignaturaObject._id ?
+                        <Tooltip id="filterTooltip" title="Descargar formato de asignatura" placement="top" classes={{ tooltip: classes.tooltip }}>
+                          <div>
+                            <Button key={'filtersButton'} color={'secondary'} size="md" round={true} variant="outlined" justIcon={true} startIcon={<GetApp />}
+                              onClick={() => { downloadCourseFormat(null, true); }} />
+                          </div>
+                        </Tooltip>
+                        : null
                     }
                   </div>
-                  <h4 className={classes.cardTitleWhite}>{asignaturaObject._id ? 'Editar' : 'Crear'} asignaturas</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{asignaturaObject._id ? 'Editar' : 'Crear'} asignaturas</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles de la asignatura</h4>
+                  }
                   <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { cleanAsignaturaObjectAndSetOpenModal() }} />
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { cleanAsignaturaObjectAndSetOpenModal(); }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -709,9 +691,10 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.codigo ? true : false}
+                      disabled={!isEdit}
                       value={asignaturaObject.codigo}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, codigo: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, codigo: event.target.value });
                       }}
                     />
                   </GridItem>
@@ -724,8 +707,9 @@ function Asignaturas(props: any) {
                       className={classes.CustomTextField}
                       error={!asignaturaObject.nombre ? true : false}
                       value={asignaturaObject.nombre}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, nombre: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, nombre: event.target.value });
                       }}
                     />
                   </GridItem>
@@ -739,47 +723,52 @@ function Asignaturas(props: any) {
                       type={'number'}
                       error={isNaN(asignaturaObject.cantidadCredito) || !asignaturaObject.cantidadCredito ? true : false}
                       value={asignaturaObject.cantidadCredito}
-                      onKeyPress={ event => {
-                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                      disabled={!isEdit}
+                      onKeyPress={event => {
+                        if (event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
                         }
                       }}
                       onChange={(event) => {
-                        if(event.target.validity.valid){
-                          setAsignaturaObject({ ...asignaturaObject, cantidadCredito: event.target.value })
+                        if (event.target.validity.valid) {
+                          setAsignaturaObject({ ...asignaturaObject, cantidadCredito: event.target.value });
                         }
                       }}
                       InputProps={{
-                        inputProps: { min: 1, pattern: "[0-9]*", }
+                        inputProps: { min: 1, pattern: '[0-9]*', }
                       }}
                     />
                   </GridItem>
-                   <GridItem xs={12} sm={12} md={4} >
+                  <GridItem xs={12} sm={12} md={4} >
                     <Autocomplete
                       id="tags-outlined"
                       options={tiposAsignatura}
                       getOptionLabel={(option) => option.title}
-                      filterSelectedOptions
+                      filterSelectedOptions={true}
+                      disabled={!isEdit}
                       onChange={(e, option) => {
-                        if(option.id === 0){
-                          setAsignaturaObject({ ...asignaturaObject, 
+                        if (option.id === 0) {
+                          setAsignaturaObject({
+                            ...asignaturaObject,
                             intensidadHorariaTeorica: asignaturaObject.intensidadHorariaTeorica,
-                            intensidadHorariaPractica: 0  
-                          })
+                            intensidadHorariaPractica: 0
+                          });
                         }
-                        if(option.id === 1){
-                          setAsignaturaObject({ ...asignaturaObject, 
+                        if (option.id === 1) {
+                          setAsignaturaObject({
+                            ...asignaturaObject,
                             intensidadHorariaTeorica: 0,
                             intensidadHorariaPractica: asignaturaObject.intensidadHorariaPractica
-                          })
+                          });
                         }
-                        if(option.id === 2){
-                          setAsignaturaObject({ ...asignaturaObject, 
+                        if (option.id === 2) {
+                          setAsignaturaObject({
+                            ...asignaturaObject,
                             intensidadHorariaTeorica: asignaturaObject.intensidadHorariaTeorica,
                             intensidadHorariaPractica: asignaturaObject.intensidadHorariaPractica
-                          })
+                          });
                         }
-                        setTipoAsignaturaSelected(option || {})
+                        setTipoAsignaturaSelected(option || {});
                       }}
                       value={tipoAsignaturaSelected}
                       renderInput={(params) => (
@@ -801,23 +790,23 @@ function Asignaturas(props: any) {
                       label="Horas Trabajo Presencial Teorico"
                       variant="outlined"
                       margin="dense"
-                      disabled={(!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 0 && tipoAsignaturaSelected.id !== 2)}
+                      disabled={(!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 0 && tipoAsignaturaSelected.id !== 2) || !isEdit}
                       className={classes.CustomTextField}
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaTeorica}
                       error={(tipoAsignaturaSelected.id === 0 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaTeorica) ? true : false)}
-                      onKeyPress={ event => {
-                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                      onKeyPress={event => {
+                        if (event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
                         }
                       }}
                       onChange={(event) => {
-                        if(event.target.validity.valid){
-                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaTeorica: event.target.value})
+                        if (event.target.validity.valid) {
+                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaTeorica: event.target.value });
                         }
                       }}
                       InputProps={{
-                        inputProps: { min: 1, pattern: "[0-9]*", }
+                        inputProps: { min: 1, pattern: '[0-9]*', }
                       }}
                     />
                   </GridItem>
@@ -827,26 +816,26 @@ function Asignaturas(props: any) {
                       label="Horas Trabajo Presencial Practico"
                       variant="outlined"
                       margin="dense"
-                      disabled={!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 1 && tipoAsignaturaSelected.id !== 2}
+                      disabled={(!tipoAsignaturaSelected.id && tipoAsignaturaSelected.id !== 1 && tipoAsignaturaSelected.id !== 2) || !isEdit}
                       className={classes.CustomTextField}
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaPractica}
                       error={(tipoAsignaturaSelected.id === 1 || tipoAsignaturaSelected.id === 2) && (isNaN(asignaturaObject.intensidadHorariaPractica) ? true : false)}
-                      onKeyPress={ event => {
-                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                      onKeyPress={event => {
+                        if (event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
                         }
                       }}
                       onChange={(event) => {
-                        if(event.target.validity.valid){
-                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaPractica: event.target.value})
+                        if (event.target.validity.valid) {
+                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaPractica: event.target.value });
                         }
                       }}
                       InputProps={{
-                        inputProps: { min: 0, pattern: "[0-9]*", }
+                        inputProps: { min: 0, pattern: '[0-9]*', }
                       }}
                     />
-                    </GridItem>
+                  </GridItem>
                   <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
@@ -857,21 +846,22 @@ function Asignaturas(props: any) {
                       type={'number'}
                       value={asignaturaObject.intensidadHorariaIndependiente}
                       error={isNaN(asignaturaObject.intensidadHorariaIndependiente) ? true : false}
-                      onKeyPress={ event => {
-                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                      disabled={!isEdit}
+                      onKeyPress={event => {
+                        if (event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
                         }
                       }}
                       onChange={(event) => {
-                        if(event.target.validity.valid){
-                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaIndependiente: event.target.value})
+                        if (event.target.validity.valid) {
+                          setAsignaturaObject({ ...asignaturaObject, intensidadHorariaIndependiente: event.target.value });
                         }
                       }}
                       InputProps={{
-                        inputProps: { min: 0, pattern: "[0-9]*", }
+                        inputProps: { min: 0, pattern: '[0-9]*', }
                       }}
                     />
-                   </GridItem>
+                  </GridItem>
                   <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
@@ -883,21 +873,21 @@ function Asignaturas(props: any) {
                       type={'number'}
                       error={!asignaturaObject.intensidadHoraria ? true : false}
                       value={asignaturaObject.intensidadHoraria}
-                      onKeyPress={ event => {
-                        if(event.key === '-' || event.key === '+' || event.key === 'e') {
+                      onKeyPress={event => {
+                        if (event.key === '-' || event.key === '+' || event.key === 'e') {
                           event.preventDefault();
                         }
                       }}
                       onChange={(event) => {
-                        if(event.target.validity.valid){
-                          setAsignaturaObject({ ...asignaturaObject, intensidadHoraria: event.target.value })
+                        if (event.target.validity.valid) {
+                          setAsignaturaObject({ ...asignaturaObject, intensidadHoraria: event.target.value });
                         }
                       }}
                       InputProps={{
-                        inputProps: { min: 0, pattern: "[0-9]*", }
+                        inputProps: { min: 0, pattern: '[0-9]*', }
                       }}
                     />
-                   </GridItem>
+                  </GridItem>
                   <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
@@ -906,9 +896,10 @@ function Asignaturas(props: any) {
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.semestre ? true : false}
+                      disabled={!isEdit}
                       value={asignaturaObject.semestre}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, semestre: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, semestre: event.target.value });
                       }}
                       onKeyPress={(event) => {
                         if (!/[0-9]/.test(event.key)) {
@@ -916,167 +907,177 @@ function Asignaturas(props: any) {
                         }
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Prerrequisitos"
                       variant="outlined"
                       minRows={3}
                       maxRows={9}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.prerrequisitos}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, prerrequisitos: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, prerrequisitos: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Correquisitos"
                       variant="outlined"
                       minRows={3}
                       maxRows={9}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.correquisitos}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, correquisitos: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, correquisitos: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Presentacion de la asignatura"
                       variant="outlined"
                       minRows={3}
                       maxRows={9}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.presentacionAsignatura ? true : false}
                       value={asignaturaObject.presentacionAsignatura}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, presentacionAsignatura: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, presentacionAsignatura: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Justificacion"
                       variant="outlined"
                       minRows={3}
                       maxRows={9}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.justificacionAsignatura ? true : false}
                       value={asignaturaObject.justificacionAsignatura}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, justificacionAsignatura: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, justificacionAsignatura: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Objetivo General"
                       variant="outlined"
                       minRows={3}
                       maxRows={9}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.objetivoGeneral ? true : false}
                       value={asignaturaObject.objetivoGeneral}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, objetivoGeneral: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, objetivoGeneral: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Objetivos Especificos"
                       variant="outlined"
                       minRows={3}
                       maxRows={9}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.objetivosEspecificos ? true : false}
                       value={asignaturaObject.objetivosEspecificos}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, objetivosEspecificos: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, objetivosEspecificos: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={4} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
                       label="Competencias a Desarrollar"
                       variant="outlined"
                       minRows={5}
                       maxRows={10}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.competencias ? true : false}
                       value={asignaturaObject.competencias}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, competencias: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, competencias: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={4} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
                       label="Medios Educativos"
                       variant="outlined"
                       minRows={5}
                       maxRows={10}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       error={!asignaturaObject.mediosEducativos ? true : false}
                       value={asignaturaObject.mediosEducativos}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, mediosEducativos: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, mediosEducativos: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={4} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={4} >
                     <TextField
                       id="outlined-email"
                       label="Evaluacion"
                       variant="outlined"
                       minRows={5}
                       maxRows={10}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.evaluacion}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, evaluacion: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, evaluacion: event.target.value });
                       }}
                     />
-                   </GridItem>
+                  </GridItem>
                   <GridItem xs={12} sm={12} md={12} >
                     <Autocomplete
-                      multiple
+                      multiple={true}
                       id="tags-outlined"
                       options={docenteList}
                       getOptionLabel={(option: any) => `${option.nombre} - ${option.documento}`}
-                      filterSelectedOptions
+                      filterSelectedOptions={true}
                       value={asignaturaObject.docente}
+                      disabled={!isEdit}
                       onChange={(e, value) => {
-                        setAsignaturaObject({ ...asignaturaObject, docente: value })
+                        setAsignaturaObject({ ...asignaturaObject, docente: value });
                       }}
                       renderInput={(params) => (
                         <TextField
@@ -1089,17 +1090,18 @@ function Asignaturas(props: any) {
                         />
                       )}
                     />
-                   </GridItem>
+                  </GridItem>
                   <GridItem xs={12} sm={12} md={6} >
                     <Autocomplete
-                      multiple
+                      multiple={true}
                       id="tags-outlined"
                       options={contenidoList}
                       getOptionLabel={(option: any) => `${option.codigo} - ${option.nombre}`}
-                      filterSelectedOptions
+                      filterSelectedOptions={true}
                       value={asignaturaObject.contenido}
+                      disabled={!isEdit}
                       onChange={(e, value) => {
-                        setAsignaturaObject({ ...asignaturaObject, contenido: value })
+                        setAsignaturaObject({ ...asignaturaObject, contenido: value });
                       }}
                       renderInput={(params) => (
                         <TextField
@@ -1113,17 +1115,18 @@ function Asignaturas(props: any) {
                       )}
                     />
 
-                   </GridItem>
-                  <GridItem xs={12} sm={12} md={6}> 
-                  <Autocomplete
-                      multiple
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6}>
+                    <Autocomplete
+                      multiple={true}
                       id="tags-outlined"
                       options={equivalenciaList}
                       getOptionLabel={(option: any) => `${option.codigoPlan}: ${option.asignatura.codigo} - ${option.asignatura.nombre}`}
-                      filterSelectedOptions
+                      filterSelectedOptions={true}
                       value={asignaturaObject.equivalencia}
+                      disabled={!isEdit}
                       onChange={(e, value) => {
-                        setAsignaturaObject({ ...asignaturaObject, equivalencia: value })
+                        setAsignaturaObject({ ...asignaturaObject, equivalencia: value });
                       }}
                       renderInput={(params) => (
                         <TextField
@@ -1136,49 +1139,53 @@ function Asignaturas(props: any) {
                         />
                       )}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Bibliografia"
                       variant="outlined"
                       minRows={4}
                       maxRows={10}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.bibliografia}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, bibliografia: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, bibliografia: event.target.value });
                       }}
                     />
-                   </GridItem>
-                   <GridItem xs={12} sm={12} md={6} >
+                  </GridItem>
+                  <GridItem xs={12} sm={12} md={6} >
                     <TextField
                       id="outlined-email"
                       label="Cibergrafia"
                       variant="outlined"
                       minRows={4}
                       maxRows={10}
-                      multiline
+                      multiline={true}
                       margin="dense"
                       className={classes.CustomTextField}
                       value={asignaturaObject.cibergrafia}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setAsignaturaObject({ ...asignaturaObject, cibergrafia: event.target.value })
+                        setAsignaturaObject({ ...asignaturaObject, cibergrafia: event.target.value });
                       }}
                     />
-                   </GridItem>
+                  </GridItem>
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveAsignatura() }} >
-                  {'Guardar'}
-                </Button>
-
-              </div>
-
+              {
+                isEdit ? (
+                  <div className={classes.containerFooterModal} >
+                    <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                      onClick={() => { handleSaveAsignatura(); }} >
+                      {'Guardar'}
+                    </Button>
+                  </div>
+                ) : null
+              }
             </Card>
           </GridItem>
         </div>

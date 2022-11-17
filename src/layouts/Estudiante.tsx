@@ -1,23 +1,18 @@
-/* eslint-disable */
 import React from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
-// creates a beautiful scrollbar
+import { Switch, Route } from 'react-router-dom';
 import PerfectScrollbar from 'perfect-scrollbar';
 import 'perfect-scrollbar/css/perfect-scrollbar.css';
-// @material-ui/core components
 import withStyles from '@material-ui/core/styles/withStyles';
-// core components
 import Navbar from '../components/Navbars/Navbar';
 import Footer from '../components/Footer/Footer';
 import Sidebar from '../components/Sidebar/Sidebar';
-import FixedPlugin from '../components/FixedPlugin/FixedPlugin';
 
 import routes from '../routes';
 
 import dashboardStyle from '../assets/jss/material-dashboard-react/layouts/dashboardStyle';
 
-import image from 'assets/img/sidebar-5.jpg';
-import logo from 'assets/img/logoPoli.png';
+import image from '../assets/img/sidebar-5.jpg';
+import logo from '../assets/img/logoPoli.png';
 
 const switchRoutes = (
   <Switch>
@@ -36,7 +31,6 @@ const switchRoutes = (
 );
 
 const routesFilter = routes.filter(route => (route.layout === '/estudiante'));
-
 
 interface Props {
   classes: any;
@@ -63,7 +57,7 @@ class DashboardEstudiante extends React.Component<Props, State> {
       mobileOpen: false
     };
   }
-  
+
   handleImageClick = (i: string) => {
     this.setState({ image: i });
   }
@@ -124,8 +118,8 @@ class DashboardEstudiante extends React.Component<Props, State> {
           routes={routesFilter}
           logoText={'Currículo APIT'}
           logo={logo}
-          userName={`Bienvenido, ${userName}`} 
-          userEmail={`${userEmail}`}    
+          userName={`Bienvenido, ${userName}`}
+          userEmail={`${userEmail}`}
           image={this.state.image}
           handleDrawerToggle={this.handleDrawerToggle}
           open={this.state.mobileOpen}
@@ -147,14 +141,6 @@ class DashboardEstudiante extends React.Component<Props, State> {
             <div className={classes.map}>{switchRoutes}</div>
           )}
           {this.getRoute() ? <Footer /> : null}
-          {/* <FixedPlugin
-            handleImageClick={this.handleImageClick}
-            handleColorClick={this.handleColorClick}
-            bgColor={this.state.color}
-            bgImage={this.state.image}
-            handleFixedClick={this.handleFixedClick}
-            fixedClasses={this.state.fixedClasses}
-          /> */}
         </div>
       </div>
     );

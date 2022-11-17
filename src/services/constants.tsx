@@ -1,18 +1,20 @@
-const production = true;
-export const backendBaseUrl = production ? 'https://curriculo-apit-backend.herokuapp.com/' : 'http://127.0.0.1:3000/';
-export const frontendBaseUrl = production ? 'https://curriculo-apit-frontend.herokuapp.com/' : 'http://127.0.0.1:3002/';
+const production = process.env.name === 'prod';
+export const backendBaseUrl = production ? 'https://curriculo-apit-backend.herokuapp.com' : 'http://localhost:3000';
+export const frontendBaseUrl = production ? 'https://curriculo-apit-frontend.herokuapp.com' : 'http://localhost:3002';
 
-export const getHeaders = ()=>{
-  let token = localStorage.getItem('token');
-  if(token){
-    return({
-      'Content-Type': 'application/json',
-      'access-token':token
-    })
-  }else{
-    return({
-      'Content-Type': 'application/json',
-    })
+export const getHeaders = () => {
+  const headers = new Headers({ 'Content-Type': 'application/json' });
+  const token = localStorage.getItem('token');
 
+  if (token) {
+    headers.append('access-token', token);
   }
+
+  return headers;
+};
+
+export const buildQuery = (query: any): string => {
+  const urlParams = new URLSearchParams();
+  Object.entries(query).forEach(([key, value]) => urlParams.append(key, `${value}`));
+  return urlParams.toString();
 };

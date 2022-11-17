@@ -1,35 +1,31 @@
-//importacion de dependencias
-import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
+import React, { useEffect, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import { Router, Route, Switch, Redirect } from 'react-router-dom';
+import { userProfilesObject } from './constants/generalConstants';
 
 import Login from './layouts/Login';
 import Admin from './layouts/Admin';
-import Coordinador from './layouts/Coordinador';
+import CoordinadorPrograma from './layouts/CoordinadorPrograma';
+import CoordinadorArea from './layouts/CoordinadorArea';
 import Docente from './layouts/Docente';
 import Invitado from './layouts/Invitado';
-import Estudiante from './layouts/Estudiante'
+import Estudiante from './layouts/Estudiante';
 
-import {userProfilesObject} from './constants/generalConstants';
+import './assets/css/material-dashboard-react.css';
 
-import 'assets/css/material-dashboard-react.css?v=1.6.0';
+const history = createBrowserHistory();
 
-const hist = createBrowserHistory();
+const App: React.FC = () => {
+  const [token, Token] = useState<string>('');
 
-//Inicio componente funcional En este se valida el rol logueado para retornar sus respectivos accesos
-function IndexApp(props: any) {
-  const [islogged, setIsLogged] = useState('');
-
-  //Al iniciar el componente se valida si existe un token activo
   useEffect(() => {
-    var activeSession = localStorage.getItem('token');
-    setIsLogged(activeSession ? activeSession : '');
-  });
+    const activeSession = localStorage.getItem('token');
+    Token(activeSession || '');
+  }, []);
 
-  //Se obtinen las rutas o accesos segun el rol en sesion
   const getRouteByProfile = () => {
-    var idProfile = localStorage.getItem('idProfileLoggedUser');
+    const idProfile = localStorage.getItem('idProfileLoggedUser');
     switch (idProfile) {
       case userProfilesObject.admin.id.toString():
         return (
@@ -40,27 +36,33 @@ function IndexApp(props: any) {
           </Switch>
 
         );
-        break;
-      case userProfilesObject.coor.id.toString():
+      case userProfilesObject.coorProg.id.toString():
         return (
 
           <Switch>
-            <Route path="/coordinador" component={Coordinador} />
-            <Redirect to={'/coordinador/actas'} from={'/'} />
+            <Route path="/coordinadorPrograma" component={CoordinadorPrograma} />
+            <Redirect to={'/coordinadorPrograma/actas'} from={'/'} />
           </Switch>
 
         );
-        break;
+      case userProfilesObject.coorArea.id.toString():
+        return (
+
+          <Switch>
+            <Route path="/coordinadorArea" component={CoordinadorArea} />
+            <Redirect to={'/coordinadorArea/avancesAsignatura'} from={'/'} />
+          </Switch>
+
+        );
       case userProfilesObject.doc.id.toString():
         return (
 
           <Switch>
             <Route path="/docente" component={Docente} />
-            <Redirect to={'/docente/avancesAsignatura'} from={'/'} />
+            <Redirect to={'/docente/actas'} from={'/'} />
           </Switch>
 
         );
-        break;
       case userProfilesObject.est.id.toString():
         return (
 
@@ -70,7 +72,6 @@ function IndexApp(props: any) {
           </Switch>
 
         );
-        break;
       default:
         return (
           <Switch>
@@ -78,25 +79,24 @@ function IndexApp(props: any) {
             <Redirect to={'/invitado/micrositio'} from={'/'} />
           </Switch>
         );
-        break;
     }
-  }
+  };
 
-  //Retorno de las rutas si existe sesión, de lo contrario direcciona al login
   return (
-    <Router history={hist}>
+    <Router history={history}>
       {
-        islogged ?
+        token ?
           getRouteByProfile()
           :
-          <Switch>
-            <Route path="/login" component={Login} />
-            <Redirect to={'/login'} from={'/'} />
-          </Switch>
+          (
+            <Switch>
+              <Route path="/login" component={Login} />
+              <Redirect to={'/login'} from={'/'} />
+            </Switch>
+          )
       }
     </Router>
   );
 };
 
-ReactDOM.render(<IndexApp />, document.getElementById('root'))
-
+ReactDOM.render(<App />, document.getElementById('root'));

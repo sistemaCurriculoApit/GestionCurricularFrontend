@@ -38,7 +38,6 @@ export const dataBaseLineChart = {
       tension: 0
     }),
     low: 0,
-    // high: 150, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
     chartPadding: {
       top: 0,
       right: 0,
@@ -48,7 +47,7 @@ export const dataBaseLineChart = {
   },
   // for animation
   animation: {
-    draw: function(data: any) {
+    draw: function (data: any) {
       if (data.type === 'line' || data.type === 'area') {
         data.element.animate({
           d: {
@@ -119,7 +118,7 @@ export const dataBaseBarChart = {
       {
         seriesBarDistance: 5,
         axisX: {
-          labelInterpolationFnc: function(value: any) {
+          labelInterpolationFnc: function (value: any) {
             return value[0];
           }
         }
@@ -127,7 +126,7 @@ export const dataBaseBarChart = {
     ]
   ],
   animation: {
-    draw: function(data: any) {
+    draw: function (data: any) {
       if (data.type === 'bar') {
         data.element.animate({
           opacity: {
@@ -157,7 +156,6 @@ export const completedTasksChart = {
       tension: 0
     }),
     low: 0,
-    high: 1000, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
     chartPadding: {
       top: 0,
       right: 0,
@@ -166,7 +164,7 @@ export const completedTasksChart = {
     }
   },
   animation: {
-    draw: function(data: any) {
+    draw: function (data: any) {
       if (data.type === 'line' || data.type === 'area') {
         data.element.animate({
           d: {
