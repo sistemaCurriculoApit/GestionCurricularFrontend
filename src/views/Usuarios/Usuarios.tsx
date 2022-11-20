@@ -82,7 +82,6 @@ function Usuarios(props: any) {
     name: '',
     email: '',
     role: { id: 0, title: '' },
-    password: '',
     passwordConfirm: '',
     identificacion: '',
     universidadEstudiante: '',
@@ -106,8 +105,6 @@ function Usuarios(props: any) {
           name: data.nombreUsuario,
           email: data.correo,
           role: roleItem ? roleItem : { id: 0, title: '' },
-          password: '',
-          passwordConfirm: '',
           universidadEstudiante: estudiante.universidad ? estudiante.universidad : '',
           programaEstudiante: estudiante.programa ? estudiante.programa : '',
           identificacion: data.identificacion ? data.identificacion : '',
@@ -122,8 +119,6 @@ function Usuarios(props: any) {
           name: data.nombreUsuario,
           email: data.correo,
           role: roleItem ? roleItem : { id: 0, title: '' },
-          password: '',
-          passwordConfirm: '',
           identificacion: data.identificacion ? data.identificacion : '',
           universidadEstudiante: '',
           programaEstudiante: '',
@@ -139,8 +134,6 @@ function Usuarios(props: any) {
         name: data.nombreUsuario,
         email: data.correo,
         role: roleItem ? roleItem : { id: 0, title: '' },
-        password: '',
-        passwordConfirm: '',
         identificacion: data.identificacion,
         universidadEstudiante: '',
         programaEstudiante: '',
@@ -265,8 +258,6 @@ function Usuarios(props: any) {
     } else {
       if (userObject.name &&
         userObject.email &&
-        userObject.password &&
-        userObject.passwordConfirm &&
         userObject.role.id &&
         userObject.identificacion &&
         userObject.email.match(emailDomainRegexValidation)) {
@@ -277,25 +268,10 @@ function Usuarios(props: any) {
     }
   };
 
-  const validatePassword = () => {
-    if (userObject.password !== userObject.passwordConfirm) {
-      setShowAlert(true);
-      setSeverityAlert('warning');
-      setMessagesAlert('Las contraseñas ingresadas no coinciden, verifica que son identicas');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-      return false;
-    }
-    return true;
-  };
-
   const handleCreateUser = async () => {
     let userToSave = {
       nombreUsuario: userObject.name,
       correo: userObject.email,
-      contrasena: userObject.password,
       rolId: userObject.role.id,
       identificacion: userObject.identificacion,
       universidadEstudiante: userObject.universidadEstudiante,
@@ -330,7 +306,6 @@ function Usuarios(props: any) {
     let userToSave = {
       nombreUsuario: userObject.name,
       correo: userObject.email,
-      contrasena: userObject.password,
       rolId: userObject.role.id,
       identificacion: userObject.identificacion,
       universidadEstudiante: userObject.universidadEstudiante,
@@ -365,12 +340,8 @@ function Usuarios(props: any) {
     setOpenModalLoading(true);
     let isValid = validateFields();
     if (isValid) {
-
       if (userObject._id) {
         let isValidPassword = true;
-        if (updatePassword) {
-          isValidPassword = validatePassword();
-        }
         if (isValidPassword) {
           // EDITAR USUARIO
           handleEditUser();
@@ -378,8 +349,7 @@ function Usuarios(props: any) {
           setOpenModalLoading(false);
         }
       } else {
-        let isValidPassword = validatePassword();
-        if (isValidPassword) {
+        if (isValid) {
           // CREAR USUARIO
           handleCreateUser();
         } else {
@@ -554,7 +524,6 @@ function Usuarios(props: any) {
                   name: '',
                   email: '',
                   role: { id: 0, title: '' },
-                  password: '',
                   passwordConfirm: '',
                 });
                 setIsEdit(true);
@@ -673,58 +642,6 @@ function Usuarios(props: any) {
                       )}
                     />
                   </GridItem>
-                  {
-                    userObject._id ?
-                      <GridItem xs={12} sm={12} md={6} >
-                        <Checkbox
-                          checked={updatePassword}
-                          disabled={!isEdit}
-                          onClick={() => { setUpdatePassword(!updatePassword); }}
-                          checkedIcon={<CheckIcon className={classes.checkedIcon} />}
-                          icon={<CheckIcon className={classes.uncheckedIcon} />}
-                          classes={{
-                            checked: classes.checked
-                          }}
-                        />
-                        <span> Actualizar contaseña </span>
-                      </GridItem>
-                      : null
-                  }
-
-                  {
-                    !userObject._id || updatePassword ?
-                      <>
-                        <GridItem xs={12} sm={12} md={6} >
-                          <TextField
-                            id="outlined-password"
-                            label="Contraseña"
-                            variant="outlined"
-                            margin="dense"
-                            inputProps={{ maxLength: 150 }}
-                            className={classes.CustomTextField}
-                            type="password"
-                            error={!userObject.password ? true : false}
-                            value={userObject.password}
-                            onChange={(event) => setUserObject({ ...userObject, password: event.target.value })}
-                          />
-                        </GridItem>
-                        <GridItem xs={12} sm={12} md={6} >
-                          <TextField
-                            id="outlined-confirm-password"
-                            label="Confirmar contraseña"
-                            variant="outlined"
-                            margin="dense"
-                            inputProps={{ maxLength: 150 }}
-                            className={classes.CustomTextField}
-                            error={!userObject.passwordConfirm ? true : false}
-                            type="password"
-                            value={userObject.passwordConfirm}
-                            onChange={(event) => setUserObject({ ...userObject, passwordConfirm: event.target.value })}
-                          />
-                        </GridItem>
-                      </>
-                      : null
-                  }
 
                   {
                     userObject.role.id === userProfilesObject.est.id ?

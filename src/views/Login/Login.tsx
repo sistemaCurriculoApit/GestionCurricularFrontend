@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { createStyles } from '@material-ui/core';
 import withStyles from '@material-ui/core/styles/withStyles';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import logoApit from '../../assets/img/logoAPIT.png';
 import jwt_decode from 'jwt-decode';
@@ -29,13 +27,11 @@ function Login(props: any) {
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [googleIdentity, setGoogleIdentity] = useState(false);
 
   const handleCallbackResponse = async (response: any) => {
     const user: any = jwt_decode(response.credential);
     setEmail(user.email);
-    setPassword('google identity');
     setGoogleIdentity(true);
     setOpenModalLoading(true);
   };
@@ -64,12 +60,9 @@ function Login(props: any) {
       localStorage.setItem('idProfileLoggedUser', '-1');
       document.location.reload()
     } else {
-      if ((email && password) || googleIdentity) {
-        // Ingreso roles del sistema con credenciales
+        // Ingreso roles del sistema con credenciales de Google
         let response: any = await validateLogin({
-          correo: email,
-          contrasena: password,
-          googleIdentity: googleIdentity
+          correo: email
         });
         let { body } = response;
         if (body && body.token) {
@@ -86,15 +79,6 @@ function Login(props: any) {
             setShowAlert(false);
           }, 1000);
         }
-      } else {
-        setSeverityAlert('error');
-        setMessagesAlert('Correo electrónico y contraseña son obligatorios');
-        setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false);
-        }, 1000);
-      }
-
     }
     setOpenModalLoading(false);
   };
@@ -107,28 +91,6 @@ function Login(props: any) {
           <div className={classes.containerForm}>
             <img src={logoApit} className={classes.logoApitImg} />
             <div className={classes.containerFields}>
-              <TextField
-                id="outlined-email"
-                label="Correo electrónico"
-                variant="outlined"
-                margin="dense"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-              <TextField
-                id="outlined-password"
-                label="Contraseña"
-                variant="outlined"
-                margin="dense"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-
-              <Button type="button" variant="contained" className={classes.loginButton} onClick={() => { setOpenModalLoading(true); handleLogin(); }}>
-                Iniciar sesión
-              </Button>
-
               <a onClick={() => { setOpenModalLoading(true); handleLogin(true); }} className={classes.a}>
                 Ingresar cómo invitado
               </a>
