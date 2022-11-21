@@ -38,6 +38,7 @@ const DownloadReport = async (data: any[], header: string[], title: string) => {
 export const DownloadAdvancementReport = async (data: any[], sufix: string) => {
   const header = [
     'Asignatura',
+    'Docente',
     'Año del avance',
     'Periodo',
     'Porcentaje de avance',

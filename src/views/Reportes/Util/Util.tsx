@@ -75,6 +75,7 @@ export const parseAdvancement = (advancement: any) => {
 
 export const parseAdvancementReport = (advancement: any) => ({
   asignatura: advancement.asignaturaId.nombre,
+  docente: getProfessorName(advancement.docenteId),
   añoAvance: moment(advancement.añoAvance).format('YYYY'),
   periodo: advancement.periodo,
   porcentajeAvance: advancement.porcentajeAvance,
