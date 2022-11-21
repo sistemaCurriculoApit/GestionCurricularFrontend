@@ -1352,7 +1352,7 @@ function AvancesAsignaturas(props: any) {
                         <GridItem xs={12} sm={12} md={12} >
                           <TextField
                             id="outlined-email"
-                            label="Porcentaje aproximado"
+                            label="Porcentaje de avance en concertación"
                             variant="outlined"
                             margin="dense"
                             disabled={blockCoordinatorPermissions || !isEdit}
