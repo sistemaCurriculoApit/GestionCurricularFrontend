@@ -1,4 +1,4 @@
-const production = process.env.name === 'prod';
+const production = process.env.REACT_APP_ENV_NAME === 'prod';
 export const backendBaseUrl = production ? 'https://curriculo-apit-backend.herokuapp.com' : 'http://localhost:3000';
 export const frontendBaseUrl = production ? 'https://curriculo-apit-frontend.herokuapp.com' : 'http://localhost:3002';
 
