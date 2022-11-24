@@ -1,6 +1,6 @@
 const production = process.env.REACT_APP_ENV_NAME === 'prod';
-export const backendBaseUrl = production ? 'https://curriculo-apit-backend.herokuapp.com' : 'http://localhost:3000';
-export const frontendBaseUrl = production ? 'https://curriculo-apit-frontend.herokuapp.com' : 'http://localhost:3002';
+export const backendBaseUrl = production ? 'https://gestion-curricular-backend.vercel.app' : 'http://localhost:3000';
+export const frontendBaseUrl = production ? 'https://gestion-curricular-frontend.vercel.app' : 'http://localhost:3002';
 
 export const getHeaders = () => {
   const headers = new Headers({ 'Content-Type': 'application/json' });
