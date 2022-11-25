@@ -1,5 +1,5 @@
 const production = process.env.REACT_APP_ENV_NAME === 'prod';
-export const backendBaseUrl = production ? 'https://gestion-curricular-backend.vercel.app' : 'http://localhost:3000';
+export const backendBaseUrl = production ? 'http://45.79.210.201:3000' : 'http://localhost:3000';
 export const frontendBaseUrl = production ? 'https://gestion-curricular-frontend.vercel.app' : 'http://localhost:3002';
 
 export const getHeaders = () => {
