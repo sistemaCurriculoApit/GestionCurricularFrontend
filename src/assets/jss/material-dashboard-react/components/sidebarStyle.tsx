@@ -66,8 +66,8 @@ const sidebarStyle = (theme: Theme) => createStyles({
     position: 'relative',
     padding: '5px 5px',
     zIndex: 4,
-    display:"flex",
-    flexDirection:"column",
+    display: 'flex',
+    flexDirection: 'column',
     '&:after': {
       content: '""',
       position: 'absolute',
@@ -112,10 +112,8 @@ const sidebarStyle = (theme: Theme) => createStyles({
     textAlign: 'right'
   },
   logoImage: {
-    width:"100%",
-    display: 'inline-block',
-    marginLeft: '10px',
-    marginRight: '15px'
+    width: '100%',
+    display: 'inline-block'
   },
   img: {
     width: '240px',

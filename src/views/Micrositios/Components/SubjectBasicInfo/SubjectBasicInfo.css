@@ -1,0 +1,27 @@
+.subject-basic-info-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 1rem 0.5rem;
+  margin: 0.5rem 1rem;
+  width: 100%;
+  font-size: 1rem;
+  border-bottom: 1px solid grey;
+  border-top: 1px solid grey;
+}
+
+.subject-basic-info-container > div {
+  display: flex;
+  flex-direction: column;
+
+  padding: 0 1rem 0 0;
+}
+
+.subject-basic-info-container > div div {
+  padding: 0 0.5rem;
+}
+
+.subject-basic-info-container > div div span {
+  padding: 0 1rem;
+  font-weight: 600;
+}

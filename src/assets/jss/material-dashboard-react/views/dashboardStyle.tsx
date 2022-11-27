@@ -82,8 +82,8 @@ const dashboardStyle = createStyles({
     color: successColor[0], // color: primaryColor
     textDecoration: 'none',
     backgroundColor: 'transparent',
-    cursor:'pointer',
-    '&:hover':{
+    cursor: 'pointer',
+    '&:hover': {
       color: successColor[1],
     }
   },

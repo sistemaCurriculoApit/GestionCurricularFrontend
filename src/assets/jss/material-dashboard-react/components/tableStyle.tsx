@@ -51,12 +51,11 @@ const tableStyle = (theme: Theme) => createStyles({
     padding: '5px 8px',
     verticalAlign: 'middle',
   },
-  CellContent:{
+  CellContent: {
     whiteSpace: 'pre-line',
     textOverflow: 'ellipsis',
-    display: 'block',
-    overflow: 'auto',
-    maxHeight: '150px'
+    display: 'grid',
+    overflow: 'auto'
   },
   tableResponsive: {
     width: '100%',

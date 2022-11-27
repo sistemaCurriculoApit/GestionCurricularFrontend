@@ -1,0 +1,18 @@
+#sign-in {
+    margin: 15px 50% 15px 50%;
+}
+
+#sign-in__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;  
+    justify-content: center;
+}
+
+.horizontal-row{
+    color: gray ;
+}
+.horizontal-row:nth-child(1){
+    margin: 0;    
+}
+

@@ -1,7 +1,6 @@
-//importacion de dependencias y servicios
+// importacion de dependencias y servicios
 import React, { useEffect, useState } from 'react';
-import MomentUtils from "@date-io/moment";
-// @material-ui/core components
+import MomentUtils from '@date-io/moment';
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
 import Modal from '@material-ui/core/Modal';
@@ -11,15 +10,15 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Search from '@material-ui/icons/Search';
 import FilterList from '@material-ui/icons/FilterList';
 import Checkbox from '@material-ui/core/Checkbox';
-import FormControl from '@material-ui/core/FormControl';
 import CloseIcon from '@material-ui/icons/Close';
 import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import EditIcon from '@material-ui/icons/Edit';
 import ClearIcon from '@material-ui/icons/Clear';
 import CheckIcon from '@material-ui/icons/Check';
-import moment from "moment";
-import "moment/locale/es";
+import moment from 'moment';
+import 'moment/locale/es';
 
 // core components
 import { createStyles } from '@material-ui/core';
@@ -32,22 +31,20 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 
-//jss
-import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
-import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
-import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
+// jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
+import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react';
 import checkboxAdnRadioStyle from '../../assets/jss/material-dashboard-react/checkboxAdnRadioStyle';
 
+import { userProfilesArray, AnythingObject, userProfilesObject, emailDomainRegexValidation } from '../../constants/generalConstants';
+import { getEstudianteByEmail } from '../../services/estudiantesServices';
+import { getUserPaginated, createUser, updateUser } from '../../services/usersServices';
 
-import { userProfilesArray, AnythingObject, userProfilesObject, emailDomainRegexValidation } from '../../constants/generalConstants'
-import { getEstudianteByEmail } from '../../services/estudiantesServices'
-import { getUserPaginated, createUser, updateUser } from "../../services/usersServices"
-
-//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -61,12 +58,10 @@ const styles = createStyles({
   ...checkboxAdnRadioStyle,
 });
 
-//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Usuarios(props: any) {
   const { classes } = props;
   const openModalCreate = props.history.location.state ? props.history.location.state.openModalCreate : false;
 
-  //Declaración de variables y estados del componente
   const [showAlert, setShowAlert] = useState(false);
   const [severityAlert, setSeverityAlert] = useState('');
   const [messageAlert, setMessagesAlert] = useState('');
@@ -74,165 +69,71 @@ function Usuarios(props: any) {
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [updatePassword, setUpdatePassword] = useState(false);
   const [openMoreFilters, setOpenMoreFilters] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>(true);
   const [searchField, setSearchField] = useState('');
   const [dateCreationFrom, setDateCreationFrom] = useState<any>();
   const [dateCreationTo, setDateCreationTo] = useState<any>();
   const [userList, setUserList] = useState([]);
   const [totalUsers, setTotalUsers] = useState(0);
   const [pagePagination, setPagePagination] = useState(1);
-  const [errorEmail, setErrorEmail] = useState<any>({error:false, mensaje:""});
+  const [errorEmail, setErrorEmail] = useState<any>({ error: false, mensaje: '' });
   const [userObject, setUserObject] = useState<AnythingObject>({
     _id: '',
     name: '',
     email: '',
     role: { id: 0, title: '' },
-    password: '',
     passwordConfirm: '',
     identificacion: '',
     universidadEstudiante: '',
     programaEstudiante: '',
-    planEstudiante:'',
+    planEstudiante: '',
     universidadEstudianteOrigen: '',
     programaEstudianteOrigen: '',
-    planEstudianteOrigen:''
+    planEstudianteOrigen: ''
   });
 
-
-  //Al iniciar el componente se obtienen los usuarios y si es redirección del dashboard se abre la modal de creacion
-  useEffect(() => {
-    setOpenModalLoading(true);
-    getUsers();
-    if (openModalCreate) {
-      setOpenModal(true);
-    }
-  }, [])
-
-  //Actualizacion de la lista de usuarios si el componente de busqueda es modificado
-  useEffect(() => {
-    if (!searchField) {
-      setOpenModalLoading(true);
-      getUsers();
-    }
-  }, [searchField])
-
-  //Metodo de obtencion de usuarios
-  const getUsers = async (page?: any) => {
-    //Llamado al backend y construcción de los parametros de consulta
-    let response: any = await getUserPaginated({
-      page: page ? page : 0,
-      search: searchField,
-      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
-      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
-    });
-    setPagePagination(page ? page + 1 : 1);
-    if (response.users && response.users.length) {
-      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-      let users = response.users.map((data: any) => {
-        let arrayData = [
-          data.correo,
-          data.nombreUsuario,
-          data.identificacion,
-          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
-                onClick={() => {
-                  setDataEditUser(data);
-
-                }} />
-            </div>
-          </Tooltip>
-        ]
-        return arrayData;
-      });
-      setTotalUsers(response.totalUsers);
-      setUserList(users);
-    } else {
-      setTotalUsers(0);
-      setUserList([]);
-
-    }
-    setOpenModalLoading(false);
-  }
-
-  const setUserRoleData =  async (roleSelected:any)=>{
-    if (roleSelected.id === userProfilesObject.est.id){
-      let estudiante:any = await getEstudianteByEmail({
-        correo: userObject.email
-      });
-      if (estudiante){
-        setUserObject({...userObject, 
-          role: roleSelected,
-          universidadEstudiante: estudiante.universidad,
-          programaEstudiante: estudiante.programa,
-          planEstudiante: estudiante.plan,
-          universidadEstudianteOrigen: estudiante.universidadOrigen,
-          programaEstudianteOrigen: estudiante.programaOrigen,
-          planEstudianteOrigen: estudiante.planOrigen
-        })
-      }
-    }else{
-      setUserObject({...userObject, role:roleSelected})
-    }
-  };
-
-  //Cuando se cambia de pagina se ejecuta el metodo getUsers con la pagina solicitada
-  const onChangePage = (page: number) => {
-    setOpenModalLoading(true);
-    getUsers(page);
-
-  };
-
-  //Se establecen los datos de un usuario a editar en la modal
   const setDataEditUser = async (data: any) => {
     setOpenModal(true);
     let roleItem = userProfilesArray.find((item) => item.id === data.rolId);
-    if (roleItem && roleItem.id === userProfilesObject.est.id){
-      let estudiante:any = await getEstudianteByEmail({
+    if (roleItem && roleItem.id === userProfilesObject.est.id) {
+      let estudiante: any = await getEstudianteByEmail({
         correo: data.correo
       });
-        if (estudiante){
-          setUserObject({
-            _id: data._id,
-            name: data.nombreUsuario,
-            email: data.correo,
-            role: roleItem ? roleItem : { id: 0, title: '' },
-            password: '',
-            passwordConfirm: '',
-            universidadEstudiante: estudiante.universidad ? estudiante.universidad : '',
-            programaEstudiante: estudiante.programa ? estudiante.programa : '',
-            identificacion: data.identificacion ? data.identificacion : '',
-            planEstudiante: estudiante.plan ? estudiante.plan : '',
-            universidadEstudianteOrigen: estudiante.universidadOrigen ? estudiante.universidadOrigen : '',
-            programaEstudianteOrigen: estudiante.programaOrigen ? estudiante.programaOrigen : '',
-            planEstudianteOrigen: estudiante.planOrigen ? estudiante.planOrigen : '',
-          });
-        }else{
-          setUserObject({
-            _id: data._id,
-            name: data.nombreUsuario,
-            email: data.correo,
-            role: roleItem ? roleItem : { id: 0, title: '' },
-            password: '',
-            passwordConfirm: '',
-            identificacion: data.identificacion ? data.identificacion : '',
-            universidadEstudiante: '',
-            programaEstudiante: '',
-            planEstudiante: '',
-            universidadEstudianteOrigen: '',
-            programaEstudianteOrigen: '',
-            planEstudianteOrigen: '',
-          });
-        }
-    }else{
+      if (estudiante) {
+        setUserObject({
+          _id: data._id,
+          name: data.nombreUsuario,
+          email: data.correo,
+          role: roleItem ? roleItem : { id: 0, title: '' },
+          universidadEstudiante: estudiante.universidad ? estudiante.universidad : '',
+          programaEstudiante: estudiante.programa ? estudiante.programa : '',
+          identificacion: data.identificacion ? data.identificacion : '',
+          planEstudiante: estudiante.plan ? estudiante.plan : '',
+          universidadEstudianteOrigen: estudiante.universidadOrigen ? estudiante.universidadOrigen : '',
+          programaEstudianteOrigen: estudiante.programaOrigen ? estudiante.programaOrigen : '',
+          planEstudianteOrigen: estudiante.planOrigen ? estudiante.planOrigen : '',
+        });
+      } else {
+        setUserObject({
+          _id: data._id,
+          name: data.nombreUsuario,
+          email: data.correo,
+          role: roleItem ? roleItem : { id: 0, title: '' },
+          identificacion: data.identificacion ? data.identificacion : '',
+          universidadEstudiante: '',
+          programaEstudiante: '',
+          planEstudiante: '',
+          universidadEstudianteOrigen: '',
+          programaEstudianteOrigen: '',
+          planEstudianteOrigen: '',
+        });
+      }
+    } else {
       setUserObject({
         _id: data._id,
         name: data.nombreUsuario,
         email: data.correo,
         role: roleItem ? roleItem : { id: 0, title: '' },
-        password: '',
-        passwordConfirm: '',
         identificacion: data.identificacion,
         universidadEstudiante: '',
         programaEstudiante: '',
@@ -244,27 +145,212 @@ function Usuarios(props: any) {
     }
   };
 
-  //Manejador de la accion guardar de la modal, se encarga de crear o editar
+  const getUsers = async (page?: any) => {
+    // Llamado al backend y construcción de los parametros de consulta
+    let response: any = await getUserPaginated({
+      page: page ? page : 0,
+      search: searchField,
+      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+    });
+    setPagePagination(page ? page + 1 : 1);
+    if (response.users && response.users.length) {
+      // Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
+      let users = response.users.map((data: any) => {
+        let arrayData = [
+          data.correo,
+          data.nombreUsuario,
+          data.identificacion,
+          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+          (
+            <Tooltip id="filterTooltip" title="Ver usuarios" placement="top" classes={{ tooltip: classes.tooltip }}>
+              <div className={classes.buttonHeaderContainer}>
+                <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                  onClick={() => {
+                    setIsEdit(false);
+                    setDataEditUser(data);
+                  }} />
+              </div>
+            </Tooltip>
+          ),
+          (
+            <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
+              <div className={classes.buttonHeaderContainer}>
+                <Button
+                  key={'filtersButton'}
+                  color={'primary'}
+                  size="sm"
+                  round={true}
+                  justIcon={true}
+                  variant="outlined"
+                  startIcon={<EditIcon />}
+                  onClick={() => {
+                    setIsEdit(true);
+                    setDataEditUser(data);
+                  }} />
+              </div>
+            </Tooltip>
+          )
+        ];
+        return arrayData;
+      });
+      setTotalUsers(response.totalUsers);
+      setUserList(users);
+    } else {
+      setTotalUsers(0);
+      setUserList([]);
+
+    }
+    setOpenModalLoading(false);
+  };
+
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getUsers();
+    if (openModalCreate) {
+      setOpenModal(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!searchField) {
+      setOpenModalLoading(true);
+      getUsers();
+    }
+  }, [searchField]);
+
+  const setUserRoleData = async (roleSelected: any) => {
+    if (roleSelected.id === userProfilesObject.est.id) {
+      let estudiante: any = await getEstudianteByEmail({
+        correo: userObject.email
+      });
+      if (estudiante) {
+        setUserObject({
+          ...userObject,
+          role: roleSelected,
+          universidadEstudiante: estudiante.universidad,
+          programaEstudiante: estudiante.programa,
+          planEstudiante: estudiante.plan,
+          universidadEstudianteOrigen: estudiante.universidadOrigen,
+          programaEstudianteOrigen: estudiante.programaOrigen,
+          planEstudianteOrigen: estudiante.planOrigen
+        });
+      }
+    } else {
+      setUserObject({ ...userObject, role: roleSelected });
+    }
+  };
+
+  const onChangePage = (page: number) => {
+    setOpenModalLoading(true);
+    getUsers(page);
+
+  };
+
+  const validateFields = () => {
+    if (userObject._id) {
+      if (userObject.name && userObject.email && userObject.role.id && userObject.email.match(emailDomainRegexValidation) && userObject.identificacion) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (userObject.name &&
+        userObject.email &&
+        userObject.role.id &&
+        userObject.identificacion &&
+        userObject.email.match(emailDomainRegexValidation)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
+  const handleCreateUser = async () => {
+    let userToSave = {
+      nombreUsuario: userObject.name,
+      correo: userObject.email,
+      rolId: userObject.role.id,
+      identificacion: userObject.identificacion,
+      universidadEstudiante: userObject.universidadEstudiante,
+      programa: userObject.programaEstudiante,
+      plan: userObject.planEstudiante,
+      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
+      programaOrigen: userObject.programaEstudianteOrigen,
+      planOrigen: userObject.planEstudianteOrigen,
+    };
+    let response: any = await createUser(userToSave);
+    if (response && response.error) {
+      setSeverityAlert('error');
+      setShowAlert(true);
+      setMessagesAlert(response && response.descripcion ? response.descripcion : 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Usuario creado satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModal(false);
+      getUsers();
+    }
+  };
+
+  const handleEditUser = async () => {
+    let userToSave = {
+      nombreUsuario: userObject.name,
+      correo: userObject.email,
+      rolId: userObject.role.id,
+      identificacion: userObject.identificacion,
+      universidadEstudiante: userObject.universidadEstudiante,
+      programa: userObject.programaEstudiante,
+      plan: userObject.planEstudiante,
+      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
+      programaOrigen: userObject.programaEstudianteOrigen,
+      planOrigen: userObject.planEstudianteOrigen,
+    };
+    let response: any = await updateUser(userToSave, userObject._id);
+    if (response && response.error) {
+      setSeverityAlert('error');
+      setShowAlert(true);
+      setMessagesAlert(response && response.descripcion ? response.descripcion : 'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    } else {
+      setSeverityAlert('success');
+      setShowAlert(true);
+      setMessagesAlert('Usuario editado satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModal(false);
+      getUsers();
+    }
+  };
+
   const handleSaveUser = () => {
     setOpenModalLoading(true);
     let isValid = validateFields();
     if (isValid) {
-
       if (userObject._id) {
         let isValidPassword = true;
-        if (updatePassword) {
-          isValidPassword = validatePassword();
-        }
         if (isValidPassword) {
-          //EDITAR USUARIO
+          // EDITAR USUARIO
           handleEditUser();
         } else {
           setOpenModalLoading(false);
         }
       } else {
-        let isValidPassword = validatePassword();
-        if (isValidPassword) {
-          //CREAR USUARIO
+        if (isValid) {
+          // CREAR USUARIO
           handleCreateUser();
         } else {
           setOpenModalLoading(false);
@@ -282,117 +368,6 @@ function Usuarios(props: any) {
     }
   };
 
-  //Metodo para crear un usuario
-  const handleCreateUser = async () => {
-    let userToSave = {
-      nombreUsuario: userObject.name,
-      correo: userObject.email,
-      contrasena: userObject.password,
-      rolId: userObject.role.id,
-      identificacion: userObject.identificacion,
-      universidadEstudiante: userObject.universidadEstudiante,
-      programa: userObject.programaEstudiante,
-      plan: userObject.planEstudiante,
-      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
-      programaOrigen: userObject.programaEstudianteOrigen,
-      planOrigen: userObject.planEstudianteOrigen,
-    };
-    let response: any = await createUser(userToSave);
-    if (response && response.error) {
-      setSeverityAlert('error');
-      setShowAlert(true);
-      setMessagesAlert(response && response.descripcion ? response.descripcion:'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-    } else {
-      setSeverityAlert('success');
-      setShowAlert(true);
-      setMessagesAlert('Usuario creado satisfactoriamente');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModal(false);
-      getUsers();
-    }
-  }
-
-  //Metodo para editar un usuario
-  const handleEditUser = async () => {
-    let userToSave = {
-      nombreUsuario: userObject.name,
-      correo: userObject.email,
-      contrasena: userObject.password,
-      rolId: userObject.role.id,
-      identificacion: userObject.identificacion,
-      universidadEstudiante: userObject.universidadEstudiante,
-      programa: userObject.programaEstudiante,
-      plan: userObject.planEstudiante,
-      universidadEstudianteOrigen: userObject.universidadEstudianteOrigen,
-      programaOrigen: userObject.programaEstudianteOrigen,
-      planOrigen: userObject.planEstudianteOrigen,
-    };
-    let response: any = await updateUser(userToSave, userObject._id);
-    if (response && response.error) {
-      setSeverityAlert('error');
-      setShowAlert(true);
-      setMessagesAlert(response && response.descripcion ? response.descripcion:'Ha ocurrido un error intentando actualizar, por favor intentelo de nuevo');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-    } else {
-      setSeverityAlert('success');
-      setShowAlert(true);
-      setMessagesAlert('Usuario editado satisfactoriamente');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModal(false);
-      getUsers();
-    }
-  }
-
-  //Validacion de campos obligatorios para la creacion y edicion
-  const validateFields = () => {
-    if (userObject._id) {
-      if (userObject.name && userObject.email && userObject.role.id && userObject.email.match(emailDomainRegexValidation) && userObject.identificacion) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      if (userObject.name &&
-        userObject.email &&
-        userObject.password &&
-        userObject.passwordConfirm &&
-        userObject.role.id &&
-        userObject.identificacion &&
-        userObject.email.match(emailDomainRegexValidation)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  };
-
-  //Validacion de contraseñas, que sean iguales
-  const validatePassword = () => {
-    if (userObject.password !== userObject.passwordConfirm) {
-      setShowAlert(true);
-      setSeverityAlert('warning');
-      setMessagesAlert('Las contraseñas ingresadas no coinciden, verifica que son identicas');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
-      return false;
-    }
-    return true;
-  };
-
-  //Retorno con todos la construcción de la interfaz del modulo
   return (
     <div>
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -413,26 +388,26 @@ function Usuarios(props: any) {
                     onChange={(event) => setSearchField(event.target.value)}
                     InputProps={{
                       endAdornment:
-                        <Button key={'searchButton'} color={'primary'} round variant="outlined" size='sm' justIcon startIcon={<ClearIcon />}
+                        <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" size="sm" justIcon={true} startIcon={<ClearIcon />}
                           onClick={() => {
                             setSearchField('');
                           }} />
                     }}
                   />
 
-                  <Tooltip id='searchTooltip' title="Buscar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="searchTooltip" title="Buscar" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
+                      <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<Search />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getUsers();
                         }} />
                     </div>
                   </Tooltip>
-                  <Tooltip id='filterTooltip' title="Más filtros" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="filterTooltip" title="Más filtros" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" justIcon startIcon={<FilterList />}
-                        onClick={() => { setOpenMoreFilters(!openMoreFilters) }} />
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<FilterList />}
+                        onClick={() => { setOpenMoreFilters(!openMoreFilters); }} />
                     </div>
                   </Tooltip>
                 </div>
@@ -442,7 +417,7 @@ function Usuarios(props: any) {
                   <div>
                     <Card className={classes.cardFilters}>
                       <div >
-                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                           <GridContainer>
                             <GridItem xs={12} sm={12} md={12}>
                               <h4 className={classes.cardTitleBlack}>Fecha de creación</h4>
@@ -451,16 +426,16 @@ function Usuarios(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha desde"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationFrom}
                                   onChange={(newValue: any) => {
                                     setDateCreationFrom(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationFrom ? (
@@ -474,16 +449,16 @@ function Usuarios(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha hasta"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationTo}
                                   onChange={(newValue: any) => {
                                     setDateCreationTo(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationTo ? (
@@ -496,7 +471,7 @@ function Usuarios(props: any) {
                         </MuiPickersUtilsProvider>
                       </div>
                       <div className={classes.containerFooterCard} >
-                        <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                        <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                           onClick={() => {
                             setOpenModalLoading(true);
                             getUsers();
@@ -523,6 +498,7 @@ function Usuarios(props: any) {
                       'Identificación',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver usuarios',
                       'Acciones'
                     ]}
                     tableData={userList}
@@ -538,9 +514,9 @@ function Usuarios(props: any) {
         </GridItem>
       </GridContainer>
       <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nuevo usuario" placement='left' classes={{ tooltip: classes.tooltip }}>
+        <Tooltip id="addTooltip" title="Crear nuevo usuario" placement="left" classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} round={true} justIcon={true} startIcon={<AddIcon />}
               onClick={() => {
                 setOpenModal(!openModal);
                 setUserObject({
@@ -548,9 +524,9 @@ function Usuarios(props: any) {
                   name: '',
                   email: '',
                   role: { id: 0, title: '' },
-                  password: '',
                   passwordConfirm: '',
-                })
+                });
+                setIsEdit(true);
               }} />
           </div>
         </Tooltip>
@@ -569,12 +545,17 @@ function Usuarios(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{userObject._id ? 'Editar': 'Crear'} usuario</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{userObject._id ? 'Editar' : 'Crear'} usuario</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles del usuario</h4>
+                  }
                   <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModal(false); }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -594,23 +575,25 @@ function Usuarios(props: any) {
                       value={userObject.name}
                       defaultValue={''}
                       error={!userObject.name ? true : false}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setUserObject({ ...userObject, name: event.target.value })
+                        setUserObject({ ...userObject, name: event.target.value });
                       }}
                     />
                   </GridItem>
                   <GridItem xs={12} sm={12} md={6} >
-                      <TextField
-                        id="outlined-name"
-                        label="Identificación"
-                        variant="outlined"
-                        margin="dense"
-                        inputProps={{ maxLength: 150 }}
-                        className={classes.CustomTextField}
-                        error={!userObject.identificacion ? true : false}
-                        value={userObject.identificacion}
-                        onChange={(event) => setUserObject({ ...userObject, identificacion: event.target.value })}
-                      />
+                    <TextField
+                      id="outlined-name"
+                      label="Identificación"
+                      variant="outlined"
+                      margin="dense"
+                      inputProps={{ maxLength: 150 }}
+                      className={classes.CustomTextField}
+                      error={!userObject.identificacion ? true : false}
+                      value={userObject.identificacion}
+                      disabled={!isEdit}
+                      onChange={(event) => setUserObject({ ...userObject, identificacion: event.target.value })}
+                    />
                   </GridItem>
 
                   <GridItem xs={12} sm={12} md={6} >
@@ -620,19 +603,19 @@ function Usuarios(props: any) {
                       variant="outlined"
                       margin="dense"
                       inputProps={{ maxLength: 150 }}
-                      inputMode='email'
+                      inputMode="email"
                       error={errorEmail.error}
                       helperText={errorEmail.mensaje}
                       className={classes.CustomTextField}
                       value={userObject.email}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        if (!event.target.value.match(emailDomainRegexValidation))  {
-                          setErrorEmail({error:true, mensaje:"El formato del correo no es válido"})
+                        if (!event.target.value.match(emailDomainRegexValidation)) {
+                          setErrorEmail({ error: true, mensaje: 'El formato del correo no es válido' });
+                        } else {
+                          setErrorEmail({ error: false, mensaje: '' });
                         }
-                        else{
-                          setErrorEmail({error:false, mensaje:""})
-                        }
-                        setUserObject({ ...userObject, email: event.target.value })
+                        setUserObject({ ...userObject, email: event.target.value });
                       }}
                     />
                   </GridItem>
@@ -642,9 +625,10 @@ function Usuarios(props: any) {
                       id="tags-outlined"
                       options={userProfilesArray}
                       getOptionLabel={(option) => option.title}
-                      filterSelectedOptions
-                      onChange={(e, option) => {setUserRoleData(option || {})}}
+                      filterSelectedOptions={true}
+                      onChange={(e, option) => { setUserRoleData(option || {}); }}
                       value={userObject.role}
+                      disabled={!isEdit}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -658,61 +642,10 @@ function Usuarios(props: any) {
                       )}
                     />
                   </GridItem>
-                  {
-                    userObject._id ?
-                      <GridItem xs={12} sm={12} md={6} >
-                        <Checkbox
-                          checked={updatePassword}
-                          onClick={() => { setUpdatePassword(!updatePassword) }}
-                          checkedIcon={<CheckIcon className={classes.checkedIcon} />}
-                          icon={<CheckIcon className={classes.uncheckedIcon} />}
-                          classes={{
-                            checked: classes.checked
-                          }}
-                        />
-                        <span> Actualizar contaseña </span>
-                      </GridItem>
-                      : null
-                  }
-
-                  {
-                    !userObject._id || updatePassword ?
-                      <>
-                        <GridItem xs={12} sm={12} md={6} >
-                          <TextField
-                            id="outlined-password"
-                            label="Contraseña"
-                            variant="outlined"
-                            margin="dense"
-                            inputProps={{ maxLength: 150 }}
-                            className={classes.CustomTextField}
-                            type="password"
-                            error={!userObject.password ? true : false}
-                            value={userObject.password}
-                            onChange={(event) => setUserObject({ ...userObject, password: event.target.value })}
-                          />
-                        </GridItem>
-                        <GridItem xs={12} sm={12} md={6} >
-                          <TextField
-                            id="outlined-confirm-password"
-                            label="Confirmar contraseña"
-                            variant="outlined"
-                            margin="dense"
-                            inputProps={{ maxLength: 150 }}
-                            className={classes.CustomTextField}
-                            error={!userObject.passwordConfirm ? true : false}
-                            type="password"
-                            value={userObject.passwordConfirm}
-                            onChange={(event) => setUserObject({ ...userObject, passwordConfirm: event.target.value })}
-                          />
-                        </GridItem>
-                      </>
-                      : null
-                  }
 
                   {
                     userObject.role.id === userProfilesObject.est.id ?
-                    <>
+                      <>
                         <GridItem xs={12} sm={12} md={6} >
                           <TextField
                             id="outlined-name"
@@ -788,20 +721,22 @@ function Usuarios(props: any) {
                             onChange={(event) => setUserObject({ ...userObject, planEstudianteOrigen: event.target.value })}
                           />
                         </GridItem>
-                    </>
-                    : null
+                      </>
+                      : null
                   }
 
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSaveUser(); }}>
-                  {'Guardar'}
-                </Button>
-
-              </div>
-
+              {
+                isEdit ? (
+                  <div className={classes.containerFooterModal} >
+                    <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSaveUser(); }}>
+                      {'Guardar'}
+                    </Button>
+                  </div>
+                ) : null
+              }
             </Card>
           </GridItem>
         </div>

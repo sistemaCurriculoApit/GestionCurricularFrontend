@@ -22,7 +22,7 @@ const appStyle = (theme: Theme) => createStyles({
     maxHeight: '100%',
     width: '100%',
     overflowScrolling: 'touch',
-    backgroundColor:'#dadada'
+    backgroundColor: '#dadada'
   },
   content: {
     marginTop: '50px',

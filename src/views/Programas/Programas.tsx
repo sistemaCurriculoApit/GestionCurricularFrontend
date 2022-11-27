@@ -1,7 +1,6 @@
-//importacion de dependencias y servicios
+// importacion de dependencias y servicios
 import React, { useState, useEffect } from 'react';
-import MomentUtils from "@date-io/moment";
-// @material-ui/core components
+import MomentUtils from '@date-io/moment';
 import withStyles from '@material-ui/core/styles/withStyles';
 import TextField from '@material-ui/core/TextField';
 import Modal from '@material-ui/core/Modal';
@@ -15,8 +14,9 @@ import AddIcon from '@material-ui/icons/Add';
 import SendIcon from '@material-ui/icons/Send';
 import ClearIcon from '@material-ui/icons/Clear';
 import EditIcon from '@material-ui/icons/Edit';
-import moment from "moment";
-import "moment/locale/es";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import moment from 'moment';
+import 'moment/locale/es';
 
 // core components
 import { createStyles } from '@material-ui/core';
@@ -29,21 +29,19 @@ import CardBody from '../../components/Card/CardBody';
 import Button from '../../components/CustomButtons/Button';
 import TablePagination from '../../components/Pagination/TablePagination';
 import ModalLoading from '../../components/ModalLoading/ModalLoading';
-import AlertComponent from '../../components/Alert/AlertComponent'
+import AlertComponent from '../../components/Alert/AlertComponent';
 
-//jss
-import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle'
-import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle'
-import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle'
-import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle'
-import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react'
+// jss
+import { CustomSearchTextField, CustomTextField } from '../../assets/jss/material-dashboard-react/components/customInputStyle';
+import cardTabletCustomStyle from '../../assets/jss/material-dashboard-react/components/cardTabletCustomStyle';
+import { containerFloatButton } from '../../assets/jss/material-dashboard-react/components/buttonStyle';
+import tooltipStyle from '../../assets/jss/material-dashboard-react/tooltipStyle';
+import { container, containerFormModal, containerFooterModal, modalForm } from '../../assets/jss/material-dashboard-react';
 
-import { AnythingObject } from '../../constants/generalConstants'
-import { getProgramasPaginated, createPrograma, updatePrograma } from "../../services/programasServices"
-import { getAllPlanes } from "../../services/planesServices"
+import { AnythingObject } from '../../constants/generalConstants';
+import { getProgramasPaginated, createPrograma, updatePrograma } from '../../services/programasServices';
+import { getAllPlanes } from '../../services/planesServices';
 
-
-//Estilos generales usados en el modulo
 const styles = createStyles({
   CustomSearchTextFieldStyle: CustomSearchTextField.input,
   CustomTextField: CustomTextField.input,
@@ -56,11 +54,7 @@ const styles = createStyles({
   ...containerFloatButton,
 });
 
-
-//Inicio componente funcional con sus rescpectivas propiedades si las hubiere
 function Programas(props: any) {
-  
-  //Declaración de variables y estados del componente
   const { classes } = props;
 
   const [showAlert, setShowAlert] = useState(false);
@@ -72,7 +66,7 @@ function Programas(props: any) {
   const [openModalLoading, setOpenModalLoading] = useState(false);
   const [dateCreationFrom, setDateCreationFrom] = useState<any>(null);
   const [dateCreationTo, setDateCreationTo] = useState<any>(null);
-
+  const [isEdit, setIsEdit] = useState<boolean>();
   const [programasList, setProgramasList] = useState([]);
   const [planesList, setPlanesList] = useState([]);
   const [totalProgramas, setTotalProgramas] = useState(0);
@@ -85,71 +79,16 @@ function Programas(props: any) {
     plan: [],
   });
 
-  //Al iniciar el componente se obtienen los programas
-  useEffect(() => {
-    setOpenModalLoading(true);
-    getProgramas();
-  }, [])
-
-  //Actualizacion de la lista de programas si el componente de busqueda es modificado
-  useEffect(() => {
-    if (!searchField) {
-      setOpenModalLoading(true);
-      getProgramas();
-    }
-  }, [searchField])
-
-  //Metodo de obtencion de programas
-  const getProgramas = async (page?: any) => {
-    //Llamado al backend y construcción de los parametros de consulta
-    let response: any = await getProgramasPaginated({
-      page: page ? page : 0,
-      search: searchField,
-      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
-      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
-    });
-    setPagePagination(page ? page + 1 : 1);
-    if (response.programas && response.programas.length) {
-      //Se recorre respuesta con los datos obtenidos para generar un arreglo en el orden que se muestran los datos en la tabla
-      let programas = response.programas.map((data: any) => {
-        let arrayData = [
-          data.codigo,
-          data.nombre,
-          data.descripcion,
-          moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
-          moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
-          <Tooltip id='filterTooltip' title="Editar" placement='top' classes={{ tooltip: classes.tooltip }}>
-            <div className={classes.buttonHeaderContainer}>
-              <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<EditIcon />}
-                onClick={() => {
-                  setDataEditPrograma(data);
-                }} />
-            </div>
-          </Tooltip>
-        ];
-        return arrayData;
-      });
-      setTotalProgramas(response.totalProgramas);
-      setProgramasList(programas);
-    } else {
-      setTotalProgramas(0);
-      setProgramasList([]);
-
-    }
-    setOpenModalLoading(false);
-  }
-
-  //Obtencion de los planes para la modal, cuando se crea o se edita un programa
   const getPlanes = async (isEdit?: boolean, programaToEdit?: any) => {
-    let response: any = await getAllPlanes({
+    const response: any = await getAllPlanes({
       search: '',
     });
-    let planesSelected = [];
+    const planesSelected = [];
     if (response && response.planes) {
       setPlanesList(response.planes);
       if (isEdit && programaToEdit.plan && programaToEdit.plan.length) {
         for (let i = 0; i < programaToEdit.plan.length; i++) {
-          let findPlan = response.planes.find((plan: any) => plan._id === programaToEdit.plan[i]._id)
+          const findPlan = response.planes.find((plan: any) => plan._id === programaToEdit.plan[i]._id);
           if (findPlan) {
             planesSelected.push(findPlan);
           }
@@ -158,24 +97,8 @@ function Programas(props: any) {
     }
     setProgramaObject({ ...programaToEdit, plan: planesSelected });
     setOpenModalLoading(false);
-  }
-
-  //Cuando se cambia de pagina se ejecuta el metodo getProgramas con la pagina solicitada
-  const onChangePage = (page: number) => {
-    setOpenModalLoading(true);
-    getProgramas(page);
   };
 
-  //Se establecen los datos de un programa a editar en la modal
-  const setDataEditPrograma = (data: any) => {
-    try {
-      handleOpenModal(true, data);
-    } catch (error) {
-      setOpenModalLoading(false);
-    }
-  };
-
-  //Metodo que controla la apertura de la modal con el fin de obtener los planes
   const handleOpenModal = (isEdit?: boolean, programaToEdit?: any) => {
     try {
       setOpenModal(true);
@@ -184,60 +107,89 @@ function Programas(props: any) {
     } catch (error) {
       setOpenModalLoading(false);
     }
-  }
+  };
 
-  //Manejador de la accion guardar de la modal, se encarga de crear o editar
-  const handleSavePrograma = () => {
-    setOpenModalLoading(true);
-    let isValid = validateFields();
-    if (isValid) {
-      if (programaObject._id) {
-        //EDITAR
-        handleEditPrograma();
-      } else {
-        //CREAR
-        handleCreatePrograma();
-      }
-
-    } else {
-      setSeverityAlert('warning');
-      setShowAlert(true);
-      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
+  const setDataEditPrograma = (data: any) => {
+    try {
+      handleOpenModal(true, data);
+    } catch (error) {
       setOpenModalLoading(false);
     }
   };
 
-  //Metodo para crear un programa
-  const handleCreatePrograma = async () => {
-    let programaToSave = {
-      ...programaObject,
-      plan: programaObject.plan.map((plan: any) => ({ _id: plan._id })),
-    };
-    let response: any = await createPrograma(programaToSave);
-    if (response && response.error) {
-      setSeverityAlert('error');
-      setShowAlert(true);
-      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModalLoading(false);
+  const getProgramas = async (page?: any) => {
+    const response: any = await getProgramasPaginated({
+      page: page ? page : 0,
+      search: searchField,
+      dateCreationFrom: dateCreationFrom ? dateCreationFrom.toDate() : '',
+      dateCreationTo: dateCreationTo ? dateCreationTo.toDate() : '',
+    });
+    setPagePagination(page ? page + 1 : 1);
+    if (response.programas && response.programas.length) {
+      const programas = response.programas.map((data: any) => ([
+        data.codigo,
+        data.nombre,
+        data.descripcion,
+        moment(data.fechaCreacion).format('D/MM/YYYY, h:mm:ss a'),
+        moment(data.fechaActualizacion).format('D/MM/YYYY, h:mm:ss a'),
+        (
+          <Tooltip id="filterTooltip" title="Ver programas" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<VisibilityIcon />}
+                onClick={() => {
+                  setIsEdit(false);
+                  setDataEditPrograma(data);
+                }} />
+            </div>
+          </Tooltip>
+        ),
+        (
+          <Tooltip id="filterTooltip" title="Editar" placement="top" classes={{ tooltip: classes.tooltip }}>
+            <div className={classes.buttonHeaderContainer}>
+              <Button
+                key={'filtersButton'}
+                color={'primary'}
+                size="sm"
+                round={true}
+                justIcon={true}
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => {
+                  setIsEdit(true);
+                  setDataEditPrograma(data);}} />
+            </div>
+          </Tooltip>
+        )
+      ]));
+      setTotalProgramas(response.totalProgramas);
+      setProgramasList(programas);
     } else {
-      setSeverityAlert('success');
-      setShowAlert(true);
-      setMessagesAlert('Programa creado satisfactoriamente');
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 1000);
-      setOpenModal(false);
+      setTotalProgramas(0);
+      setProgramasList([]);
+
+    }
+    setOpenModalLoading(false);
+  };
+
+  useEffect(() => {
+    setOpenModalLoading(true);
+    getProgramas();
+  }, []);
+
+  useEffect(() => {
+    if (!searchField) {
+      setOpenModalLoading(true);
       getProgramas();
     }
-  }
+  }, [searchField]);
 
-  //Metodo para editar un programa
+  const onChangePage = (page: number) => {
+    setOpenModalLoading(true);
+    getProgramas(page);
+  };
+
+  const validateFields = () => programaObject.codigo && programaObject.nombre;
+
   const handleEditPrograma = async () => {
     let programaToSave = {
       ...programaObject,
@@ -262,20 +214,55 @@ function Programas(props: any) {
       setOpenModal(false);
       getProgramas();
     }
-  }
+  };
 
-  //Validacion de campos obligatorios para la creacion y edicion
-  const validateFields = () => {
-    if (programaObject.codigo &&
-      programaObject.nombre
-    ) {
-      return true;
+  const handleCreatePrograma = async () => {
+    let programaToSave = {
+      ...programaObject,
+      plan: programaObject.plan.map((plan: any) => ({ _id: plan._id })),
+    };
+    let response: any = await createPrograma(programaToSave);
+    if (response && response.error) {
+      setSeverityAlert('error');
+      setShowAlert(true);
+      setMessagesAlert(response.descripcion || 'Ha ocurrido un error intentando crear, por favor intentelo de nuevo');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
     } else {
-      return false;
+      setShowAlert(true);
+      setSeverityAlert('success');
+      setMessagesAlert('Programa creado satisfactoriamente');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModal(false);
+      getProgramas();
     }
   };
 
-  //Retorno con todos la construcción de la interfaz del modulo
+  const handleSavePrograma = () => {
+    setOpenModalLoading(true);
+    let isValid = validateFields();
+    if (isValid) {
+      if (programaObject._id) {
+        handleEditPrograma();
+      } else {
+        handleCreatePrograma();
+      }
+
+    } else {
+      setSeverityAlert('warning');
+      setShowAlert(true);
+      setMessagesAlert('Debe diligenciar todos los campos obligatorios');
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 1000);
+      setOpenModalLoading(false);
+    }
+  };
+
   return (
     <div >
       <AlertComponent severity={severityAlert} message={messageAlert} visible={showAlert} />
@@ -296,16 +283,16 @@ function Programas(props: any) {
                     onChange={(event) => setSearchField(event.target.value)}
                     InputProps={{
                       endAdornment:
-                        <Button key={'searchButton'} color={'primary'} round variant="outlined" size='sm' justIcon startIcon={<ClearIcon />}
+                        <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" size="sm" justIcon={true} startIcon={<ClearIcon />}
                           onClick={() => {
-                            setSearchField('')
+                            setSearchField('');
                           }} />
                     }}
                   />
 
-                  <Tooltip id='searchTooltip' title="Buscar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="searchTooltip" title="Buscar" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'searchButton'} color={'primary'} round variant="outlined" justIcon startIcon={<Search />}
+                      <Button key={'searchButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<Search />}
                         onClick={() => {
                           setOpenModalLoading(true);
                           getPlanes();
@@ -313,10 +300,10 @@ function Programas(props: any) {
                       />
                     </div>
                   </Tooltip>
-                  <Tooltip id='filterTooltip' title="Más filtros" placement='top' classes={{ tooltip: classes.tooltip }}>
+                  <Tooltip id="filterTooltip" title="Más filtros" placement="top" classes={{ tooltip: classes.tooltip }}>
                     <div className={classes.buttonHeaderContainer}>
-                      <Button key={'filtersButton'} color={'primary'} round variant="outlined" justIcon startIcon={<FilterList />}
-                        onClick={() => { setOpenMoreFilters(!openMoreFilters) }} />
+                      <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" justIcon={true} startIcon={<FilterList />}
+                        onClick={() => { setOpenMoreFilters(!openMoreFilters); }} />
                     </div>
                   </Tooltip>
                 </div>
@@ -326,22 +313,22 @@ function Programas(props: any) {
                   <div>
                     <Card className={classes.cardFilters}>
                       <div >
-                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={"sw"} >
+                        <MuiPickersUtilsProvider libInstance={moment} utils={MomentUtils} locale={'sw'} >
                           <GridContainer>
                             <GridItem xs={12} sm={12} md={6}>
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha desde"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationFrom}
                                   onChange={(newValue: any) => {
                                     setDateCreationFrom(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationFrom ? (
@@ -355,16 +342,16 @@ function Programas(props: any) {
                               <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <DatePicker
                                   label="Fecha hasta"
-                                  inputVariant='outlined'
-                                  margin='dense'
+                                  inputVariant="outlined"
+                                  margin="dense"
                                   className={classes.CustomTextField}
                                   format="DD/MM/YYYY"
                                   value={dateCreationTo}
                                   onChange={(newValue: any) => {
                                     setDateCreationTo(newValue);
                                   }}
-                                  clearable
-                                  clearLabel='Limpiar'
+                                  clearable={true}
+                                  clearLabel="Limpiar"
                                 />
                                 {
                                   dateCreationTo ? (
@@ -377,7 +364,7 @@ function Programas(props: any) {
                         </MuiPickersUtilsProvider>
                       </div>
                       <div className={classes.containerFooterCard} >
-                        <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
+                        <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
                           onClick={() => {
                             setOpenModalLoading(true);
                             getPlanes();
@@ -405,6 +392,7 @@ function Programas(props: any) {
                       'Descripcion',
                       'Fecha de creación',
                       'Fecha ultima actualización',
+                      'Ver programas',
                       'Acciones'
                     ]}
                     tableData={programasList}
@@ -420,9 +408,9 @@ function Programas(props: any) {
         </GridItem>
       </GridContainer>
       <div className={classes.containerFloatButton}>
-        <Tooltip id='addTooltip' title="Crear nuevo programa" placement='left' classes={{ tooltip: classes.tooltip }}>
+        <Tooltip id="addTooltip" title="Crear nuevo programa" placement="left" classes={{ tooltip: classes.tooltip }}>
           <div>
-            <Button key={'searchButton'} color={'primary'} round justIcon startIcon={<AddIcon />}
+            <Button key={'searchButton'} color={'primary'} round={true} justIcon={true} startIcon={<AddIcon />}
               onClick={() => {
                 handleOpenModal(false,
                   {
@@ -432,7 +420,8 @@ function Programas(props: any) {
                     descripcion: '',
                     plan: [],
                   }
-                )
+                );
+                setIsEdit(true);
               }}
             />
           </div>
@@ -453,12 +442,17 @@ function Programas(props: any) {
             <Card className={classes.container}>
               <CardHeader color="success">
                 <div className={classes.TitleFilterContainer}>
-                  <h4 className={classes.cardTitleWhite}>{programaObject._id ? 'Editar': 'Crear'} programa</h4>
+                  {
+                    isEdit ?
+                      <h4 className={classes.cardTitleWhite}>{programaObject._id ? 'Editar' : 'Crear'} programa</h4>
+                      :
+                      <h4 className={classes.cardTitleWhite}>Detalles del programa</h4>
+                  }
                   <div className={classes.headerActions}>
-                    <Tooltip id='filterTooltip' title="Cerrar" placement='top' classes={{ tooltip: classes.tooltip }}>
+                    <Tooltip id="filterTooltip" title="Cerrar" placement="top" classes={{ tooltip: classes.tooltip }}>
                       <div className={classes.buttonHeaderContainer}>
-                        <Button key={'filtersButton'} color={'primary'} size='sm' round variant="outlined" justIcon startIcon={<CloseIcon />}
-                          onClick={() => { setOpenModal(false) }} />
+                        <Button key={'filtersButton'} color={'primary'} size="sm" round={true} variant="outlined" justIcon={true} startIcon={<CloseIcon />}
+                          onClick={() => { setOpenModal(false); }} />
                       </div>
                     </Tooltip>
                   </div>
@@ -475,8 +469,9 @@ function Programas(props: any) {
                       className={classes.CustomTextField}
                       error={!programaObject.codigo ? true : false}
                       value={programaObject.codigo}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setProgramaObject({ ...programaObject, codigo: event.target.value })
+                        setProgramaObject({ ...programaObject, codigo: event.target.value });
                       }}
                     />
                   </GridItem>
@@ -490,8 +485,9 @@ function Programas(props: any) {
                       className={classes.CustomTextField}
                       error={!programaObject.nombre ? true : false}
                       value={programaObject.nombre}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setProgramaObject({ ...programaObject, nombre: event.target.value })
+                        setProgramaObject({ ...programaObject, nombre: event.target.value });
                       }}
                     />
                   </GridItem>
@@ -504,23 +500,25 @@ function Programas(props: any) {
                       className={classes.CustomTextField}
                       minRows={4}
                       maxRows={10}
-                      multiline
+                      multiline={true}
                       value={programaObject.descripcion}
+                      disabled={!isEdit}
                       onChange={(event) => {
-                        setProgramaObject({ ...programaObject, descripcion: event.target.value })
+                        setProgramaObject({ ...programaObject, descripcion: event.target.value });
                       }}
                     />
                   </GridItem>
                   <GridItem xs={12} sm={12} md={12} >
                     <Autocomplete
-                      multiple
+                      multiple={true}
                       id="tags-outlined"
                       options={planesList}
                       getOptionLabel={(option) => `${option.codigo} - ${option.nombre}`}
-                      filterSelectedOptions
+                      filterSelectedOptions={true}
                       value={programaObject.plan}
+                      disabled={!isEdit}
                       onChange={(event, value) => {
-                        setProgramaObject({ ...programaObject, plan: value })
+                        setProgramaObject({ ...programaObject, plan: value });
                       }}
                       renderInput={(params) => (
                         <TextField
@@ -537,12 +535,14 @@ function Programas(props: any) {
                   </GridItem>
                 </GridContainer>
               </div>
-              <div className={classes.containerFooterModal} >
-                <Button key={'filtersButton'} color={'primary'} round variant="outlined" endIcon={<SendIcon />}
-                  onClick={() => { handleSavePrograma() }} >
-                  {'Guardar'}
-                </Button>
-              </div>
+              {isEdit ? (
+                <div className={classes.containerFooterModal} >
+                  <Button key={'filtersButton'} color={'primary'} round={true} variant="outlined" endIcon={<SendIcon />}
+                    onClick={() => { handleSavePrograma(); }} >
+                    {'Guardar'}
+                  </Button>
+                </div>
+              ) : null}
             </Card>
           </GridItem>
         </div>
